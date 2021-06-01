@@ -13,10 +13,117 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="parser">
+      <UniqueIdentifier>{76b2c211-e425-42dd-8912-cbda12710fcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="message">
+      <UniqueIdentifier>{4bdee5b2-4467-4b36-8542-5cfe3c60f5cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LPG-language-server.cpp">
+    <ClCompile Include="src\LPG-language-server.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser\LPGParser.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\working_files.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lex_utils.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WorkSpaceManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LEGDocumentationProvider.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CompilationUnit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message\text_document_document_symbol.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ASTUtils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\parser\LPGKWLexer.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGKWLexerprs.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGKWLexersym.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGLexer.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGLexerprs.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGLexersym.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGParser.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGParserprs.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGParsersym.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\working_files.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lex_utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lru_cache.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WorkSpaceManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LEGDocumentationProvider.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CompilationUnit.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Directory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message\MessageHandler.h">
+      <Filter>message</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LPGParser_top_level_ast.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ASTUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

@@ -18,6 +18,46 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ASTUtils.cpp" />
+    <ClCompile Include="src\CompilationUnit.cpp" />
+    <ClCompile Include="src\LEGDocumentationProvider.cpp" />
+    <ClCompile Include="src\lex_utils.cc" />
+    <ClCompile Include="src\LPG-language-server.cpp" />
+    <ClCompile Include="src\message\text_document_document_symbol.cpp" />
+    <ClCompile Include="src\parser\LPGParser.cpp" />
+    <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp" />
+    <ClCompile Include="src\WorkSpaceManager.cpp" />
+    <ClCompile Include="src\timer.cpp" />
+    <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="src\working_files.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ASTUtils.h" />
+    <ClInclude Include="src\CompilationUnit.h" />
+    <ClInclude Include="src\Directory.h" />
+    <ClInclude Include="src\LEGDocumentationProvider.h" />
+    <ClInclude Include="src\lex_utils.h" />
+    <ClInclude Include="src\lru_cache.h" />
+    <ClInclude Include="src\message\MessageHandler.h" />
+    <ClInclude Include="src\parser\LPGKWLexer.h" />
+    <ClInclude Include="src\parser\LPGKWLexerprs.h" />
+    <ClInclude Include="src\parser\LPGKWLexersym.h" />
+    <ClInclude Include="src\parser\LPGLexer.h" />
+    <ClInclude Include="src\parser\LPGLexerprs.h" />
+    <ClInclude Include="src\parser\LPGLexersym.h" />
+    <ClInclude Include="src\parser\LPGParser.h" />
+    <ClInclude Include="src\parser\LPGParserprs.h" />
+    <ClInclude Include="src\parser\LPGParsersym.h" />
+    <ClInclude Include="src\parser\LPGParser_top_level_ast.h" />
+    <ClInclude Include="src\WorkSpaceManager.h" />
+    <ClInclude Include="src\timer.h" />
+    <ClInclude Include="src\utils.h" />
+    <ClInclude Include="src\working_files.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -72,6 +112,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>E:\LPG-language-server\third_party\loguru;E:\LPG-language-server\third_party\lpgRuntimeCpp\src;E:\LPG-language-server\third_party\LspCpp;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -86,8 +127,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LOGURU_WITH_STREAMS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,10 +180,36 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="LPG-language-server.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets" Condition="Exists('packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets')" />
+    <Import Project="..\packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets" Condition="Exists('..\packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets')" />
+    <Import Project="..\packages\boost.1.76.0.0\build\boost.targets" Condition="Exists('..\packages\boost.1.76.0.0\build\boost.targets')" />
+    <Import Project="..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets" Condition="Exists('..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets')" />
+    <Import Project="..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets" Condition="Exists('..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets')" />
+    <Import Project="..\packages\boost_coroutine-vc141.1.76.0.0\build\boost_coroutine-vc141.targets" Condition="Exists('..\packages\boost_coroutine-vc141.1.76.0.0\build\boost_coroutine-vc141.targets')" />
+    <Import Project="..\packages\boost_date_time-vc141.1.76.0.0\build\boost_date_time-vc141.targets" Condition="Exists('..\packages\boost_date_time-vc141.1.76.0.0\build\boost_date_time-vc141.targets')" />
+    <Import Project="..\packages\boost_filesystem-vc141.1.76.0.0\build\boost_filesystem-vc141.targets" Condition="Exists('..\packages\boost_filesystem-vc141.1.76.0.0\build\boost_filesystem-vc141.targets')" />
+    <Import Project="..\packages\boost_program_options-vc141.1.76.0.0\build\boost_program_options-vc141.targets" Condition="Exists('..\packages\boost_program_options-vc141.1.76.0.0\build\boost_program_options-vc141.targets')" />
+    <Import Project="..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets" Condition="Exists('..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets')" />
+    <Import Project="..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets" Condition="Exists('..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets')" />
+    <Import Project="..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets" Condition="Exists('..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\boost.1.76.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.76.0.0\build\boost.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_coroutine-vc141.1.76.0.0\build\boost_coroutine-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_coroutine-vc141.1.76.0.0\build\boost_coroutine-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_date_time-vc141.1.76.0.0\build\boost_date_time-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_date_time-vc141.1.76.0.0\build\boost_date_time-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_filesystem-vc141.1.76.0.0\build\boost_filesystem-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_filesystem-vc141.1.76.0.0\build\boost_filesystem-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_program_options-vc141.1.76.0.0\build\boost_program_options-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_program_options-vc141.1.76.0.0\build\boost_program_options-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets'))" />
+    <Error Condition="!Exists('..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets'))" />
+  </Target>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
