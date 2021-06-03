@@ -70,7 +70,7 @@ public:
 	std::set<AbsolutePath> toReconcile;
 	WorkingFiles working_files;
 	WorkSpaceManager   work_space_mgr;
-	std::unique_ptr<ATimer<boost::posix_time::milliseconds>>  timer;
+	std::unique_ptr<SimpleTimer<>>  timer;
 	Server() :work_space_mgr(working_files,server.remote_end_point_, _log), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
 		
@@ -174,9 +174,8 @@ public:
 			{
 				std::lock_guard lock(mutex_);
 				toReconcile.insert(path);
-				timer= std::make_unique<ATimer<boost::posix_time::milliseconds>>();
-				timer->bind([&]()
-				{
+				
+				timer = std::make_unique<SimpleTimer<>>(500,[&](){
 						std::set<AbsolutePath> cusToReconcile;
 						{
 							std::lock_guard lock2(mutex_);
@@ -191,8 +190,7 @@ public:
 								work_space_mgr.OnChange(file, std::move(context));
 							}
 						}
-				});
-				timer->start(500);
+				});	
 			}
 			
 		});
