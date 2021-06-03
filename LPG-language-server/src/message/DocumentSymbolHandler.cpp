@@ -33,7 +33,7 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 			{
 				children.range.end = pos.value();
 			}
-			out.push_back(children);
+			out.emplace_back(children);
 		}
 		
 	}
@@ -58,7 +58,7 @@ struct LPGModelVisitor :public AbstractVisitor {
             parent->children = {};
     	}
         auto& children = parent->children.value();
-        children.push_back(lsDocumentSymbol());
+        children.emplace_back(lsDocumentSymbol());
         lsDocumentSymbol* treeNode = &children[children.size() - 1];
         treeNode->kind = lsSymbolKind::Struct;
         auto token = n->getLeftIToken();

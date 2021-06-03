@@ -122,7 +122,7 @@ void LruCache<TKey, TValue>::Insert(const TKey& key, const TValue& value) {
   IncrementScore();
   entry.key = key;
   entry.value = value;
-  entries_.push_back(entry);
+  entries_.emplace_back(entry);
 }
 
 template <typename TKey, typename TValue>

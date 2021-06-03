@@ -32,7 +32,7 @@
 #include "IcuUtil.h"
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
-
+#include "Monitor.h"
 using namespace boost::asio::ip;
 using namespace std;
 class DummyLog :public lsp::Log
@@ -71,7 +71,21 @@ public:
 	WorkingFiles working_files;
 	WorkSpaceManager   work_space_mgr;
 	std::unique_ptr<SimpleTimer<>>  timer;
-	Server() :work_space_mgr(working_files,server.remote_end_point_, _log), server(_address, _port, protocol_json_handler, endpoint, _log)
+
+	struct ServerMonitor : Monitor
+	{
+		std::atomic_bool is_running_= true;
+		bool isCancelled() override
+		{
+			return  is_running_.load(std::memory_order_relaxed);
+		}
+		void Cancel()
+		{
+			is_running_.store(false, std::memory_order_relaxed);
+		}
+	};
+	ServerMonitor _monitor;
+	Server() :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
 		
 		server.remote_end_point_.registerRequestHandler([&](const td_initialize::request& req)
@@ -186,6 +200,10 @@ public:
 							std::wstring context;
 							if(auto file = working_files.GetFileByFilename(file_path); file)
 							{
+								if(_monitor.isCancelled())
+								{
+									return;
+								}
 								working_files.GetFileBufferContent(file, context);
 								work_space_mgr.OnChange(file, std::move(context));
 							}
@@ -222,7 +240,7 @@ public:
 				std::vector<Directory> remove;
 			    for(auto& it :notify.params.event.removed)
 			    {
-					remove.push_back(Directory(it.uri.GetAbsolutePath()));
+					remove.emplace_back(Directory(it.uri.GetAbsolutePath()));
 			    }
 				working_files.CloseFilesInDirectory(remove);
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
@@ -230,6 +248,7 @@ public:
 
 		server.remote_end_point_.registerNotifyHandler([&](Notify_Exit::notify& notify)
 		{
+				_monitor.Cancel();
 				server.stop();
 				esc_event.notify(std::make_unique<bool>(true));
 		});

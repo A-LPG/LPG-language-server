@@ -164,12 +164,12 @@ std::vector<std::string> SplitString(const std::string& str,
   std::string::size_type pos = 0;
   std::string::size_type prev = 0;
   while ((pos = str.find(delimiter, prev)) != std::string::npos) {
-    strings.push_back(str.substr(prev, pos - prev));
+    strings.emplace_back(str.substr(prev, pos - prev));
     prev = pos + 1;
   }
 
   // To get the last substring (or only, if delimiter is not found)
-  strings.push_back(str.substr(prev));
+  strings.emplace_back(str.substr(prev));
 
   return strings;
 }
@@ -235,7 +235,7 @@ std::vector<std::string> GetFilesAndDirectoriesInFolder(std::string folder,
   std::vector<std::string> result;
   GetFilesInFolderHelper(
       folder, recursive, add_folder_to_path ? folder : "",
-      [&result](const std::string& path) { result.push_back(path); });
+      [&result](const std::string& path) { result.emplace_back(path); });
   return result;
 }
 
@@ -327,7 +327,7 @@ std::vector<std::string> ReadLinesWithEnding(const AbsolutePath& filename) {
 
   std::ifstream input(filename.path);
   for (std::string line; SafeGetline(input, line);)
-    result.push_back(line);
+    result.emplace_back(line);
 
   return result;
 }
@@ -350,7 +350,7 @@ std::vector<std::string> ToLines(const std::string& content,
     } else {
       remove_last_cr(line);
     }
-    result.push_back(line);
+    result.emplace_back(line);
   }
 
   return result;

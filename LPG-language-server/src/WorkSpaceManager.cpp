@@ -1,5 +1,6 @@
 #include  "WorkSpaceManager.h"
 #include <functional>
+#include <Monitor.h>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -24,15 +25,16 @@
 using namespace LPGParser_top_level_ast;
 struct WorkSpaceManagerData
 {
-	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log): working_files(_w), end_point(_end_point),
-		logger(_log)
+	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log,Monitor& m): working_files(_w),
+		end_point(_end_point),
+		logger(_log), monitor(m)
 	{
 	}
 
 	WorkingFiles& working_files;
 	RemoteEndPoint& end_point;
 	lsp::Log& logger;
-
+	Monitor& monitor;
 	typedef boost::shared_lock<boost::shared_mutex> readLock;
 	typedef boost::unique_lock<boost::shared_mutex> writeLock;
 	boost::shared_mutex _rw_mutex;
@@ -78,7 +80,7 @@ struct WorkSpaceManagerData
 				{
 					if (it.second->working_file->directory == dir)
 					{
-						files_to_be_delete.push_back(it.first);
+						files_to_be_delete.emplace_back(it.first);
 						break;
 					}
 				}	
@@ -109,7 +111,7 @@ std::string stripName(const std::string& rawId) {
 	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
 }
  Object* WorkSpaceManager::findDefOf_internal(ASTNodeToken* s,
-	std::shared_ptr<CompilationUnit> refUnit)
+                                              const std::shared_ptr<CompilationUnit>& refUnit)
 {
 	 auto     id = stripName(s->toString());
 	 std::vector<std::string> includedFiles;
@@ -158,7 +160,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	return OnOpen(_open, std::move(content) );
 }
 
-void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, std::shared_ptr<CompilationUnit>& refUnit)
+void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit)
 {
 	if(!refUnit){
 		return;
@@ -167,6 +169,9 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, st
 	if (!root){
 		return;
 	}
+	if(d_ptr->monitor.isCancelled())
+		return;
+	
 	auto optSeg = static_cast<option_specList*>(root->getoptions_segment());
 	for (int i = 0; i < optSeg->size(); i++) {
 		auto optSpec = static_cast<option_spec*>(optSeg->getoption_specAt(i));
@@ -183,10 +188,14 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, st
 				auto  optValue = opt->getoption_value();
 				if ( dynamic_cast<option_value0*>(optValue)) {
 					auto fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
-					result.push_back(fileName);
+					result.emplace_back(fileName);
 					if (optName == (L"import_terminals")) {
 						// pick up defs from the filter
+						if (d_ptr->monitor.isCancelled())
+							return;
 						auto filterUnit = lookupImportedFile(refUnit->working_file->directory, fileName);
+						if (d_ptr->monitor.isCancelled())
+							return;
 						 collectIncludedFiles(result, filterUnit);
 					}
 				}
@@ -246,7 +255,7 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
-Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, std::shared_ptr<CompilationUnit>& unit)
+Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit)
 {
 	auto     id = stripName(s->toString());
 	std::unordered_map<std::wstring, IAst*>& symbolTable = *(unit->root->symbolTable);
@@ -296,7 +305,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path
 	return  d_ptr->find(temp);
 }
 
-WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(_w , end_point, _log))
+WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log, Monitor& m):d_ptr(new WorkSpaceManagerData(_w , end_point, _log,m))
 {
 	
 }
@@ -335,23 +344,32 @@ struct MessageHandle : public IMessageHandler
 			info += "\n";
 		}
 		diagnostic.message.swap(info);
-		notify.params.diagnostics.push_back(std::move(diagnostic));
+		notify.params.diagnostics.emplace_back(std::move(diagnostic));
 	}
 };
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
 {
 	if (!_change)
 		return {};
+	if (d_ptr->monitor.isCancelled())
+		return {};
+	
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
 	MessageHandle handle;
 	handle.notify.params.uri = _change->filename;
 	
 	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+	
 	unit->_lexer.getLexStream()->setMessageHandler(&handle);
 	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
 
-	unit->_lexer.lexer(nullptr, unit->_parser.getIPrsStream());
-	unit->parser();
+	unit->_lexer.lexer(&d_ptr->monitor, unit->_parser.getIPrsStream());
+	
+	if (d_ptr->monitor.isCancelled())
+		return {};
+	unit->parser(&d_ptr->monitor);
+	if (d_ptr->monitor.isCancelled())
+		return {};
 	d_ptr->update_unit(_change->filename, unit);
 
 	d_ptr->end_point.sendNotification(handle.notify);
@@ -374,7 +392,7 @@ void WorkSpaceManager::OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFolde
 	std::vector<Directory> remove;
 	for (auto& it : params.event.removed)
 	{
-		remove.push_back(Directory(it.uri.GetAbsolutePath()));
+		remove.emplace_back(Directory(it.uri.GetAbsolutePath()));
 	}
 	d_ptr->remove_in_directory(remove);
 }

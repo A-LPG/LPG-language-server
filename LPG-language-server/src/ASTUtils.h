@@ -12,7 +12,7 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_map<std::wstri
 		{
 			if (dynamic_cast<T*>(it.second))
 			{
-				vec.push_back(it.second);
+				vec.emplace_back(it.second);
 			}
 		}
 	}

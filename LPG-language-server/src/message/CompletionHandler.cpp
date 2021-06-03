@@ -116,7 +116,7 @@ void  CompletionHandler::MakeCompletionItem(const std::string& proposal, const s
     item.insertTextFormat = lsInsertTextFormat::PlainText;
 	
     item.textEdit = std::move(edit);
-    out.items.push_back(std::move(item));
+    out.items.emplace_back(std::move(item));
 	
 }
 

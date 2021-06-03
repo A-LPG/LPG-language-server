@@ -193,7 +193,7 @@ struct FoldingVisitor :public AbstractVisitor {
             range.endLine = ls_pos.line;
             range.endCharacter = ls_pos.character;
         }
-        handler->out.push_back(std::move(range));
+        handler->out.emplace_back(std::move(range));
     }
 
     void makeFoldable(IToken* first_token, IToken* last_token) {

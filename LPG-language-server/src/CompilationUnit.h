@@ -19,9 +19,9 @@ struct CompilationUnit : Object
 	LPGLexer _lexer; // Create the lexer
 	LPGParser _parser;
 	LPGParser_top_level_ast::LPG* root = nullptr;
-	void parser()
+	void parser(Monitor* monitor)
 	{
 		_parser.reset(_lexer.getLexStream());
-		root = (LPGParser_top_level_ast::LPG*)_parser.parser(nullptr, 100);
+		root = (LPGParser_top_level_ast::LPG*)_parser.parser(monitor, 100);
 	}
 };

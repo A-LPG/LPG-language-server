@@ -60,7 +60,7 @@ void WorkingFiles::CloseFilesInDirectory(const std::vector<Directory>& directori
         for (auto& dir : directories)
         {
             if (it.second->directory == dir) {
-                files_to_be_delete.push_back(it.first);
+                files_to_be_delete.emplace_back(it.first);
             }
         }
     }

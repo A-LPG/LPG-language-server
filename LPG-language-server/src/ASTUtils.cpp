@@ -13,7 +13,7 @@ namespace
          void unimplementedVisitor(const std::string& s) {}
          bool visit(symWithAttrs1* n) {
              if (n->getSYMBOL()->toString()==(name))
-                 result.push_back(n);
+                 result.emplace_back(n);
          	
              return AbstractVisitor::visit(n);
          }

@@ -537,7 +537,7 @@ namespace LPGParser_top_level_ast {
 
         void addElement(ASTNode* element)
         {
-            list.push_back(element);
+            list.emplace_back(element);
             if (leftRecursive)
                 rightIToken = element->getRightIToken();
             else leftIToken = element->getLeftIToken();
@@ -551,7 +551,7 @@ namespace LPGParser_top_level_ast {
         AbstractASTNodeList(ASTNode* element, bool leftRecursive) :ASTNode(element->getLeftIToken(), element->getRightIToken())
         {
             this->leftRecursive = leftRecursive;
-            list.push_back(element);
+            list.emplace_back(element);
         }
 
         /**
@@ -627,8 +627,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_options_segment);
-            list.push_back((IAst*)lpg_LPG_INPUT);
+            list.emplace_back((IAst*)lpg_options_segment);
+            list.emplace_back((IAst*)lpg_LPG_INPUT);
             return list;
         }
 
@@ -729,7 +729,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_alias_segment);
+            list.emplace_back((IAst*)lpg_alias_segment);
             return list;
         }
 
@@ -774,7 +774,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_ast_segment);
+            list.emplace_back((IAst*)lpg_ast_segment);
             return list;
         }
 
@@ -819,7 +819,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_define_segment);
+            list.emplace_back((IAst*)lpg_define_segment);
             return list;
         }
 
@@ -864,7 +864,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_eof_segment);
+            list.emplace_back((IAst*)lpg_eof_segment);
             return list;
         }
 
@@ -909,7 +909,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_eol_segment);
+            list.emplace_back((IAst*)lpg_eol_segment);
             return list;
         }
 
@@ -954,7 +954,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_error_segment);
+            list.emplace_back((IAst*)lpg_error_segment);
             return list;
         }
 
@@ -999,7 +999,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_export_segment);
+            list.emplace_back((IAst*)lpg_export_segment);
             return list;
         }
 
@@ -1044,7 +1044,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_globals_segment);
+            list.emplace_back((IAst*)lpg_globals_segment);
             return list;
         }
 
@@ -1089,7 +1089,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_headers_segment);
+            list.emplace_back((IAst*)lpg_headers_segment);
             return list;
         }
 
@@ -1134,7 +1134,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_identifier_segment);
+            list.emplace_back((IAst*)lpg_identifier_segment);
             return list;
         }
 
@@ -1179,7 +1179,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_import_segment);
+            list.emplace_back((IAst*)lpg_import_segment);
             return list;
         }
 
@@ -1224,7 +1224,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_include_segment);
+            list.emplace_back((IAst*)lpg_include_segment);
             return list;
         }
 
@@ -1269,7 +1269,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_keywords_segment);
+            list.emplace_back((IAst*)lpg_keywords_segment);
             return list;
         }
 
@@ -1314,7 +1314,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_names_segment);
+            list.emplace_back((IAst*)lpg_names_segment);
             return list;
         }
 
@@ -1359,7 +1359,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_notice_segment);
+            list.emplace_back((IAst*)lpg_notice_segment);
             return list;
         }
 
@@ -1404,7 +1404,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_rules_segment);
+            list.emplace_back((IAst*)lpg_rules_segment);
             return list;
         }
 
@@ -1449,7 +1449,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_keywords_segment);
+            list.emplace_back((IAst*)lpg_keywords_segment);
             return list;
         }
 
@@ -1494,7 +1494,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_start_segment);
+            list.emplace_back((IAst*)lpg_start_segment);
             return list;
         }
 
@@ -1539,7 +1539,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_terminals_segment);
+            list.emplace_back((IAst*)lpg_terminals_segment);
             return list;
         }
 
@@ -1584,7 +1584,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_trailers_segment);
+            list.emplace_back((IAst*)lpg_trailers_segment);
             return list;
         }
 
@@ -1629,7 +1629,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_types_segment);
+            list.emplace_back((IAst*)lpg_types_segment);
             return list;
         }
 
@@ -1674,7 +1674,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_recover_segment);
+            list.emplace_back((IAst*)lpg_recover_segment);
             return list;
         }
 
@@ -1719,7 +1719,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_predecessor_segment);
+            list.emplace_back((IAst*)lpg_predecessor_segment);
             return list;
         }
 
@@ -1799,7 +1799,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_option_list);
+            list.emplace_back((IAst*)lpg_option_list);
             return list;
         }
 
@@ -1888,8 +1888,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_option_value);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_option_value);
             return list;
         }
 
@@ -2110,8 +2110,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_macro_name_symbol);
-            list.push_back((IAst*)lpg_macro_segment);
+            list.emplace_back((IAst*)lpg_macro_name_symbol);
+            list.emplace_back((IAst*)lpg_macro_segment);
             return list;
         }
 
@@ -2284,8 +2284,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_drop_command_list);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_drop_command_list);
             return list;
         }
 
@@ -2435,10 +2435,10 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_optMacroName);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_ruleList);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_optMacroName);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_ruleList);
             return list;
         }
 
@@ -2610,9 +2610,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_terminal_symbol);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_name);
+            list.emplace_back((IAst*)lpg_terminal_symbol);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_name);
             return list;
         }
 
@@ -2708,9 +2708,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_name);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_name3);
+            list.emplace_back((IAst*)lpg_name);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_name3);
             return list;
         }
 
@@ -2765,8 +2765,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_action_segment_list);
-            list.push_back((IAst*)lpg_nonTermList);
+            list.emplace_back((IAst*)lpg_action_segment_list);
+            list.emplace_back((IAst*)lpg_nonTermList);
             return list;
         }
 
@@ -2865,9 +2865,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_ruleNameWithAttributes);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_ruleList);
+            list.emplace_back((IAst*)lpg_ruleNameWithAttributes);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_ruleList);
             return list;
         }
 
@@ -2938,9 +2938,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_className);
-            list.push_back((IAst*)lpg_arrayElement);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_className);
+            list.emplace_back((IAst*)lpg_arrayElement);
             return list;
         }
 
@@ -3033,8 +3033,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_symWithAttrsList);
-            list.push_back((IAst*)lpg_opt_action_segment);
+            list.emplace_back((IAst*)lpg_symWithAttrsList);
+            list.emplace_back((IAst*)lpg_opt_action_segment);
             return list;
         }
 
@@ -3132,7 +3132,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_MACRO_NAME);
+            list.emplace_back((IAst*)lpg_MACRO_NAME);
             return list;
         }
 
@@ -3307,8 +3307,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_terminal_symbol);
-            list.push_back((IAst*)lpg_optTerminalAlias);
+            list.emplace_back((IAst*)lpg_terminal_symbol);
+            list.emplace_back((IAst*)lpg_optTerminalAlias);
             return list;
         }
 
@@ -3372,8 +3372,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_name);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_name);
             return list;
         }
 
@@ -3468,9 +3468,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_barSymbolList);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_barSymbolList);
             return list;
         }
 
@@ -3560,8 +3560,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_SYMBOL2);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_SYMBOL2);
             return list;
         }
 
@@ -3679,7 +3679,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_SYMBOL);
             return list;
         }
 
@@ -3724,7 +3724,7 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_symbol_list);
+            list.emplace_back((IAst*)lpg_symbol_list);
             return list;
         }
 
@@ -3781,9 +3781,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_ERROR_KEY);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_ERROR_KEY);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -3844,9 +3844,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_EOL_KEY);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_EOL_KEY);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -3907,9 +3907,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_EOF_KEY);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_EOF_KEY);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -3970,9 +3970,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_IDENTIFIER_KEY);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_IDENTIFIER_KEY);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -4033,9 +4033,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -4096,9 +4096,9 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_alias_lhs_macro_name);
-            list.push_back((IAst*)lpg_produces);
-            list.push_back((IAst*)lpg_alias_rhs);
+            list.emplace_back((IAst*)lpg_alias_lhs_macro_name);
+            list.emplace_back((IAst*)lpg_produces);
+            list.emplace_back((IAst*)lpg_alias_rhs);
             return list;
         }
 
@@ -4405,8 +4405,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_DROPSYMBOLS_KEY);
-            list.push_back((IAst*)lpg_drop_symbols);
+            list.emplace_back((IAst*)lpg_DROPSYMBOLS_KEY);
+            list.emplace_back((IAst*)lpg_drop_symbols);
             return list;
         }
 
@@ -4460,8 +4460,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_DROPRULES_KEY);
-            list.push_back((IAst*)lpg_drop_rules);
+            list.emplace_back((IAst*)lpg_DROPRULES_KEY);
+            list.emplace_back((IAst*)lpg_drop_rules);
             return list;
         }
 
@@ -4826,8 +4826,8 @@ namespace LPGParser_top_level_ast {
         std::vector<IAst*> getAllChildren()
         {
             std::vector<IAst*> list;
-            list.push_back((IAst*)lpg_SYMBOL);
-            list.push_back((IAst*)lpg_optAttrList);
+            list.emplace_back((IAst*)lpg_SYMBOL);
+            list.emplace_back((IAst*)lpg_optAttrList);
             return list;
         }
 
