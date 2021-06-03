@@ -66,10 +66,14 @@ bool ShouldIgnoreFileForIndexing(const std::string& path) {
 class Server
 {
 public:
+	std::mutex mutex_;
+	std::set<AbsolutePath> toReconcile;
 	WorkingFiles working_files;
-	WorkSpaceManager   project;
-	Server() :server(_address, _port, protocol_json_handler, endpoint, _log), project(working_files, _log)
+	WorkSpaceManager   work_space_mgr;
+	std::unique_ptr<ATimer<boost::posix_time::milliseconds>>  timer;
+	Server() :work_space_mgr(working_files,server.remote_end_point_, _log), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
+		
 		server.remote_end_point_.registerRequestHandler([&](const td_initialize::request& req)
 			->lsp::ResponseOrError< td_initialize::response > {
 				td_initialize::response rsp;
@@ -81,7 +85,7 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_symbol::request& req)
 			->lsp::ResponseOrError< td_symbol::response > {
-				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 			    if(!unit)
 			    {
 					Rsp_Error error;
@@ -93,7 +97,7 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
 			->lsp::ResponseOrError< td_definition::response > {
-				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -106,7 +110,7 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_hover::request& req)
 			->lsp::ResponseOrError< td_hover::response > {
-				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -118,7 +122,7 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
 			->lsp::ResponseOrError< td_completion::response > {
-				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -131,7 +135,7 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
 			->lsp::ResponseOrError< td_foldingRange::response > {
-				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -154,7 +158,7 @@ public:
 			    {
 					std::wstring context;
 					working_files.GetFileBufferContent(work_file, context);
-					project.OnOpen(work_file, std::move(context));
+					work_space_mgr.OnOpen(work_file, std::move(context));
 			    }
 					
 				// 解析 
@@ -162,17 +166,34 @@ public:
 		
 		server.remote_end_point_.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
-				Timer time;
-				const auto& params = notify.params;
-				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
-				if (ShouldIgnoreFileForIndexing(path))
-					return;
-				if(auto work_file= working_files.OnChange(notify.params))
+			const auto& params = notify.params;
+			AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
+			if (ShouldIgnoreFileForIndexing(path))
+				return;
+			if(auto work_file= working_files.OnChange(params))
+			{
+				std::lock_guard lock(mutex_);
+				toReconcile.insert(path);
+				timer= std::make_unique<ATimer<boost::posix_time::milliseconds>>();
+				timer->bind([&]()
 				{
-					std::wstring context;
-					working_files.GetFileBufferContent(work_file, context);
-					project.OnChange(work_file, std::move(context));
-				}
+						std::set<AbsolutePath> cusToReconcile;
+						{
+							std::lock_guard lock2(mutex_);
+							cusToReconcile.swap(toReconcile);
+						}
+						for(auto& file_path : cusToReconcile)
+						{
+							std::wstring context;
+							if(auto file = working_files.GetFileByFilename(file_path); file)
+							{
+								working_files.GetFileBufferContent(file, context);
+								work_space_mgr.OnChange(file, std::move(context));
+							}
+						}
+				});
+				timer->start(500);
+			}
 			
 		});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidClose::notify& notify)
@@ -183,7 +204,7 @@ public:
 				if (ShouldIgnoreFileForIndexing(path))
 					return;
 				working_files.OnClose(params.textDocument);
-				project.OnClose(notify.params.textDocument.uri);
+				work_space_mgr.OnClose(notify.params.textDocument.uri);
 			    // 通知消失了
 		});
 		
@@ -195,7 +216,7 @@ public:
 				if (ShouldIgnoreFileForIndexing(path))
 					return;
 				working_files.OnClose(params.textDocument);
-				project.OnSave(params.textDocument.uri);
+				work_space_mgr.OnSave(params.textDocument.uri);
 				// 通知消失了
 			});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
@@ -206,7 +227,7 @@ public:
 					remove.push_back(Directory(it.uri.GetAbsolutePath()));
 			    }
 				working_files.CloseFilesInDirectory(remove);
-				project.OnDidChangeWorkspaceFolders(notify.params);
+				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
 
 		server.remote_end_point_.registerNotifyHandler([&](Notify_Exit::notify& notify)
