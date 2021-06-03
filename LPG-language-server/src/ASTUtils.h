@@ -22,7 +22,7 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_map<std::wstri
 		return static_cast<LPG*>(node);
 	}
 	static void getMacros(LPG* root, std::vector<IAst*>& vec) {
-		
+		if (!root || !root->symbolTable) return;
 		// DO NOT pick up macros from any imported file! They shouldn't be
 		// treated as defined in this scope!
 		 allDefsOfType<macro_name_symbol0>(vec,*root->symbolTable);
@@ -30,12 +30,12 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_map<std::wstri
 		
 	}
 	static void getNonTerminals(LPG* root, std::vector<IAst*>& vec) {
-
+		if (!root || !root->symbolTable) return;
 		// TODO: pick up non-terminals from imported files
 		allDefsOfType<nonTerm>(vec, *root->symbolTable);
 	}
 	static void getTerminals(LPG* root, std::vector<IAst*>& vec) {
-
+		if (!root || !root->symbolTable) return;
 		// TODO: pick up non-terminals from imported files
 		allDefsOfType<terminal>(vec, *root->symbolTable);
 	}
@@ -51,4 +51,6 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_map<std::wstri
 	}
 	static int toOffset(ILexStream* lex, int line, int column);
 	static boost::optional<lsPosition> toPosition(ILexStream* lex, int offset);
+
+	static std::string getLabelFor(ASTNode *n);;
 };

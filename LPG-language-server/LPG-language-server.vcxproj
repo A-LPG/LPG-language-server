@@ -21,10 +21,12 @@
   <ItemGroup>
     <ClCompile Include="src\ASTUtils.cpp" />
     <ClCompile Include="src\CompilationUnit.cpp" />
-    <ClCompile Include="src\LEGDocumentationProvider.cpp" />
     <ClCompile Include="src\lex_utils.cc" />
     <ClCompile Include="src\LPG-language-server.cpp" />
-    <ClCompile Include="src\message\text_document_document_symbol.cpp" />
+    <ClCompile Include="src\message\CompletionHandler.cpp" />
+    <ClCompile Include="src\message\FoldingRangeHandler.cpp" />
+    <ClCompile Include="src\message\HoverHandler.cpp" />
+    <ClCompile Include="src\message\DocumentSymbolHandler.cpp" />
     <ClCompile Include="src\parser\LPGParser.cpp" />
     <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp" />
     <ClCompile Include="src\WorkSpaceManager.cpp" />
@@ -36,7 +38,6 @@
     <ClInclude Include="src\ASTUtils.h" />
     <ClInclude Include="src\CompilationUnit.h" />
     <ClInclude Include="src\Directory.h" />
-    <ClInclude Include="src\LEGDocumentationProvider.h" />
     <ClInclude Include="src\lex_utils.h" />
     <ClInclude Include="src\lru_cache.h" />
     <ClInclude Include="src\message\MessageHandler.h" />

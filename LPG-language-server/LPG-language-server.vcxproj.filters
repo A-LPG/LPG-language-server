@@ -42,13 +42,10 @@
     <ClCompile Include="src\WorkSpaceManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\LEGDocumentationProvider.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\CompilationUnit.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\message\text_document_document_symbol.cpp">
+    <ClCompile Include="src\message\DocumentSymbolHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
     <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp">
@@ -56,6 +53,15 @@
     </ClCompile>
     <ClCompile Include="src\ASTUtils.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message\HoverHandler.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message\CompletionHandler.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message\FoldingRangeHandler.cpp">
+      <Filter>message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,9 +108,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\WorkSpaceManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\LEGDocumentationProvider.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\CompilationUnit.h">

@@ -23,12 +23,16 @@
 #include <iostream>
 #include "LibLsp/lsp/textDocument/document_symbol.h"
 #include "LibLsp/lsp/workspace/didChangeWorkspaceFolders.h"
+#include "LibLsp/lsp/textDocument/hover.h"
+#include "LibLsp/lsp/textDocument/completion.h"
 #include "WorkSpaceManager.h"
 #include "timer.h"
 #include "utils.h"
 #include "working_files.h"
 #include "IcuUtil.h"
 #include "message/MessageHandler.h"
+#include "LibLsp/lsp/textDocument/foldingRange.h"
+
 using namespace boost::asio::ip;
 using namespace std;
 class DummyLog :public lsp::Log
@@ -81,24 +85,68 @@ public:
 			    if(!unit)
 			    {
 					Rsp_Error error;
-					return  error;
+					return  std::move(error);
 			    }
 			    td_symbol::response rsp;
 				process_symbol(unit, rsp.result);
-				return rsp;
+				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
 			->lsp::ResponseOrError< td_definition::response > {
+				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
 				td_definition::response rsp;
+				rsp.result.first = {};
+				process_definition(unit, req.params.position, rsp.result.first.value());
+				return std::move(rsp);
+			});
+		server.remote_end_point_.registerRequestHandler([&](const td_hover::request& req)
+			->lsp::ResponseOrError< td_hover::response > {
+				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
+				td_hover::response rsp;
+				process_hover(unit, req.params.position, rsp.result);
+				return std::move(rsp);
+			});
+		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
+			->lsp::ResponseOrError< td_completion::response > {
+				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
+				td_completion::response rsp;
+				CompletionHandler(unit, rsp.result, req.params);
 				
-				return rsp;
+				return std::move(rsp);
+			});
+		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
+			->lsp::ResponseOrError< td_foldingRange::response > {
+				auto unit = project.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
+				td_foldingRange::response rsp;
+				FoldingRangeHandler(unit, rsp.result, req.params);
+
+				return std::move(rsp);
 			});
 		
-
 		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{
 				
-				const auto& params = notify.params;
+				auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
 					return;

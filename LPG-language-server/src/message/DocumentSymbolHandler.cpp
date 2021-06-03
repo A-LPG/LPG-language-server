@@ -4,6 +4,8 @@
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
 #include <stack>
+#include "LPGSourcePositionLocator.h"
+#include "../WorkSpaceManager.h"
 using namespace LPGParser_top_level_ast;
 void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILexStream* lex)
 {
@@ -11,11 +13,11 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 	int size = list->size();
 	for(int i = 0; i < size; ++i)
 	{
-		auto _option_spec = static_cast<option_spec*>(list->getoption_specAt(i));
-		optionList* lpg_optionList = static_cast<optionList*>(_option_spec->getoption_list());
+		auto _option_spec = list->getoption_specAt(i);
+		optionList* lpg_optionList = _option_spec->getoption_list();
 		for(int k =0; k < lpg_optionList->list.size(); ++k)
 		{
-			option* _opt = static_cast<option*>(lpg_optionList->getoptionAt(i));
+			option* _opt = lpg_optionList->getoptionAt(i);
 			lsDocumentSymbol children;
 			children.name = _opt->to_utf8_string();
 			children.kind = lsSymbolKind::Property;
@@ -36,6 +38,7 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 		
 	}
 }
+
 struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
 
@@ -58,11 +61,18 @@ struct LPGModelVisitor :public AbstractVisitor {
         children.push_back(lsDocumentSymbol());
         lsDocumentSymbol* treeNode = &children[children.size() - 1];
         treeNode->kind = lsSymbolKind::Struct;
-        auto pos =  ASTUtils::toPosition(lex, n->getLeftIToken()->getStartOffset());
+        auto token = n->getLeftIToken();
+        treeNode->name =  token->to_utf8_string();
+        auto pos =  ASTUtils::toPosition(lex, token->getStartOffset());
     	if(pos)
     	{
             treeNode->range.start = pos.value();
     	}
+        pos = ASTUtils::toPosition(lex, token->getEndOffset());
+        if (pos)
+        {
+            treeNode->range.end = pos.value();
+        }
         return  treeNode;
     }
     lsDocumentSymbol* pushSubItem(IAst* n)
@@ -323,64 +333,68 @@ struct LPGModelVisitor :public AbstractVisitor {
         return true;
     }
 
-    bool visit(terminal_symbol1 n) {
-        createSubItem((ASTNode)n->getMACRO_NAME());
+    bool visit(terminal_symbol1* n) {
+        createSubItem((ASTNode*)n->getMACRO_NAME());
         return false;
     }
 
-    void endVisit(start_symbol0 n) {
-        
+    void endVisit(start_symbol0* n) {
+        createSubItem(n);
     }
 
-    void endVisit(start_symbol1 n) {
-        
+    void endVisit(start_symbol1* n) {
+        createSubItem(n);
     }
 
     void endVisit(terminal* n) {
-        Iterminal_symbol symbol = n->getterminal_symbol();
-        optTerminalAlias alias = n->getoptTerminalAlias();
+        auto symbol = n->getterminal_symbol();
+        auto alias = n->getoptTerminalAlias();
         std::string label;
         if (alias != nullptr) {
-            Iproduces prod = alias.getproduces();
-            Iname name = alias.getname();
+            auto prod = alias->getproduces();
+            auto name = alias->getname();
             label = nameImage(name) + " " + producesImage(prod) + " " + symbolImage(symbol);
         }
         else
             label = symbolImage(symbol);
-        createSubItem(symbol);
+       auto item = createSubItem(symbol);
+       item->name.swap(label);
     }
 
     bool visit(nonTerm* n) {
-        if (n->getruleList().size() > 1)
-            
+        if (n->getruleList()->size() > 1)
+            pushSubItem(n);
         return true;
     }
 
     void endVisit(nonTerm* n) {
-            
+        if (n->getruleList()->size() > 1)
+            popSubItem();
     }
 
     bool visit(rule* n) {
         fRHSLabel.clear();
-         nonTerm* parentNonTerm = (nonTerm*)n->getParent()->getParent();
+         nonTerm* parentNonTerm = static_cast<nonTerm*>(n->getParent()->getParent());
         if (parentNonTerm->getruleList()->size() == 1) {
-            fRHSLabel.append(parentNonTerm.getruleNameWithAttributes().getSYMBOL());
+            fRHSLabel.append(parentNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
             fRHSLabel.append(" ::= ");
         }
         return true;
     }
 
     void endVisit(rule* n) {
-        
+       auto item =  createSubItem(n);
+       item->name.swap(fRHSLabel);
+       fRHSLabel.clear();
     }
 
     void endVisit(symWithAttrs0* n) {
-        fRHSLabel.append(' ');
+        fRHSLabel.push_back(' ');
         fRHSLabel.append(n->getIToken()->to_utf8_string());
     }
 
-    void endVisit(symWithAttrs1 n) {
-        fRHSLabel.append(' ');
+    void endVisit(symWithAttrs1* n) {
+        fRHSLabel.push_back(' ');
         fRHSLabel.append(n->getSYMBOL()->to_utf8_string());
     }
 
@@ -388,78 +402,72 @@ struct LPGModelVisitor :public AbstractVisitor {
     // return true;
     // }
     bool visit(type_declarations* n) {
-        
+        pushSubItem(n);
         return true;
     }
 
     void endVisit(type_declarations* n) {
+        popSubItem();
+    }
+
+    std::string producesImage(ASTNode* produces) {
+        if ( dynamic_cast<produces0*>(produces) 
+            || dynamic_cast<produces1*>(produces)
+            || dynamic_cast<produces2*>(produces)
+            || dynamic_cast<produces3*>(produces)
+            )
+            return produces->getLeftIToken()->to_utf8_string();
+   
         
+         return "<???>";
     }
 
-    /*std::string producesImage(Iproduces produces) {
-        if (produces instanceof produces0)
-            return ((produces0)produces).getLeftIToken()->to_utf8_string();
-        else if (produces instanceof produces1)
-            return ((produces1)produces).getLeftIToken()->to_utf8_string();
-        else if (produces instanceof produces2)
-            return ((produces2)produces).getLeftIToken()->to_utf8_string();
-        else if (produces instanceof produces3)
-            return ((produces3)produces).getLeftIToken()->to_utf8_string();
-        else
-            return "<???>";
-    }
-
-    std::string nameImage(Iname name) {
-        if (name instanceof name0)
-            return ((name0)name).getLeftIToken()->to_utf8_string();
-        else if (name instanceof name1)
-            return ((name1)name).getLeftIToken()->to_utf8_string();
-        else if (name instanceof name2)
-            return "$empty";
-        else if (name instanceof name3)
-            return "$error";
-        else if (name instanceof name4)
-            return "$eol";
-        else if (name instanceof name5)
-            return ((name5)name).getLeftIToken()->to_utf8_string();
-        else
-            return "<???>";
-    }
-
-    std::string symbolImage(IASTNodeToken symbol) {
-        return symbol.getLeftIToken()->to_utf8_string();
-    }
-
-    std::string symbolListImage(Isymbol_list symbols) {
-        SYMBOLList symbolList = (SYMBOLList)symbols;
-        StringBuffer buff = new StringBuffer();
-        buff.append('(');
-        for (int i = 0; i < symbolList.size(); i++) {
-            if (i > 0)
-                buff.append(',');
-            buff.append(symbolImage(symbolList.getSYMBOLAt(i)));
+    std::string nameImage(ASTNode* name) {
+        if (dynamic_cast<name0*>(name)
+            || dynamic_cast<name1*>(name)
+            || dynamic_cast<name5*>(name))
+        {
+            return name->getLeftIToken()->to_utf8_string();;
         }
-        buff.append(')');
-        return buff->to_utf8_string();
+
+        else if (dynamic_cast<name2*>(name))
+            return "$empty";
+        else  if (dynamic_cast<name3*>(name))
+            return "$error";
+        else if (dynamic_cast<name4*>(name))
+            return "$eol";
+        else
+            return "<???>";
+    }
+
+    std::string symbolImage(ASTNode* symbol) {
+        return symbol->getLeftIToken()->to_utf8_string();
+    }
+
+    std::string symbolListImage(ASTNode* symbols) {
+        auto symbolList = (SYMBOLList*)symbols;
+        std::string buff;
+        buff.push_back('(');
+        for (int i = 0; i < symbolList->size(); i++) {
+            if (i > 0)
+                buff.push_back(',');
+            buff.append(symbolImage(symbolList->getSYMBOLAt(i)));
+        }
+        buff.push_back(')');
+        return buff;
     }
 
     std::string blockImage(ASTNodeToken block) {
         return block.getLeftIToken()->to_utf8_string();
-    }*/
+    }
 };
-void process_symbol(std::shared_ptr<CompilationUnit>& unit, lsDocumentSymbol&out)
+void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocumentSymbol >& children)
 {
 	 if(!unit->root)
 	 {
 		 return;
 	 }
-	
-	 if(!out.children.has_value())
-	 {
-         out.children = {};
-	 }
-    
-     std::vector<lsDocumentSymbol>& children = out.children.value();
+
 	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
 	if(lpg_options_)
 	{
@@ -482,11 +490,18 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, lsDocumentSymbol&out
 		lpg_options_segment.children = {};
 		build_option(lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
 	}
-	auto _input =  unit->root->getLPG_INPUT();
-    if(_input)
+	 if(auto _input =  unit->root->getLPG_INPUT(); _input)
     {
-        LPGModelVisitor visitor(&out);
+        lsDocumentSymbol root;
+        root.children = {};
+        LPGModelVisitor visitor(&root);
         _input->accept(&visitor);
+
+    	for(auto& it :root.children.value())
+    	{
+            children.push_back({});
+            children.back().swap(it);
+    	}
     }
 
 	

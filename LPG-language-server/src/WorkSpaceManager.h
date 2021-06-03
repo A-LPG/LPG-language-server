@@ -30,10 +30,10 @@ struct WorkSpaceManagerData;
 
 struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path);
-	void   collectIncludedFiles(std::vector<std::string>& result,std::shared_ptr<CompilationUnit>refUnit);
+	void   collectIncludedFiles(std::vector<std::string>& result, std::shared_ptr<CompilationUnit>& refUnit);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName);
-	Object* findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, std::shared_ptr<CompilationUnit> unit);
+	Object* findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, std::shared_ptr<CompilationUnit>& unit);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
 	WorkSpaceManager(WorkingFiles&, lsp::Log&);
 	~WorkSpaceManager();

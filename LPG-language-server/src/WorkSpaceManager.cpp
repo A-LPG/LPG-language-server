@@ -16,6 +16,7 @@
 #include "working_files.h"
 #include "parser/LPGParser_top_level_ast.h"
 #include <boost/filesystem.hpp>
+#include "IMessageHandler.h"
 using namespace LPGParser_top_level_ast;
 struct WorkSpaceManagerData
 {
@@ -152,7 +153,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	return OnOpen(_open, std::move(content) );
 }
 
-void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, std::shared_ptr<CompilationUnit> refUnit)
+void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, std::shared_ptr<CompilationUnit>& refUnit)
 {
 	if(!refUnit){
 		return;
@@ -240,7 +241,7 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
-Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, std::shared_ptr<CompilationUnit> unit)
+Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, std::shared_ptr<CompilationUnit>& unit)
 {
 	auto     id = stripName(s->toString());
 	std::unordered_map<std::wstring, IAst*>& symbolTable = *(unit->root->symbolTable);
@@ -304,11 +305,30 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<Workin
 {
 	return OnChange(_open,std::move( content) );
 }
+struct MessageHandle : public IMessageHandler
+{
+	void handleMessage(int errorCode, std::vector<int> msgLocation, std::vector<int> errorLocation,
+		const std::wstring& filename, const std::vector<std::wstring>& errorInfo) override
+	{
 
+		std::wcout << "filename:" << filename << std::endl;
+		std::wcout << "errorCode:" << errorCode << std::endl;
+		for (auto& it : errorInfo)
+		{
+			std::wcout << "\terrorInfo:" << it << std::endl;
+		}
+
+	}
+};
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
 {
-	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change);
+	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
+	MessageHandle handle;
 	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+	unit->_lexer.getLexStream()->setMessageHandler(&handle);
+	unit->_lexer.lexer(nullptr, unit->_parser.getIPrsStream());
+
+	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
 	unit->parser();
 	d_ptr->update_unit(_change->filename, unit);
 	return unit;

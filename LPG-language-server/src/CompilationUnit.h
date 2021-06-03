@@ -9,11 +9,13 @@ namespace LPGParser_top_level_ast {
 }
 
 struct WorkingFile;
-
+struct WorkSpaceManager;
 struct CompilationUnit : Object
 {
-	CompilationUnit(std::shared_ptr<WorkingFile>& file);
+	string getName();
+	CompilationUnit(std::shared_ptr<WorkingFile>& file, WorkSpaceManager&);
 	std::shared_ptr<WorkingFile> working_file;
+	WorkSpaceManager& parent;
 	LPGLexer _lexer; // Create the lexer
 	LPGParser _parser;
 	LPGParser_top_level_ast::LPG* root = nullptr;
