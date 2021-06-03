@@ -77,7 +77,7 @@ public:
 		std::atomic_bool is_running_= true;
 		bool isCancelled() override
 		{
-			return  is_running_.load(std::memory_order_relaxed);
+			return  !is_running_.load(std::memory_order_relaxed);
 		}
 		void Cancel()
 		{
