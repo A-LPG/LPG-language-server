@@ -16,16 +16,21 @@
 #include "working_files.h"
 #include "parser/LPGParser_top_level_ast.h"
 #include <boost/filesystem.hpp>
+#include <LibLsp/JsonRpc/RemoteEndPoint.h>
+
 #include "IMessageHandler.h"
+#include "message/MessageHandler.h"
+#include <LibLsp/lsp/textDocument/publishDiagnostics.h>
 using namespace LPGParser_top_level_ast;
 struct WorkSpaceManagerData
 {
-	WorkSpaceManagerData(WorkingFiles& _w, lsp::Log& _log):working_files(_w), logger(_log)
+	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log): working_files(_w), end_point(_end_point),
+		logger(_log)
 	{
-		
 	}
-	
+
 	WorkingFiles& working_files;
+	RemoteEndPoint& end_point;
 	lsp::Log& logger;
 
 	typedef boost::shared_lock<boost::shared_mutex> readLock;
@@ -291,7 +296,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path
 	return  d_ptr->find(temp);
 }
 
-WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(_w , _log))
+WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(_w , end_point, _log))
 {
 	
 }
@@ -307,30 +312,49 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<Workin
 }
 struct MessageHandle : public IMessageHandler
 {
-	void handleMessage(int errorCode, std::vector<int> msgLocation, std::vector<int> errorLocation,
+	Notify_TextDocumentPublishDiagnostics::notify notify;
+	lsRange toRange(const Location& location)
+	{
+		lsRange range;
+		range.start.line = location.start_line;
+		range.start.character = location.start_column;
+		range.end.line = location.end_line;
+		range.end.character = location.end_column;
+		return  range;
+	}
+	void handleMessage(int errorCode, const Location& msgLocation, const Location& errorLocation,
 		const std::wstring& filename, const std::vector<std::wstring>& errorInfo) override
 	{
-
-		std::wcout << "filename:" << filename << std::endl;
-		std::wcout << "errorCode:" << errorCode << std::endl;
+		lsDiagnostic diagnostic;
+		diagnostic.severity = lsDiagnosticSeverity::Error;
+		diagnostic.range = toRange(errorLocation);
+		std::string info;
 		for (auto& it : errorInfo)
 		{
-			std::wcout << "\terrorInfo:" << it << std::endl;
+			info += IcuUtil::ws2s(it);
+			info += "\n";
 		}
-
+		diagnostic.message.swap(info);
+		notify.params.diagnostics.push_back(std::move(diagnostic));
 	}
 };
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
 {
+	if (!_change)
+		return {};
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
 	MessageHandle handle;
+	handle.notify.params.uri = _change->filename;
+	
 	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
 	unit->_lexer.getLexStream()->setMessageHandler(&handle);
-	unit->_lexer.lexer(nullptr, unit->_parser.getIPrsStream());
-
 	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
+
+	unit->_lexer.lexer(nullptr, unit->_parser.getIPrsStream());
 	unit->parser();
 	d_ptr->update_unit(_change->filename, unit);
+
+	d_ptr->end_point.sendNotification(handle.notify);
 	return unit;
 }
 
@@ -358,6 +382,11 @@ void WorkSpaceManager::OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFolde
 void WorkSpaceManager::UpdateIncludePaths(const std::vector<Directory>& dirs)
 {
 	d_ptr->includeDirs = dirs;
+}
+
+RemoteEndPoint& WorkSpaceManager::GetEndPoint() const
+{
+	return  d_ptr->end_point;
 }
 
 

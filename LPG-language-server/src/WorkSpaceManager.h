@@ -4,6 +4,7 @@
 #include <vector>
 
 
+class RemoteEndPoint;
 struct Directory;
 
 namespace LPGParser_top_level_ast {
@@ -35,7 +36,7 @@ struct WorkSpaceManager {
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName);
 	Object* findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, std::shared_ptr<CompilationUnit>& unit);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
-	WorkSpaceManager(WorkingFiles&, lsp::Log&);
+	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&);
 	~WorkSpaceManager();
 	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&, std::wstring&& content);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>&, std::wstring&& content);
@@ -43,6 +44,7 @@ struct WorkSpaceManager {
 	void OnSave(const lsDocumentUri& _save);
 	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);
 	void UpdateIncludePaths(const std::vector<Directory>&);
+	RemoteEndPoint& GetEndPoint()const;
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
 	Object* findDefOf_internal(LPGParser_top_level_ast::ASTNodeToken* s, std::shared_ptr<CompilationUnit> unit);
