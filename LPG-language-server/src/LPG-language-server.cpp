@@ -37,6 +37,9 @@
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
+
+
+
 class DummyLog :public lsp::Log
 {
 public:
@@ -270,6 +273,7 @@ public:
 	std::shared_ptr < GenericEndpoint >  endpoint = std::make_shared<GenericEndpoint>(_log);
 	lsp::TcpServer server;
 	Condition<bool> esc_event;
+
 };
 
 
@@ -300,7 +304,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	Server server;
-	server.esc_event.wait();
+	auto ddd =server.esc_event.wait();
 	return 0;
 }
 

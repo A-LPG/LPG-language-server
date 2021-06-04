@@ -1,7 +1,6 @@
 #include "CompilationUnit.h"
 
-
-#include "working_files.h"
+#include <LibLsp/lsp/working_files.h>
 
 
 string CompilationUnit::getName()

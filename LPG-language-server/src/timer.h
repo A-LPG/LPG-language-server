@@ -7,8 +7,6 @@
 #include <thread>
 #include <atomic>
 #include <functional>
-#include <boost/timer.hpp>
-#include <boost/asio.hpp>
 struct Timer {
   using Clock = std::chrono::high_resolution_clock;
 
