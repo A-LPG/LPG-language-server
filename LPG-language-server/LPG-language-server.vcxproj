@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="src\ASTUtils.cpp" />
     <ClCompile Include="src\CompilationUnit.cpp" />
-    <ClCompile Include="src\lex_utils.cc" />
     <ClCompile Include="src\LPG-language-server.cpp" />
     <ClCompile Include="src\message\CompletionHandler.cpp" />
     <ClCompile Include="src\message\FoldingRangeHandler.cpp" />
@@ -38,8 +37,6 @@
     <ClInclude Include="src\ASTUtils.h" />
     <ClInclude Include="src\CompilationUnit.h" />
     <ClInclude Include="src\Directory.h" />
-    <ClInclude Include="src\lex_utils.h" />
-    <ClInclude Include="src\lru_cache.h" />
     <ClInclude Include="src\message\MessageHandler.h" />
     <ClInclude Include="src\parser\LPGKWLexer.h" />
     <ClInclude Include="src\parser\LPGKWLexerprs.h" />

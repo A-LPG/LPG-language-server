@@ -8,7 +8,6 @@
 #include <numeric>
 #include <stringex.h>
 
-#include "lex_utils.h"
 #include "utils.h"
 
 
@@ -22,14 +21,14 @@ WorkingFile::WorkingFile(WorkingFiles& _parent, const AbsolutePath& filename,
                          const std::string& buffer_content)
 	: filename(filename), directory(filename), parent(_parent), buffer_content(buffer_content)
 {
-       directory = Directory(GetPathFromFileFullPath(filename.path));
+       directory = Directory(GetDirName(filename.path));
 }
 
 WorkingFile::WorkingFile(WorkingFiles& _parent, const AbsolutePath& filename,
                          std::string&& buffer_content)
 	: filename(filename), directory(filename), parent(_parent), buffer_content(buffer_content)
 {
-    directory = Directory(GetPathFromFileFullPath(filename.path));
+    directory = Directory(GetDirName(filename.path));
 }
 
 
@@ -107,6 +106,34 @@ std::shared_ptr<WorkingFile>  WorkingFiles::OnOpen( lsTextDocumentItem& open) {
   return  it.first->second;
 }
 
+namespace 
+{
+    // VSCode (UTF-16) disagrees with Emacs lsp-mode (UTF-8) on how to represent
+// text documents.
+// We use a UTF-8 iterator to approximate UTF-16 in the specification (weird).
+// This is good enough and fails only for UTF-16 surrogate pairs.
+    int GetOffsetForPosition(lsPosition position, std::string_view content) {
+        size_t i = 0;
+        // Iterate lines until we have found the correct line.
+        while (position.line > 0 && i < content.size()) {
+            if (content[i] == '\n')
+                position.line--;
+            i++;
+        }
+        // Iterate characters on the target line.
+        while (position.character > 0 && i < content.size()) {
+            if (uint8_t(content[i++]) >= 128) {
+                // Skip 0b10xxxxxx
+                while (i < content.size() && uint8_t(content[i]) >= 128 &&
+                    uint8_t(content[i]) < 192)
+                    i++;
+            }
+            position.character--;
+        }
+        return int(i);
+    }
+   
+}
 std::shared_ptr<WorkingFile>  WorkingFiles::OnChange(const lsTextDocumentDidChangeParams& change) {
   std::lock_guard<std::mutex> lock(d_ptr->files_mutex);
 
@@ -193,9 +220,3 @@ bool WorkingFiles::GetFileBufferContent(std::shared_ptr<WorkingFile>& file, std:
     }
     return  false;
 }
-
-//lsPosition CharPos(const WorkingFile& file,
-//                   char character,
-//                   int character_offset = 0) {
-//  return CharPos(file.buffer_content, character, character_offset);
-//}
