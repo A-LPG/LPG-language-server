@@ -27,12 +27,6 @@
     <ClCompile Include="src\parser\LPGParser.cpp">
       <Filter>parser</Filter>
     </ClCompile>
-    <ClCompile Include="src\working_files.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\utils.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\timer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -89,12 +83,6 @@
     <ClInclude Include="src\parser\LPGParsersym.h">
       <Filter>parser</Filter>
     </ClInclude>
-    <ClInclude Include="src\working_files.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utils.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\timer.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -102,9 +90,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\CompilationUnit.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Directory.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\message\MessageHandler.h">

@@ -12,9 +12,9 @@
 #include <LibLsp/lsp/workspace/workspaceFolders.h>
 
 #include "CompilationUnit.h"
-#include "Directory.h"
-#include "utils.h"
-#include "working_files.h"
+#include "LibLsp/lsp/utils.h"
+#include "LibLsp/lsp/working_files.h"
+#include "LibLsp/lsp/SimpleTimer.h"
 #include "parser/LPGParser_top_level_ast.h"
 #include <boost/filesystem.hpp>
 #include <LibLsp/JsonRpc/RemoteEndPoint.h>
@@ -23,6 +23,7 @@
 #include "message/MessageHandler.h"
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
 using namespace LPGParser_top_level_ast;
+using namespace lsp;
 struct WorkSpaceManagerData
 {
 	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log,Monitor& m): working_files(_w),

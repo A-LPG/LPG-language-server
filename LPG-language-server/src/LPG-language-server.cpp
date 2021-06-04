@@ -27,14 +27,16 @@
 #include "LibLsp/lsp/textDocument/completion.h"
 #include "WorkSpaceManager.h"
 #include "timer.h"
-#include "utils.h"
-#include "working_files.h"
+#include "LibLsp/lsp/utils.h"
+#include "LibLsp/lsp/working_files.h"
+#include "LibLsp/lsp/SimpleTimer.h"
 #include "IcuUtil.h"
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
 #include "Monitor.h"
 using namespace boost::asio::ip;
 using namespace std;
+using namespace lsp;
 class DummyLog :public lsp::Log
 {
 public:
