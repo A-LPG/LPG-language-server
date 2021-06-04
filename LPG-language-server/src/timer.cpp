@@ -1,7 +1,7 @@
 #include "timer.h"
 
 #include <loguru.hpp>
-
+#include <loguru.cpp>
 using namespace std::chrono;
 
 // static

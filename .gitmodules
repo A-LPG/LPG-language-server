@@ -1,3 +1,12 @@
 [submodule "third_party/LspCpp"]
 	path = third_party/LspCpp
 	url = https://github.com/kuafuwang/LspCpp
+[submodule "third_party/LPG-cpp-runtime"]
+	path = third_party/LPG-cpp-runtime
+	url = https://github.com/kuafuwang/LPG-cpp-runtime
+[submodule "third_party/loguru"]
+	path = third_party/loguru
+	url = https://github.com/emilk/loguru
+[submodule "third_party/rapidjson"]
+	path = third_party/rapidjson
+	url = https://github.com/Tencent/rapidjson

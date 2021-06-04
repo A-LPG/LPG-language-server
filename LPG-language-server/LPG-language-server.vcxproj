@@ -68,7 +68,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -105,10 +105,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\LPG-language-server\third_party\loguru;E:\LPG-language-server\third_party\lpgRuntimeCpp\src;E:\LPG-language-server\third_party\LspCpp;$(IncludePath)</IncludePath>
+    <IncludePath>..\third_party\loguru;..\third_party\rapidjson\include;..\third_party\LPG-cpp-runtime\lpgRuntimeCpp\src;..\third_party\LspCpp;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\third_party\loguru;..\third_party\rapidjson\include;..\third_party\LPG-cpp-runtime\lpgRuntimeCpp\src;..\third_party\LspCpp;$(IncludePath)</IncludePath>
+    <LibraryPath>..\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -128,6 +131,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LspCppMDD.lib;lpg_MDD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -136,14 +140,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LOGURU_WITH_STREAMS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>LspCppMD.lib;lpg_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -177,7 +184,6 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets" Condition="Exists('packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets')" />
-    <Import Project="..\packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets" Condition="Exists('..\packages\tencent.rapidjson.1.1.1\build\tencent.rapidjson.targets')" />
     <Import Project="..\packages\boost.1.76.0.0\build\boost.targets" Condition="Exists('..\packages\boost.1.76.0.0\build\boost.targets')" />
     <Import Project="..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets" Condition="Exists('..\packages\boost_chrono-vc141.1.76.0.0\build\boost_chrono-vc141.targets')" />
     <Import Project="..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets" Condition="Exists('..\packages\boost_context-vc141.1.76.0.0\build\boost_context-vc141.targets')" />
@@ -203,7 +209,11 @@
     <Error Condition="!Exists('..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_regex-vc141.1.76.0.0\build\boost_regex-vc141.targets'))" />
     <Error Condition="!Exists('..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_system-vc140.1.76.0.0\build\boost_system-vc140.targets'))" />
     <Error Condition="!Exists('..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost_thread-vc141.1.76.0.0\build\boost_thread-vc141.targets'))" />
+    <Error Condition="!Exists('..\packages\icu4c.v140.redist.59.1.1\build\native\icu4c.v140.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\icu4c.v140.redist.59.1.1\build\native\icu4c.v140.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\icu4c.v140.59.1.1\build\native\icu4c.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\icu4c.v140.59.1.1\build\native\icu4c.v140.targets'))" />
   </Target>
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\icu4c.v140.redist.59.1.1\build\native\icu4c.v140.redist.targets" Condition="Exists('..\packages\icu4c.v140.redist.59.1.1\build\native\icu4c.v140.redist.targets')" />
+    <Import Project="..\packages\icu4c.v140.59.1.1\build\native\icu4c.v140.targets" Condition="Exists('..\packages\icu4c.v140.59.1.1\build\native\icu4c.v140.targets')" />
   </ImportGroup>
 </Project>
