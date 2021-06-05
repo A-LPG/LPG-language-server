@@ -23,6 +23,7 @@
     <ClCompile Include="src\CompilationUnit.cpp" />
     <ClCompile Include="src\LPG-language-server.cpp" />
     <ClCompile Include="src\message\CompletionHandler.cpp" />
+    <ClCompile Include="src\message\DocumentFormatHandler.cpp" />
     <ClCompile Include="src\message\FoldingRangeHandler.cpp" />
     <ClCompile Include="src\message\HoverHandler.cpp" />
     <ClCompile Include="src\message\DocumentSymbolHandler.cpp" />

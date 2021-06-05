@@ -236,3 +236,4 @@ FoldingRangeHandler::FoldingRangeHandler(std::shared_ptr<CompilationUnit>& u, st
     FoldingVisitor visitor(this,unit->_lexer.getILexStream(),unit->_parser.getIPrsStream());
     unit->root->accept(&visitor);
 }
+

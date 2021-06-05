@@ -5,6 +5,7 @@
 #include <LibLsp/lsp/textDocument/foldingRange.h>
 
 
+struct lsFormattingOptions;
 struct FoldingRangeRequestParams;
 struct lsCompletionParams;
 struct CompletionList;
@@ -75,4 +76,13 @@ struct FoldingRangeHandler
 
 	std::shared_ptr<CompilationUnit>& unit;
 	std::vector<FoldingRange>& out;
+};
+struct DocumentFormatHandler
+{
+
+	DocumentFormatHandler(std::shared_ptr<CompilationUnit>&, std::vector<lsTextEdit>&, const lsFormattingOptions&);
+
+
+	std::shared_ptr<CompilationUnit>& unit;
+	std::vector<lsTextEdit>& out;
 };
