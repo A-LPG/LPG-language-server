@@ -86,12 +86,12 @@ struct DocumentFormatHandler
 	std::shared_ptr<CompilationUnit>& unit;
 	std::vector<lsTextEdit>& out;
 };
+struct DocumentColorHandlerData;
 struct DocumentColorHandler
 {
 
-	DocumentColorHandler(std::shared_ptr<CompilationUnit>&, std::vector<ColorInformation>&, const DocumentColorParams&);
+	DocumentColorHandler(std::shared_ptr<CompilationUnit>&, std::vector<ColorInformation>&);
+	~DocumentColorHandler();
+	DocumentColorHandlerData* d_ptr;
 
-
-	std::shared_ptr<CompilationUnit>& unit;
-	std::vector<ColorInformation>& out;
 };

@@ -4,24 +4,19 @@
 #include "LibLsp/lsp/textDocument/signature_help.h"
 #include "LibLsp/lsp/general/initialize.h"
 #include "LibLsp/lsp/ProtocolJsonHandler.h"
-#include "LibLsp/lsp/textDocument/typeHierarchy.h"
 #include "LibLsp/lsp/AbsolutePath.h"
-#include "LibLsp/lsp/textDocument/resolveCompletionItem.h"
 #include <network/uri.hpp>
 #include "LibLsp/JsonRpc/Condition.h"
 #include "LibLsp/lsp/textDocument/did_change.h"
 #include "LibLsp/lsp/textDocument/did_save.h"	
 #include "LibLsp/JsonRpc/Endpoint.h"
-#include "LibLsp/JsonRpc/stream.h"
 #include "LibLsp/JsonRpc/TcpServer.h"
 #include "LibLsp/lsp/textDocument/document_symbol.h"
 #include "LibLsp/lsp/workspace/execute_command.h"
 #include "LibLsp/lsp/textDocument/declaration_definition.h"
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
-#include "LibLsp/lsp/textDocument/document_symbol.h"
 #include "LibLsp/lsp/workspace/didChangeWorkspaceFolders.h"
 #include "LibLsp/lsp/textDocument/hover.h"
 #include "LibLsp/lsp/textDocument/completion.h"
@@ -36,6 +31,9 @@
 #include "Monitor.h"
 #include "LibLsp/lsp/textDocument/formatting.h"
 #include "LibLsp/lsp/textDocument/documentColor.h"
+#include "LibLsp/lsp/general/shutdown.h"
+#include "LibLsp/lsp/workspace/did_change_watched_files.h"
+#include "LibLsp/lsp/general/initialized.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -92,20 +90,61 @@ public:
 		}
 	};
 	ServerMonitor _monitor;
+	boost::optional<Rsp_Error> need_initialize_error;
+	
 	Server() :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
+		need_initialize_error = Rsp_Error();
+		need_initialize_error->error.code = lsErrorCodes::ServerNotInitialized;
+		need_initialize_error->error.message = "Server is not initialized";
 		
 		server.remote_end_point_.registerRequestHandler([&](const td_initialize::request& req)
 			->lsp::ResponseOrError< td_initialize::response > {
+				need_initialize_error.reset();
 				td_initialize::response rsp;
+				lsServerCapabilities capabilities;
+			
 				CodeLensOptions code_lens_options;
 				code_lens_options.resolveProvider = true;
-				rsp.result.capabilities.codeLensProvider = code_lens_options;
-
-				return rsp;
+				capabilities.codeLensProvider = code_lens_options;
+				capabilities.textDocumentSync = {};
+				{
+					lsTextDocumentSyncOptions options;
+					options.openClose = true;
+					options.change = lsTextDocumentSyncKind::Incremental;
+					options.willSave = false;
+					options.willSaveWaitUntil = false;
+					capabilities.textDocumentSync.value().second = options;
+				}
+				capabilities.hoverProvider = true;
+				lsCompletionOptions completion;
+				completion.resolveProvider = true;
+				capabilities.completionProvider = completion;
+				capabilities.definitionProvider = {};
+				capabilities.definitionProvider->first = true;
+				capabilities.referencesProvider = {};
+				capabilities.referencesProvider->first = true;
+				capabilities.documentSymbolProvider = {};
+				capabilities.documentSymbolProvider->first = true;
+				capabilities.documentFormattingProvider = {};
+				capabilities.documentFormattingProvider->first = true;
+				capabilities.renameProvider = {};
+				capabilities.renameProvider->first = true;
+				capabilities.colorProvider = {};
+				capabilities.colorProvider->first = true;
+				rsp.result.capabilities.swap(capabilities);
+				return  std::move(rsp);
 			});
+		server.remote_end_point_.registerNotifyHandler([&](Notify_InitializedNotification::notify& notify)
+		{
+
+		});
 		server.remote_end_point_.registerRequestHandler([&](const td_symbol::request& req)
 			->lsp::ResponseOrError< td_symbol::response > {
+				if(need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 			    if(!unit)
 			    {
@@ -118,6 +157,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
 			->lsp::ResponseOrError< td_definition::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -131,6 +174,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_hover::request& req)
 			->lsp::ResponseOrError< td_hover::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -143,6 +190,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
 			->lsp::ResponseOrError< td_completion::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -156,6 +207,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
 			->lsp::ResponseOrError< td_foldingRange::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -169,6 +224,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_formatting::request& req)
 			->lsp::ResponseOrError< td_formatting::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -182,6 +241,10 @@ public:
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_documentColor::request& req)
 			->lsp::ResponseOrError< td_documentColor::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
 				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
@@ -196,7 +259,9 @@ public:
 		
 		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{
-				
+				if (need_initialize_error){
+					return ;
+				}
 				auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
@@ -213,6 +278,9 @@ public:
 		
 		server.remote_end_point_.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
+			if (need_initialize_error) {
+				return;
+			}
 			const auto& params = notify.params;
 			AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 			if (ShouldIgnoreFileForIndexing(path))
@@ -247,6 +315,9 @@ public:
 		});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidClose::notify& notify)
 		{
+				if (need_initialize_error) {
+					return;
+				}
 				Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
@@ -259,6 +330,9 @@ public:
 		
 		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidSave::notify& notify)
 			{
+				if (need_initialize_error) {
+					return;
+				}
 				Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
@@ -268,8 +342,17 @@ public:
 				work_space_mgr.OnSave(params.textDocument.uri);
 				// 通知消失了
 			});
+		
+		server.remote_end_point_.registerNotifyHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
+		{
+			
+		});
+
 		server.remote_end_point_.registerNotifyHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
 		{
+				if (need_initialize_error) {
+					return;
+				}
 				std::vector<Directory> remove;
 			    for(auto& it :notify.params.event.removed)
 			    {
@@ -278,7 +361,11 @@ public:
 				working_files.CloseFilesInDirectory(remove);
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
-
+		
+		server.remote_end_point_.registerRequestHandler([&](td_shutdown::request& notify) {
+			td_shutdown::response rsp;
+			return rsp;
+		});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_Exit::notify& notify)
 		{
 				_monitor.Cancel();
