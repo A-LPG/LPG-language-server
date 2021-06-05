@@ -35,6 +35,7 @@
 #include "LibLsp/lsp/textDocument/foldingRange.h"
 #include "Monitor.h"
 #include "LibLsp/lsp/textDocument/formatting.h"
+#include "LibLsp/lsp/textDocument/documentColor.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -176,6 +177,19 @@ public:
 				}
 				td_formatting::response rsp;
 				DocumentFormatHandler(unit, rsp.result, req.params.options);
+
+				return std::move(rsp);
+			});
+		server.remote_end_point_.registerRequestHandler([&](const td_documentColor::request& req)
+			->lsp::ResponseOrError< td_documentColor::response > {
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
+				td_documentColor::response rsp;
+				DocumentColorHandler(unit, rsp.result);
 
 				return std::move(rsp);
 			});

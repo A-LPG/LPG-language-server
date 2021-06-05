@@ -57,6 +57,9 @@
     <ClCompile Include="src\message\DocumentFormatHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
+    <ClCompile Include="src\message\DocumentColorHandler.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">

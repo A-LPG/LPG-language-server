@@ -3,7 +3,7 @@
 #include <vector>
 #include <LibLsp/lsp/lsp_completion.h>
 #include <LibLsp/lsp/textDocument/foldingRange.h>
-
+#include <LibLsp/lsp/textDocument/documentColor.h>
 
 struct lsFormattingOptions;
 struct FoldingRangeRequestParams;
@@ -85,4 +85,13 @@ struct DocumentFormatHandler
 
 	std::shared_ptr<CompilationUnit>& unit;
 	std::vector<lsTextEdit>& out;
+};
+struct DocumentColorHandler
+{
+
+	DocumentColorHandler(std::shared_ptr<CompilationUnit>&, std::vector<ColorInformation>&, const DocumentColorParams&);
+
+
+	std::shared_ptr<CompilationUnit>& unit;
+	std::vector<ColorInformation>& out;
 };

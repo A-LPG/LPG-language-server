@@ -332,3 +332,4 @@ DocumentFormatHandler::DocumentFormatHandler(std::shared_ptr<CompilationUnit>&u 
 
     out.emplace_back(edit);
 }
+
