@@ -27,6 +27,12 @@
  
     //#line 186 "dtParserTemplateF.gi
 
+    namespace LPGParser_top_level_ast {
+	    struct ASTNodeToken;
+	    struct terminal;
+	    struct nonTerm;
+    }
+
  struct LPGParser :public Object ,public RuleAction
 {
   
@@ -189,8 +195,10 @@
 
     //#line 37 "LPGParser.g
 
-     std::unordered_map<std::wstring, IAst*> symtab;
- 
+     std::unordered_multimap<std::wstring, IAst*> symtab;
+     std::vector<LPGParser_top_level_ast::nonTerm*>  _non_terms;
+     std::vector<LPGParser_top_level_ast::terminal*>  _terms;
+     std::vector<LPGParser_top_level_ast::ASTNodeToken*>  _macro_name_symbo;
     //#line 355 "dtParserTemplateF.gi
 
 };

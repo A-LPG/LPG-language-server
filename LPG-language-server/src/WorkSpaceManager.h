@@ -4,6 +4,7 @@
 #include <vector>
 
 
+struct ILexStream;
 struct Monitor;
 class RemoteEndPoint;
 struct Directory;
@@ -35,7 +36,7 @@ struct WorkSpaceManager {
 	void   collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName);
-	Object* findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
+	std::vector<Object*> findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
 	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&, Monitor&);
 	~WorkSpaceManager();
@@ -46,8 +47,10 @@ struct WorkSpaceManager {
 	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);
 	void UpdateIncludePaths(const std::vector<Directory>&);
 	RemoteEndPoint& GetEndPoint()const;
+	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
-	Object* findDefOf_internal(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
+    std::vector< Object*>	 findDefOf_internal(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
+	
 };
 

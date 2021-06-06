@@ -650,12 +650,8 @@ namespace LPGParser_top_level_ast {
             v->endVisit(this);
         }
 
-        //#line 44 "LPGParser.g
 
-        std::unordered_map<std::wstring, IAst*>* symbolTable;
-        void initialize() {
-            symbolTable = &(environment->symtab);
-        }
+
     };
 
     /**
@@ -2135,9 +2131,7 @@ namespace LPGParser_top_level_ast {
 
         //#line 115 "LPGParser.g
 
-        void initialize() {
-            environment->symtab.insert({ getmacro_name_symbol()->toString(), this });
-        }
+        void initialize();
     };
 
     /**
@@ -3332,9 +3326,7 @@ namespace LPGParser_top_level_ast {
 
         //#line 248 "LPGParser.g
 
-        void initialize() {
-            environment->symtab.insert({ getterminal_symbol()->toString(), this });
-        }
+        void initialize();
     };
 
     /**

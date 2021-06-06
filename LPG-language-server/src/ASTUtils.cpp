@@ -22,15 +22,15 @@ namespace
 void ASTUtils::findRefsOf(std::vector<ASTNode*>& result, nonTerm* _nonTerm)
 {
     auto root = getRoot(_nonTerm);
-    std::vector<IAst*> nonTerms;
+    std::vector<nonTerm*> nonTerms;
      getNonTerminals(root, nonTerms);
 
     // Indexed search would be nice here...
     for (int i = 0; i < nonTerms.size(); i++) {
-        auto nt = static_cast<nonTerm*>(nonTerms[i]);
+        auto nt = nonTerms[i];
         findRefsOf_AbstractVisitor visitor(result);
-        visitor.name = static_cast<RuleName*>(_nonTerm->getruleNameWithAttributes())
-            ->getSYMBOL()->toString();
+        visitor.name = _nonTerm->getruleNameWithAttributes()
+                               ->getSYMBOL()->toString();
 
         nt->accept(&visitor);
 
@@ -41,11 +41,11 @@ void ASTUtils::findRefsOf(std::vector<ASTNode*>& result, terminal* term)
 {
 
 	    auto root = getRoot(term);
-    std::vector<IAst*> nonTerms;
+    std::vector<nonTerm*> nonTerms;
     getNonTerminals(root, nonTerms);
     // Indexed search would be nice here...
     for (int i = 0; i < nonTerms.size(); i++) {
-        auto nt = static_cast<nonTerm*>(nonTerms[i]);
+        auto nt = nonTerms[i];
         findRefsOf_AbstractVisitor visitor(result);
         visitor.name = term->toString();
 
@@ -178,7 +178,7 @@ std::string ASTUtils::getLabelFor(ASTNode* n)
     }
     if (dynamic_cast<symWithAttrsList*>(n))
     {
-        return static_cast<symWithAttrsList*>(n)->to_utf8_string();
+        return n->to_utf8_string();
     }
  
     if (dynamic_cast<terminalList*>(n)) { return "terminals"; }

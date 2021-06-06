@@ -1,6 +1,7 @@
+#include <LibLsp/lsp/working_files.h>
+
 #include "MessageHandler.h"
 #include "../CompilationUnit.h"
-#include "../parser/LPGParser.h"
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
 #include "LPGSourcePositionLocator.h"
@@ -8,59 +9,9 @@
 #include "LibLsp/lsp/textDocument/hover.h"
 using namespace LPGParser_top_level_ast;
 
-struct LPGReferenceResolver
-{
-    /**
-	 * Get the target for a given source node in the AST represented by a given
-	 * Parse Controller.
-	 */
-     Object* getLinkTarget(Object* node, std::shared_ptr<CompilationUnit>& unit) {
-         if (!unit)
-             return nullptr;
-        if (!dynamic_cast<ASTNodeToken*>(node))
-        {
-            return nullptr;
-        }
-        auto  def = unit->parent.findDefOf(static_cast<ASTNodeToken*>(node), unit);
-        return def;
-    }
-
-    /**
-     * Get the text associated with a given node for use in a link from (or to)
-     * that node
-     */
-     std::string getLinkText(Object* node) {
-        if (dynamic_cast<ASTNode*>(node)) {
-            return static_cast<ASTNode*>(node)->getLeftIToken()->to_utf8_string();
-        }
-        else {
-            //System.err.println("JikesPGReferenceResolver.getLinkText(): odd; given object is not an ASTNode");
-            return {};
-        }
-    }
-};
-void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition& position, std::vector<lsLocation>& out)
-{
-    if (!unit ||!unit->root)
-    {
-        return;
-    }
-    auto offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), position);
-	if(offset < 0)
-	{
-		return;
-	}
-    LPGSourcePositionLocator locator;
-    auto selNode = locator.findNode(unit->root, offset);
-    if (selNode == nullptr) return ;
-    LPGReferenceResolver refResolver;
-  auto target =   refResolver.getLinkTarget(selNode, unit);
-}
-
 struct DocumentationProvider
 {
-    std::string  getSubstring(std::shared_ptr<CompilationUnit>& ast_unit, int start, int end) {
-        auto buf = ast_unit->_parser.getIPrsStream()->getInputChars();
+    std::string  getSubstring(const shared_ptr_wstring& buf, int start, int end) {
         const std::wstring  temp(buf.data(), start, end - start + 1);
         return IcuUtil::ws2s(temp);
     }
@@ -73,10 +24,16 @@ struct DocumentationProvider
 
 
         if (dynamic_cast<ASTNodeToken*>(target)) {
-            auto def = (ASTNode*)ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit);
-
+            ASTNode* def = nullptr;
+        	auto set = ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit);
+            if(!set.empty())
+            {
+                def = dynamic_cast<ASTNode*>(set[0]);
+            }
+            
             if (def != nullptr)
-                return getSubstring(ast_unit, def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
+                return getSubstring(def->getLeftIToken()->getIPrsStream()->getInputChars(),
+                    def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
         }
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
@@ -111,8 +68,13 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& pos
     LPGSourcePositionLocator locator;
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return;
-    LPGReferenceResolver refResolver;
-    auto target = refResolver.getLinkTarget(selNode, unit);
+   
+    Object* target = nullptr;
+	auto set = unit->getLinkTarget(selNode);
+	if(!set.empty())
+	{
+        target = set[0];
+	}
     // if target is null, we're hovering over a declaration whose javadoc is right before us, but
 // showing it can still be useful for previewing the javadoc formatting
 // OR if target is null we're hovering over something not a decl or ref (e.g. integer literal)
@@ -126,9 +88,6 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& pos
     if (target == nullptr) target = selNode;
     DocumentationProvider docProvider;
    auto doc= docProvider.getDocumentation( unit, target);
-	if(doc.size()) return;
-    if (target == selNode)
-        return ;
     MarkupContent content;
     content.value = doc;
     out.contents.second = content;

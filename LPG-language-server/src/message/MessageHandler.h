@@ -95,3 +95,12 @@ struct DocumentColorHandler
 	DocumentColorHandlerData* d_ptr;
 
 };
+struct ReferencesHandlerData;
+struct ReferencesHandler
+{
+
+	ReferencesHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&);
+	~ReferencesHandler();
+	ReferencesHandlerData* d_ptr;
+
+};

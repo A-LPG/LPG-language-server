@@ -42,7 +42,17 @@ struct WorkSpaceManagerData
 
 	std::map<std::string, std::shared_ptr<CompilationUnit>> units;
 	std::vector<Directory>includeDirs;
+	std::shared_ptr<CompilationUnit> FindFile(ILexStream* lex)
+	{
+		readLock a(_rw_mutex);
+		for(auto& it : units)
+		{
+			if (lex == it.second->_lexer.getILexStream())
+				return  it.second;
+		}
 
+		return {};
+	}
 	void update_unit(const std::string& path, std::shared_ptr<CompilationUnit>& unit)
 	{
 
@@ -111,7 +121,7 @@ std::string stripName(const std::string& rawId) {
 
 	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
 }
- Object* WorkSpaceManager::findDefOf_internal(ASTNodeToken* s,
+std::vector<Object*>  WorkSpaceManager::findDefOf_internal(ASTNodeToken* s,
                                               const std::shared_ptr<CompilationUnit>& refUnit)
 {
 	 auto     id = stripName(s->toString());
@@ -123,17 +133,18 @@ std::string stripName(const std::string& rawId) {
 		 if(!include_unit)continue;
 
 		 if (LPG * includedRoot = include_unit->root; includedRoot != nullptr) {
-			 auto findIt= includedRoot->symbolTable->find(id);
-			 ASTNode* decl = nullptr;
-		 	if(findIt != includedRoot->symbolTable->end())
-		 	{
-				decl = static_cast<ASTNode*>(findIt->second);
-		 	}
-			 if (decl != nullptr)
-				 return decl;
+			 auto& symbolTable = includedRoot->environment->symtab;
+		
+			 auto  range = symbolTable.equal_range(id);
+			 std::vector<Object*> candidates;
+			 for (auto it = range.first; it != range.second; ++it) {
+				 candidates.emplace_back(it->second);
+			 }
+			 if (candidates.size())
+				 return candidates;
 		 }
 	 }
-	 return nullptr;
+	 return {};
 	
 }
 
@@ -175,11 +186,11 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 	
 	auto optSeg = static_cast<option_specList*>(root->getoptions_segment());
 	for (int i = 0; i < optSeg->size(); i++) {
-		auto optSpec = static_cast<option_spec*>(optSeg->getoption_specAt(i));
-		auto optList = static_cast<optionList*>(optSpec->getoption_list());
+		auto optSpec = optSeg->getoption_specAt(i);
+		auto optList = optSpec->getoption_list();
 		for (int o = 0; o < optList->size(); o++) {
-			auto opt =static_cast<option*>(optList->getoptionAt(o));
-			auto sym = static_cast<ASTNodeToken*>(opt->getSYMBOL());
+			auto opt =optList->getoptionAt(o);
+			auto sym = opt->getSYMBOL();
 			auto  optName = sym->toString();
 
 			if (optName==(L"import_terminals")
@@ -188,7 +199,8 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 			{
 				auto  optValue = opt->getoption_value();
 				if ( dynamic_cast<option_value0*>(optValue)) {
-					auto fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
+					string fileName;
+					fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
 					result.emplace_back(fileName);
 					if (optName == (L"import_terminals")) {
 						// pick up defs from the filter
@@ -221,27 +233,27 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 	
 	{
 		
-		boost::filesystem::path refPath(directory.path);
+		string refPath(directory.path);
 		refPath.append(fileName);
-		unit = find(AbsolutePath(refPath.string(), false));
+		unit = find(AbsolutePath(refPath, false));
 		if (unit) return unit;
 		
-		if (boost::filesystem::exists(refPath.string(), ec))
+		if (boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath.string(), false));
+			return  CreateUnit(AbsolutePath(refPath, false));
 		}
 	}
 
 
 	for(auto & it :  d_ptr-> includeDirs)
 	{
-		boost::filesystem::path refPath(it.path);
+		string refPath(it.path);
 		refPath.append(fileName);
-		unit = find(AbsolutePath(refPath.string(), false));
+		unit = find(AbsolutePath(refPath, false));
 		if (unit) return unit;
-		if (!boost::filesystem::exists(refPath.string(), ec))
+		if (!boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath.string(), false));
+			return  CreateUnit(AbsolutePath(refPath, false));
 		}
 	}
 	return {};
@@ -256,25 +268,44 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
-Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit)
+std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit)
 {
 	auto     id = stripName(s->toString());
-	std::unordered_map<std::wstring, IAst*>& symbolTable = *(unit->root->symbolTable);
-	auto find_decl = symbolTable.find(id);
+	auto& symbolTable = (unit->root->environment->symtab);
+	auto  range  = symbolTable.equal_range(id);
 	ASTNode* decl = nullptr;
-	if(find_decl != symbolTable.end() )
+	std::vector<Object*> candidates;
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.emplace_back(it->second);
+	}
+	
+	if (candidates.empty()) {
+		// try a little harder
+		auto def_set =  findDefOf_internal(s, unit);
+		if (!def_set.empty())
+			return def_set;
+	}
+	else
 	{
-		decl = static_cast<ASTNode*>(find_decl->second);
+		for(auto& it : candidates)
+		{
+			if (s->parent != it)
+				continue;
+			// just found the same spot;
+			auto def_set = findDefOf_internal(s, unit);
+			if (!def_set.empty())
+				return def_set;	
+		}
 	}
-	if (decl == nullptr || s->parent == decl) { // just found the same spot;
-		auto def =  findDefOf_internal(s, unit);
-		if (def)
-			return def;
-	}
-	if (decl)
-		return  decl;
+
+
+	if (!candidates.empty())
+		return  candidates;
+	
 	auto node = s;
 	auto parent = static_cast<ASTNode*>(node->getParent());
+	if (!parent)return {};
+	
 	auto grandParent = static_cast<ASTNode*>(parent->getParent());
 
 	if ( dynamic_cast<option*>(grandParent)) {
@@ -285,7 +316,15 @@ Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<Compi
 			|| optName==(L"template")
 			|| optName ==(L"filter")) 
 		{
-			return lookupImportedFile(unit->working_file->directory, IcuUtil::ws2s(id) ).get();
+			auto temp_file =lookupImportedFile(unit->working_file->directory, IcuUtil::ws2s(id) ).get();
+			if(temp_file)
+			{
+				return { temp_file };
+			}
+			else
+			{
+				return {};
+			}
 		}
 	}
 	else if (dynamic_cast<IncludeSeg*>(parent)) {
@@ -294,9 +333,17 @@ Object* WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<Compi
 		auto includeFile = static_cast<include_segment*>(iseg->getinclude_segment())->getSYMBOL()
 			->to_utf8_string();
 
-		return lookupImportedFile(unit->working_file->directory, includeFile).get();
+		auto temp_file= lookupImportedFile(unit->working_file->directory, includeFile).get();
+		if (temp_file)
+		{
+			return { temp_file };
+		}
+		else
+		{
+			return {};
+		}
 	}
-	return nullptr;
+	return {};
 }
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path)
@@ -406,6 +453,11 @@ void WorkSpaceManager::UpdateIncludePaths(const std::vector<Directory>& dirs)
 RemoteEndPoint& WorkSpaceManager::GetEndPoint() const
 {
 	return  d_ptr->end_point;
+}
+
+std::shared_ptr<CompilationUnit> WorkSpaceManager::FindFile(ILexStream* lex)
+{
+	return  d_ptr->FindFile(lex);
 }
 
 

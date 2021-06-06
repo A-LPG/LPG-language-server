@@ -14,6 +14,7 @@
 #include "LibLsp/lsp/textDocument/document_symbol.h"
 #include "LibLsp/lsp/workspace/execute_command.h"
 #include "LibLsp/lsp/textDocument/declaration_definition.h"
+#include "LibLsp/lsp/textDocument/references.h"
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
@@ -253,6 +254,23 @@ public:
 				}
 				td_documentColor::response rsp;
 				DocumentColorHandler(unit, rsp.result);
+
+				return std::move(rsp);
+			});
+		server.remote_end_point_.registerRequestHandler([&](const td_references::request& req)
+			->lsp::ResponseOrError< td_references::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
+					Rsp_Error error;
+					return  std::move(error);
+				}
+				td_references::response rsp;
+				ReferencesHandler(unit, req.params.position,rsp.result);
 
 				return std::move(rsp);
 			});

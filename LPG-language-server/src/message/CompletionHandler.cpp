@@ -169,7 +169,7 @@ void  CompletionHandler::computeOptionKeyProposals(const string& prefix) {
 void CompletionHandler::computeMacroCompletions(const string& prefix) {
 
 
-    std::vector<IAst*> macros;
+    std::vector<ASTNodeToken*> macros;
 	ASTUtils::getMacros(unit->root, macros);
 
     for (auto& iter : macros) {
@@ -183,12 +183,11 @@ void CompletionHandler::computeMacroCompletions(const string& prefix) {
 }
 void CompletionHandler::computeNonTerminalCompletions(const string& prefix) {
    
-    std::vector<IAst*>  nonTerms;
+    std::vector<nonTerm*>  nonTerms;
 	ASTUtils::getNonTerminals(unit->root,nonTerms);
 
-    for (auto& iter : nonTerms) {
-        nonTerm* nt = (nonTerm*)iter;
-    	
+    for (auto& nt : nonTerms) {
+      	
         std::stringex ntRawName = nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
     	
         int idx = ntRawName.find('$');
@@ -204,7 +203,7 @@ void CompletionHandler::computeNonTerminalCompletions(const string& prefix) {
 }
 void CompletionHandler::computeTerminalCompletions(const string& prefix) {
 
-    std::vector<IAst*> terms;
+    std::vector<terminal*> terms;
 	ASTUtils::getTerminals(unit->root, terms);
 
     for (auto& iter : terms) {
