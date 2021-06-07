@@ -35,6 +35,7 @@
 #include "LibLsp/lsp/general/shutdown.h"
 #include "LibLsp/lsp/workspace/did_change_watched_files.h"
 #include "LibLsp/lsp/general/initialized.h"
+#include "LibLsp/JsonRpc/cancellation.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -98,41 +99,51 @@ public:
 		need_initialize_error = Rsp_Error();
 		need_initialize_error->error.code = lsErrorCodes::ServerNotInitialized;
 		need_initialize_error->error.message = "Server is not initialized";
-		
-		server.remote_end_point_.registerRequestHandler([&](const td_initialize::request& req)
+		Server* this_server = this;
+		server.remote_end_point_.registerRequestHandler([=](const td_initialize::request& req)
 			->lsp::ResponseOrError< td_initialize::response > {
-				need_initialize_error.reset();
+				this_server->need_initialize_error.reset();
 				td_initialize::response rsp;
 				lsServerCapabilities capabilities;
 			
-				CodeLensOptions code_lens_options;
-				code_lens_options.resolveProvider = true;
-				capabilities.codeLensProvider = code_lens_options;
-				capabilities.textDocumentSync = {};
+		/*		CodeLensOptions code_lens_options;
+				code_lens_options.resolveProvider = false;
+				capabilities.codeLensProvider = code_lens_options;*/
+			
+				std::pair<boost::optional<lsTextDocumentSyncKind>,
+				boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
+				
 				{
 					lsTextDocumentSyncOptions options;
 					options.openClose = true;
 					options.change = lsTextDocumentSyncKind::Incremental;
 					options.willSave = false;
 					options.willSaveWaitUntil = false;
-					capabilities.textDocumentSync.value().second = options;
+					textDocumentSync.second = options;
+					capabilities.textDocumentSync = textDocumentSync;
 				}
 				capabilities.hoverProvider = true;
 				lsCompletionOptions completion;
 				completion.resolveProvider = true;
 				capabilities.completionProvider = completion;
-				capabilities.definitionProvider = {};
-				capabilities.definitionProvider->first = true;
-				capabilities.referencesProvider = {};
-				capabilities.referencesProvider->first = true;
-				capabilities.documentSymbolProvider = {};
-				capabilities.documentSymbolProvider->first = true;
-				capabilities.documentFormattingProvider = {};
-				capabilities.documentFormattingProvider->first = true;
-				capabilities.renameProvider = {};
-				capabilities.renameProvider->first = true;
-				capabilities.colorProvider = {};
-				capabilities.colorProvider->first = true;
+			
+				std::pair< boost::optional<bool>, boost::optional<WorkDoneProgressOptions> > option;
+				option.first = true;
+				capabilities.definitionProvider = option;
+				FoldingRangeOptions foldingRangeProvider;
+				capabilities.foldingRangeProvider = foldingRangeProvider;
+				capabilities.referencesProvider = option;
+			
+				capabilities.documentSymbolProvider = option;
+
+				capabilities.documentFormattingProvider = option;
+			
+				std::pair< boost::optional<bool>, boost::optional<RenameOptions> > renameopt;
+				renameopt.first = true;
+				capabilities.renameProvider = renameopt;
+			
+				capabilities.colorProvider = option;
+	
 				rsp.result.capabilities.swap(capabilities);
 				return  std::move(rsp);
 			});
@@ -146,14 +157,16 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
-			    if(!unit)
-			    {
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				if (!unit)
+				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
-			    }
-			    td_symbol::response rsp;
+				}
+				td_symbol::response rsp;
 				process_symbol(unit, rsp.result);
+			    
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
@@ -162,14 +175,15 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
 				}
 				td_definition::response rsp;
-				rsp.result.first = {};
+				rsp.result.first = std::vector<lsLocation>();
 				process_definition(unit, req.params.position, rsp.result.first.value());
 				return std::move(rsp);
 			});
@@ -179,10 +193,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
 				}
 				td_hover::response rsp;
@@ -195,7 +210,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -212,10 +227,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
 				}
 				td_foldingRange::response rsp;
@@ -229,7 +245,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -246,10 +262,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
 				}
 				td_documentColor::response rsp;
@@ -263,10 +280,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
+					error.error.message = "can find file";
 					return  std::move(error);
 				}
 				td_references::response rsp;
@@ -293,7 +311,10 @@ public:
 					
 				// 解析 
 			});
-		
+		server.remote_end_point_.registerNotifyHandler([&](Notify_Cancellation::notify& notify)
+		{
+
+		});
 		server.remote_end_point_.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
 			if (need_initialize_error) {
@@ -380,7 +401,7 @@ public:
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
 		
-		server.remote_end_point_.registerRequestHandler([&](td_shutdown::request& notify) {
+		server.remote_end_point_.registerRequestHandler([&](const td_shutdown::request& notify) {
 			td_shutdown::response rsp;
 			return rsp;
 		});

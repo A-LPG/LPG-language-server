@@ -26,7 +26,7 @@ struct ReferencesHandlerData
 		auto lex = left_token->getILexStream();
         lsLocation location;
         location.uri = ast_unit->working_file->filename;
-        auto pos = ASTUtils::toPosition(lex, left_token->getStartOffset());
+        auto pos = ASTUtils::toPosition(lex, left_token->getStartOffset()-1);
         if (pos)
         {
             location.range.start = pos.value();

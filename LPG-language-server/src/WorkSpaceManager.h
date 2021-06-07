@@ -38,6 +38,7 @@ struct WorkSpaceManager {
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName);
 	std::vector<Object*> findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
+	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path);
 	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&, Monitor&);
 	~WorkSpaceManager();
 	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&, std::wstring&& content);

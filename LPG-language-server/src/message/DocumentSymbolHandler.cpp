@@ -14,25 +14,37 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 	for(int i = 0; i < size; ++i)
 	{
 		auto _option_spec = list->getoption_specAt(i);
+		if(!_option_spec)
+		{
+            continue;
+		}
 		optionList* lpg_optionList = _option_spec->getoption_list();
+		if(!lpg_optionList)
+		{
+            continue;
+		}
 		for(int k =0; k < lpg_optionList->list.size(); ++k)
 		{
-			option* _opt = lpg_optionList->getoptionAt(i);
+			option* _opt = lpg_optionList->getoptionAt(k);
+			if(!_opt)
+                continue;
+			
 			lsDocumentSymbol children;
 			children.name = _opt->to_utf8_string();
 			children.kind = lsSymbolKind::Property;
 			auto pos = ASTUtils::toPosition(lex,
-				_opt->getLeftIToken()->getStartOffset());
+				_opt->getSYMBOL()->getLeftIToken()->getStartOffset());
 			if (pos)
 			{
 				children.range.start = pos.value();
 			}
 			pos = ASTUtils::toPosition(lex,
-				_opt->getRightIToken()->getEndOffset());
+                _opt->getSYMBOL()->getRightIToken()->getEndOffset());
 			if (pos)
 			{
 				children.range.end = pos.value();
 			}
+            children.selectionRange = children.range;
 			out.emplace_back(children);
 		}
 		
@@ -46,7 +58,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     std::stack< lsDocumentSymbol*> fItemStack;
     void unimplementedVisitor(const std::string& s) { }
-    LPGModelVisitor(lsDocumentSymbol* rootSymbol)
+    LPGModelVisitor(lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l)
     {
         fItemStack.push(rootSymbol);
     }
@@ -55,7 +67,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto parent =  fItemStack.top();
     	if(!parent->children.has_value())
     	{
-            parent->children = {};
+            parent->children = std::vector<lsDocumentSymbol>();
     	}
         auto& children = parent->children.value();
         children.emplace_back(lsDocumentSymbol());
@@ -73,6 +85,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         {
             treeNode->range.end = pos.value();
         }
+        treeNode->selectionRange = treeNode->range;
         return  treeNode;
     }
     lsDocumentSymbol* pushSubItem(IAst* n)
@@ -108,7 +121,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(DefineSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Define Seg";
+        symbol->name = "Define ";
     	
         return true;
     }
@@ -119,7 +132,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(EofSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Eof Seg";
+        symbol->name = "Eof ";
 
         return true;
     }
@@ -131,7 +144,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(EolSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Eol Seg";
+        symbol->name = "Eol ";
         return true;
     }
 
@@ -142,7 +155,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(ErrorSeg* n) {
     	
         auto symbol = pushSubItem(n);
-        symbol->name = "Error Seg";
+        symbol->name = "Error ";
         return true;
     }
 
@@ -152,7 +165,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(ExportSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Export Seg";
+        symbol->name = "Export ";
         return true;
     }
 
@@ -162,7 +175,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(GlobalsSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "GlobalsSeg";
+        symbol->name = "Globals";
         return true;
     }
 
@@ -172,7 +185,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(HeadersSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "HeadersSeg";
+        symbol->name = "Headers";
         return true;
     }
 
@@ -182,7 +195,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(IdentifierSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "IdentifierSeg";
+        symbol->name = "Identifier";
         return true;
     }
 
@@ -212,7 +225,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(KeywordsSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Keywords Seg";
+        symbol->name = "Keywords ";
         return true;
     }
 
@@ -223,7 +236,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(NamesSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Names Seg";
+        symbol->name = "Names ";
         return true;
     }
 
@@ -233,7 +246,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(NoticeSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Notice Seg";
+        symbol->name = "Notice ";
         return false;
     }
 
@@ -243,7 +256,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(PredecessorSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Predecessor Seg";
+        symbol->name = "Predecessor ";
         return true;
     }
 
@@ -253,7 +266,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(RecoverSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Recover Seg";
+        symbol->name = "Recover ";
         return true;
     }
 
@@ -263,7 +276,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(RulesSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Rules Seg";
+        symbol->name = "Rules ";
         return true;
     }
 
@@ -273,7 +286,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(SoftKeywordsSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "SoftKeywords Seg";
+        symbol->name = "SoftKeywords ";
         return true;
     }
 
@@ -283,7 +296,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(StartSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Start Seg";
+        symbol->name = "Start ";
         return true;
     }
 
@@ -293,7 +306,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(TerminalsSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Terminals Seg";
+        symbol->name = "Terminals ";
         return true;
     }
 
@@ -303,7 +316,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(TrailersSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Trailers Seg";
+        symbol->name = "Trailers ";
         return true;
     }
 
@@ -313,7 +326,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(TypesSeg* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "Types Seg";
+        symbol->name = "Types ";
         return true;
     }
 
@@ -467,7 +480,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
 	 {
 		 return;
 	 }
-
+     auto lex = unit->_lexer.getILexStream();
 	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
 	if(lpg_options_)
 	{
@@ -475,26 +488,27 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
 		lsDocumentSymbol& lpg_options_segment = children[children.size()-1];
 		lpg_options_segment.kind = lsSymbolKind::Module;
 		lpg_options_segment.name = "options";
-		auto pos = ASTUtils::toPosition(unit->_lexer.getILexStream(),
+		auto pos = ASTUtils::toPosition(lex,
 			lpg_options_->getLeftIToken()->getStartOffset());
 		if (pos)
 		{
 			lpg_options_segment.range.start = pos.value();
 		}
-		pos = ASTUtils::toPosition(unit->_lexer.getILexStream(),
+		pos = ASTUtils::toPosition(lex,
 			lpg_options_->getRightIToken()->getEndOffset());
 		if (pos)
 		{
 			lpg_options_segment.range.end = pos.value();
 		}
-		lpg_options_segment.children = {};
+        lpg_options_segment.selectionRange = lpg_options_segment.range;
+		lpg_options_segment.children = std::vector<lsDocumentSymbol>();
 		build_option(lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
 	}
 	 if(auto _input =  unit->root->getLPG_INPUT(); _input)
     {
         lsDocumentSymbol root;
         root.children = {};
-        LPGModelVisitor visitor(&root);
+        LPGModelVisitor visitor(&root, lex);
         _input->accept(&visitor);
 
     	for(auto& it :root.children.value())

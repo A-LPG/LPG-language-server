@@ -76,12 +76,14 @@ boost::optional<lsPosition>  ASTUtils::toPosition(ILexStream* lex, int offset)
     try
     {
         lsPosition ls_position;
-        ls_position.line =lex->getLineOffset(offset);
-        ls_position.character = offset - lex->getLineOffset(ls_position.line);
+        ls_position.line =lex->getLineNumberOfCharAt(offset);
+        ls_position.character = offset - lex->getLineOffset(ls_position.line-1);
+        ls_position.line -= 1;
         return  ls_position;
     }
     catch (...)
     {
+        return  {};
     }
     return {};
 }

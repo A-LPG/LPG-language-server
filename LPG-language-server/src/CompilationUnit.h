@@ -25,7 +25,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	LPGParser_top_level_ast::LPG* root = nullptr;
 	void parser(Monitor* monitor)
 	{
-		_parser.reset(_lexer.getLexStream());
+		_lexer.lexer(monitor, _parser.getIPrsStream());
 		root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(_parser.parser(monitor, 100));
 	}
 	/**

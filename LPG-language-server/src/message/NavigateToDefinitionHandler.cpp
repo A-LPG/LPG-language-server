@@ -103,10 +103,10 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
     if (selNode == nullptr) return ;
 	
   auto target = unit->getLinkTarget(selNode);
-  std::vector<Object*> candidate;
+
   if (target.empty())
   {
-      candidate.push_back(selNode);
+      target.push_back(selNode);
   }
   DefinitionProvider provider;
   for(auto it: target)

@@ -2,6 +2,7 @@
 #include <IAst.h>
 #include <unordered_map>
 #include "LibLsp/lsp/lsPosition.h"
+#include "parser/LPGParser.h"
 #include "parser/LPGParser_top_level_ast.h"
 using namespace  LPGParser_top_level_ast;
 struct ASTUtils

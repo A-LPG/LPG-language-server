@@ -57,7 +57,7 @@ struct WorkSpaceManagerData
 	{
 
 		{
-			writeLock b(_rw_mutex);
+		//	writeLock b(_rw_mutex);
 			units[path] = unit;
 		}
 	}
@@ -74,7 +74,7 @@ struct WorkSpaceManagerData
 	{
 		readLock a(_rw_mutex);
 		auto findIt = units.find(path);
-		if (findIt == units.end())
+		if (findIt != units.end())
 			return findIt->second;
 		return {};
 	}
@@ -353,6 +353,16 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path
 	return  d_ptr->find(temp);
 }
 
+std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePath& path)
+{
+	auto unit = find(path);
+	if(!unit)
+	{
+		unit = CreateUnit(path);
+	}
+	return  unit;
+}
+
 WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log, Monitor& m):d_ptr(new WorkSpaceManagerData(_w , end_point, _log,m))
 {
 	
@@ -373,9 +383,9 @@ struct MessageHandle : public IMessageHandler
 	lsRange toRange(const Location& location)
 	{
 		lsRange range;
-		range.start.line = location.start_line;
+		range.start.line = location.start_line-1;
 		range.start.character = location.start_column;
-		range.end.line = location.end_line;
+		range.end.line = location.end_line-1;
 		range.end.character = location.end_column;
 		return  range;
 	}
@@ -384,7 +394,7 @@ struct MessageHandle : public IMessageHandler
 	{
 		lsDiagnostic diagnostic;
 		diagnostic.severity = lsDiagnosticSeverity::Error;
-		diagnostic.range = toRange(errorLocation);
+		diagnostic.range = toRange(msgLocation);
 		std::string info;
 		for (auto& it : errorInfo)
 		{
@@ -397,24 +407,27 @@ struct MessageHandle : public IMessageHandler
 };
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
 {
+
+	
 	if (!_change)
 		return {};
 	if (d_ptr->monitor.isCancelled())
 		return {};
-	
+	WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
+
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
 	MessageHandle handle;
 	handle.notify.params.uri = _change->filename;
 	
 	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+
+	unit->_parser.reset(unit->_lexer.getLexStream());
 	
 	unit->_lexer.getLexStream()->setMessageHandler(&handle);
 	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
-
-	unit->_lexer.lexer(&d_ptr->monitor, unit->_parser.getIPrsStream());
-	
 	if (d_ptr->monitor.isCancelled())
 		return {};
+
 	unit->parser(&d_ptr->monitor);
 	if (d_ptr->monitor.isCancelled())
 		return {};

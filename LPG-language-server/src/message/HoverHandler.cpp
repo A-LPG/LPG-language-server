@@ -88,8 +88,11 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& pos
     if (target == nullptr) target = selNode;
     DocumentationProvider docProvider;
    auto doc= docProvider.getDocumentation( unit, target);
-    MarkupContent content;
-    content.value = doc;
-    out.contents.second = content;
+   TextDocumentHover::Left content= std::vector< std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>> >();
+   std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;
+	item .first= doc;
+   content->push_back(item);
+  
+    out.contents.first = content;
 }
 
