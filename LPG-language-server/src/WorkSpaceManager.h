@@ -41,8 +41,8 @@ struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path);
 	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&, Monitor&);
 	~WorkSpaceManager();
-	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&, std::wstring&& content);
-	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>&, std::wstring&& content);
+	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&);
+	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>&);
 	void OnClose(const lsDocumentUri& close);
 	void OnSave(const lsDocumentUri& _save);
 	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);

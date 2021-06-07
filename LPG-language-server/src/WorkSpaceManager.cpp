@@ -169,7 +169,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	std::shared_ptr<WorkingFile> _open=d_ptr->working_files.OnOpen(item);
 	if (!_open)
 		return {};
-	return OnOpen(_open, std::move(content) );
+	return OnOpen(_open);
 }
 
 void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit)
@@ -373,9 +373,9 @@ WorkSpaceManager::~WorkSpaceManager()
 	delete d_ptr;
 }
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open, std::wstring&& content)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open)
 {
-	return OnChange(_open,std::move( content) );
+	return OnChange(_open);
 }
 struct MessageHandle : public IMessageHandler
 {
@@ -405,7 +405,7 @@ struct MessageHandle : public IMessageHandler
 		notify.params.diagnostics.emplace_back(std::move(diagnostic));
 	}
 };
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change)
 {
 
 	
@@ -415,7 +415,23 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
 
+	auto findIt = d_ptr->units.find(_change->filename);
+	if (findIt != d_ptr->units.end())
+	{
+		if( findIt->second->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
+		{
+			return  findIt->second;
+		}
+	}
+	std::wstring content;
+	if(!_change->parent.GetFileBufferContent(_change, content))
+	{
+		return {};
+	}
+	
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
+	unit->counter.store(_change->counter.load(std::memory_order_relaxed));
+	
 	MessageHandle handle;
 	handle.notify.params.uri = _change->filename;
 	

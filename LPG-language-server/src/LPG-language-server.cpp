@@ -18,6 +18,8 @@
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
+
+#include "CompilationUnit.h"
 #include "LibLsp/lsp/workspace/didChangeWorkspaceFolders.h"
 #include "LibLsp/lsp/textDocument/hover.h"
 #include "LibLsp/lsp/textDocument/completion.h"
@@ -30,6 +32,7 @@
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
 #include "Monitor.h"
+#include "LibLsp/lsp/textDocument/resolveCompletionItem.h"
 #include "LibLsp/lsp/textDocument/formatting.h"
 #include "LibLsp/lsp/textDocument/documentColor.h"
 #include "LibLsp/lsp/general/shutdown.h"
@@ -93,7 +96,22 @@ public:
 	};
 	ServerMonitor _monitor;
 	boost::optional<Rsp_Error> need_initialize_error;
-	
+	std::shared_ptr<CompilationUnit> GetLatestUnit(const AbsolutePath& path)
+	{
+		auto unit = work_space_mgr.find(path);
+		if (unit)
+		{
+			if (unit->NeedToCompile())
+			{
+				unit = work_space_mgr.OnChange(unit->working_file);
+			}
+		}
+		else
+		{
+			unit=  work_space_mgr.CreateUnit(path);
+		}
+		return  unit;
+	}
 	Server() :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
 		need_initialize_error = Rsp_Error();
@@ -157,7 +175,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit =GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -175,7 +193,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -193,7 +211,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -204,13 +222,14 @@ public:
 				process_hover(unit, req.params.position, rsp.result);
 				return std::move(rsp);
 			});
+		
 		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
 			->lsp::ResponseOrError< td_completion::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -218,16 +237,23 @@ public:
 				}
 				td_completion::response rsp;
 				CompletionHandler(unit, rsp.result, req.params);
-				
 				return std::move(rsp);
+				
 			});
+		//server.remote_end_point_.registerRequestHandler([&](const completionItem_resolve::request& req)
+		//	{
+		//		completionItem_resolve::response rsp;
+		//		rsp.result = req.params;
+		//		return std::move(rsp);
+		//	});
+		
 		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
 			->lsp::ResponseOrError< td_foldingRange::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -245,7 +271,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -262,7 +288,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -280,7 +306,7 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = work_space_mgr.find_or_open(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
 				if (!unit)
 				{
 					Rsp_Error error;
@@ -304,9 +330,7 @@ public:
 					return;
 				if(auto work_file = working_files.OnOpen(params.textDocument))
 			    {
-					std::wstring context;
-					working_files.GetFileBufferContent(work_file, context);
-					work_space_mgr.OnOpen(work_file, std::move(context));
+					work_space_mgr.OnOpen(work_file);
 			    }
 					
 				// 解析 
@@ -330,22 +354,22 @@ public:
 				toReconcile.insert(path);
 				
 				timer = std::make_unique<SimpleTimer<>>(500,[&](){
-						std::set<AbsolutePath> cusToReconcile;
+					std::set<AbsolutePath> cusToReconcile;
 						{
 							std::lock_guard lock2(mutex_);
 							cusToReconcile.swap(toReconcile);
 						}
-						for(auto& file_path : cusToReconcile)
+						for(auto& file_info : cusToReconcile)
 						{
 							std::wstring context;
-							if(auto file = working_files.GetFileByFilename(file_path); file)
+							if(auto file = working_files.GetFileByFilename(file_info); file)
 							{
 								if(_monitor.isCancelled())
 								{
 									return;
 								}
-								working_files.GetFileBufferContent(file, context);
-								work_space_mgr.OnChange(file, std::move(context));
+								work_space_mgr.OnChange(file);
+								
 							}
 						}
 				});	

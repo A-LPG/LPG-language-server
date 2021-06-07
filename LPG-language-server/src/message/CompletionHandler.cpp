@@ -227,7 +227,10 @@ CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, Comple
     {
         return;
     }
-    offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), params.position);
+    lsPosition pos = params.position;
+    //pos.line += 1;
+	
+    offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), pos);
     if (offset < 0)
     {
         return;
@@ -236,8 +239,10 @@ CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, Comple
     auto thisNode =static_cast<ASTNode*>(locator.findNode(unit->root, offset));
     if (thisNode == nullptr) return;
 	auto thisLeftToken = thisNode->getLeftIToken();
-    std::string prefixToken = (offset >= thisLeftToken->getStartOffset() && offset < thisLeftToken->getEndOffset()) ? thisLeftToken->to_utf8_string() : "";
-    std::stringex  prefix = (!prefixToken.empty()) ? prefixToken.substr(0, offset - thisLeftToken->getStartOffset()) : "";
+    auto temp = thisLeftToken->to_utf8_string();
+    auto temp2 = thisNode->to_utf8_string();
+    std::string prefixToken = (offset >= thisLeftToken->getStartOffset() && offset <= thisLeftToken->getEndOffset()) ? thisLeftToken->to_utf8_string() : "";
+    std::stringex  prefix = (!prefixToken.empty()) ? prefixToken.substr(0, offset - thisLeftToken->getStartOffset()+1) : "";
 
     if(dynamic_cast<option*>(thisNode->parent))
     {
