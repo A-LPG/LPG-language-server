@@ -42,6 +42,15 @@ struct DefinitionProvider
             return {};
 
         if (dynamic_cast<ASTNodeToken*>(target)) {
+            auto node = (ASTNodeToken*)target;
+            if (ast_unit->is_macro_name_symbol(node))
+            {
+	            auto def = dynamic_cast<defineSpec*>(node->parent);
+                if (def){
+                    return getLocation(ast_unit, def->getLeftIToken(), def->getRightIToken());
+                }
+            }
+        	
             ASTNode* def = nullptr;
             auto set = ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit);
             if (!set.empty())
@@ -52,7 +61,7 @@ struct DefinitionProvider
             {
                 return getLocation(ast_unit,def->getLeftIToken(), def->getRightIToken());
             }
-          
+            return getLocation(ast_unit, node->getLeftIToken(), node->getRightIToken());
         }
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
@@ -82,6 +91,11 @@ struct DefinitionProvider
             }
             return std::move(location);
         }
+        else if (dynamic_cast<defineSpec*>(target))
+        {
+            auto node = (defineSpec*)target;
+            return getLocation(ast_unit, node->getLeftIToken(), node->getRightIToken());
+        }
         return {};
 
     }
@@ -101,15 +115,42 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
     LPGSourcePositionLocator locator;
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return ;
-	
-  auto target = unit->getLinkTarget(selNode);
+    Object* target = nullptr;
+  auto set = unit->getLinkTarget(selNode);
 
-  if (target.empty())
-  {
-      target.push_back(selNode);
+  if (!set.empty()){
+      target = set[0];
   }
+
+  if (target == nullptr) target = selNode;
+	
+  do
+  {
+    auto result = unit->FindMacroInBlock(target, position);
+
+    if (!result)break;
+    if (result->def_set.empty())
+    {
+        std::wstringex name = result->macro_name;
+        name.trim_left(unit->_lexer.escape_token);
+        auto key = IcuUtil::ws2s(name);
+        if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()){
+            return;
+        }
+    	break;
+    }
+    for(auto& it : result->def_set)
+    {
+        set.emplace_back(it);
+    }    
+  } while (false);
+	
+  if (set.empty()){
+      set.push_back(selNode);
+  }
+	
   DefinitionProvider provider;
-  for(auto it: target)
+  for(auto it: set)
   {
       auto link = provider.getLocation(unit, it);
   	  if(link.has_value())

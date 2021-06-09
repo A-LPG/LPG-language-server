@@ -1,5 +1,7 @@
 #include "ASTUtils.h"
 
+#include "code.h"
+
 namespace 
 {
 	struct findRefsOf_AbstractVisitor :public AbstractVisitor

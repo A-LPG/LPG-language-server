@@ -2,6 +2,8 @@
 
 #include <LibLsp/lsp/working_files.h>
 
+#include "ASTUtils.h"
+#include "code.h"
 #include "WorkSpaceManager.h"
 #include "parser/LPGParser_top_level_ast.h"
 
@@ -66,4 +68,64 @@ std::vector<Object*> CompilationUnit::getLinkTarget(Object* node)
 	}
 	auto def = parent.findDefOf(static_cast<LPGParser_top_level_ast::ASTNodeToken*>(node), shared_from_this());
 	return def;
+}
+
+namespace 
+{
+	bool InMacroInBlock(Object* target)
+	{
+
+		if (dynamic_cast<action_segment*>(target) || dynamic_cast<macro_segment*>(target))
+		{
+			return true;
+		}
+		else
+		{
+			return  false;
+		}
+	}
+
+}
+
+
+std::unique_ptr< CompilationUnit::FindMacroInBlockResult>
+CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position)
+{
+    do
+    {
+        if (!InMacroInBlock(target)) break;
+        auto lex = _lexer.getILexStream();
+        auto line = ASTUtils::getLine(lex, position.line + 1);
+        if (line.size() <= position.character)break;
+        auto temp = line.substr(0, position.character);
+        auto escape = _lexer.escape_token;
+        auto index = temp.rfind(escape);
+        if (std::wstring::npos == index) break;
+        temp = line.substr(index);
+        const wchar_t* cursor = temp.data();
+        const wchar_t* end_cursor;
+        auto tail = cursor + temp.size();
+        for (end_cursor = cursor + 1;
+            end_cursor < tail && (Code::IsAlnum(*end_cursor) && *end_cursor != escape);
+            end_cursor++) { }
+	        
+
+        std::wstring macro_name(cursor, end_cursor);
+        if (macro_name.empty()) break;
+		std::unique_ptr< FindMacroInBlockResult> result = std::make_unique<FindMacroInBlockResult>();
+		
+		result->def_set= parent.findDefOf(macro_name, shared_from_this());
+		result->macro_name .swap(macro_name) ;
+		return  result;
+    } while (false);
+	return {};
+}
+
+bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken* node)
+{
+	for (auto& it : _parser._macro_name_symbo)
+	{
+		if (it == node)return true;
+	}
+	return false;
 }

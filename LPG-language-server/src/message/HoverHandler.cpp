@@ -12,13 +12,7 @@ using namespace LPGParser_top_level_ast;
 
 struct DocumentationProvider
 {
-    bool is_macro_name_symbol(ASTNodeToken* node , std::vector<LPGParser_top_level_ast::ASTNodeToken*>& table){
-    	for(auto& it : table)
-    	{
-    		if(it == node)return true;
-    	}
-    	return false;
-    }
+
     std::string  getSubstring(const shared_ptr_wstring& buf, int start, int end) {
         const std::wstring  temp(buf.data(), start, end - start + 1);
         return IcuUtil::ws2s(temp);
@@ -33,7 +27,7 @@ struct DocumentationProvider
 
         if (dynamic_cast<ASTNodeToken*>(target)) {
             auto node = (ASTNodeToken*)target;
-            if(is_macro_name_symbol(node,ast_unit->_parser._macro_name_symbo))
+            if (ast_unit->is_macro_name_symbol(node))
             {
                 defineSpec* def = dynamic_cast<defineSpec*>(node->parent);
             	if(def)
@@ -51,12 +45,12 @@ struct DocumentationProvider
             }
             
             if (def != nullptr)
+            {
                 return getSubstring(def->getLeftIToken()->getIPrsStream()->getInputChars(),
                     def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
-            else
-            {
-                return  node->to_utf8_string();
             }
+			return  node->to_utf8_string();
+            
         }
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
@@ -86,18 +80,7 @@ struct DocumentationProvider
     }
 
 };
-bool InMacroInBlock(Object* target)
-{
-   
-    if (dynamic_cast<action_segment*>(target) || dynamic_cast<macro_segment*>(target))
-    {
-        return true;
-    }
-    else
-    {
-        return  false;
-    }
-}
+
 void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& temp_position, TextDocumentHover::Result& out)
 {
 
@@ -125,45 +108,31 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& tem
         target = set[0];
 	}
     // if target is null, we're hovering over a declaration whose javadoc is right before us, but
-// showing it can still be useful for previewing the javadoc formatting
-// OR if target is null we're hovering over something not a decl or ref (e.g. integer literal)
-// ==>  show information if something other than the source is available:
-// 1. if target != src, show something
-// 2. if target == src, and docProvider gives something, then show it
-// 3. if target == src, and docProvider doesn't give anything, don't show anything
-//
+	// showing it can still be useful for previewing the javadoc formatting
+	// OR if target is null we're hovering over something not a decl or ref (e.g. integer literal)
+	// ==>  show information if something other than the source is available:
+	// 1. if target != src, show something
+	// 2. if target == src, and docProvider gives something, then show it
+	// 3. if target == src, and docProvider doesn't give anything, don't show anything
+	//
 
-// if this is not a reference, provide info for it anyway 
+	// if this is not a reference, provide info for it anyway 
     if (target == nullptr) target = selNode;
 
 	do
-	{
-        if (!InMacroInBlock(target)) break;
-     
-        auto line = ASTUtils::getLine(lex, temp_position.line + 1);
-        if (line.size() <= temp_position.character)break;
-        auto temp = line.substr(0, temp_position.character);
-        auto escape = unit->_lexer.escape_token;
-        auto index = temp.rfind(escape);
-		if(std::wstring::npos == index) break;
-        temp = line.substr(index);
-        const wchar_t*  cursor = temp.data();
-        const wchar_t* end_cursor;
-        auto tail = cursor + temp.size();
-        for (end_cursor = cursor + 1;
-            end_cursor < tail && (Code::IsAlnum(*end_cursor) && *end_cursor != escape);
-            end_cursor++);
-		
-        std::wstring marcro_name(cursor, end_cursor);
-		if(marcro_name.empty()) break;
-        set =  unit->parent.findDefOf(marcro_name, unit);
-        if (!set.empty())
+    {
+        auto result = unit->FindMacroInBlock(target, temp_position);
+        
+		if(!result)break;
+        if (!result->def_set.empty())
         {
-            target = set[0];
-        }else
+            target = result->def_set[0];
+        }
+		else 
         {
-            marcro_name.assign(cursor + 1, end_cursor);
-            auto key = IcuUtil::ws2s(marcro_name);
+            std::wstringex name = result->macro_name;
+            name.trim_left(unit->_lexer.escape_token);
+            auto key = IcuUtil::ws2s(name);
         	if( unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end())
         	{
                 std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;

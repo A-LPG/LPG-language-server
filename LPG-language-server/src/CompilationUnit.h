@@ -67,5 +67,16 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
  * Parse Controller.
  */
 	std::vector<Object*> getLinkTarget(Object* node);
+
 	std::set<std::string> local_macro_name_table;
+
+	struct FindMacroInBlockResult
+	{
+		std::vector<Object*> def_set;
+		std::wstring macro_name;
+	};
+	std::unique_ptr<FindMacroInBlockResult> FindMacroInBlock(
+		Object* , const lsPosition& );
+
+	bool is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken* node);
 };
