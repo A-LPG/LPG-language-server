@@ -7,6 +7,10 @@
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <set>
+#include <LibLsp/JsonRpc/threaded_queue.h>
+#include <LibLsp/lsp/textDocument/completion.h>
+
 struct Timer {
   using Clock = std::chrono::high_resolution_clock;
 

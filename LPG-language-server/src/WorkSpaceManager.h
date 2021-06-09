@@ -36,6 +36,7 @@ struct WorkSpaceManager {
 	void   collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName);
+	std::vector<Object*> findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit);
 	std::vector<Object*> findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
 	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path);
@@ -51,7 +52,8 @@ struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
-    std::vector< Object*>	 findDefOf_internal(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit);
+    std::vector< Object*>	 findDefOf_internal(std::wstring _word, const std::shared_ptr<CompilationUnit>& unit);
+	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&&);
 	
 };
 

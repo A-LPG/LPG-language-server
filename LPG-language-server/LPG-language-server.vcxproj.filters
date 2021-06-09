@@ -66,6 +66,9 @@
     <ClCompile Include="src\message\ReferencesHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
+    <ClCompile Include="src\code.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">
@@ -111,6 +114,9 @@
       <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="src\ASTUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\code.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

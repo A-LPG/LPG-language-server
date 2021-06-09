@@ -68,7 +68,6 @@ public:
 };
 
 std::string _address = "127.0.0.1";
-std::string _port = "9333";
 bool ShouldIgnoreFileForIndexing(const std::string& path) {
 	return StartsWith(path, "git:");
 }
@@ -96,12 +95,12 @@ public:
 	};
 	ServerMonitor _monitor;
 	boost::optional<Rsp_Error> need_initialize_error;
-	std::shared_ptr<CompilationUnit> GetLatestUnit(const AbsolutePath& path)
+	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path,bool keep_consist= true)
 	{
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
-			if (unit->NeedToCompile())
+			if (unit->NeedToCompile() && keep_consist)
 			{
 				unit = work_space_mgr.OnChange(unit->working_file);
 			}
@@ -112,8 +111,12 @@ public:
 		}
 		return  unit;
 	}
-	Server() :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor), server(_address, _port, protocol_json_handler, endpoint, _log)
+	
+	Server(const std::string& _port) :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor),
+	
+	server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
+
 		need_initialize_error = Rsp_Error();
 		need_initialize_error->error.code = lsErrorCodes::ServerNotInitialized;
 		need_initialize_error->error.message = "Server is not initialized";
@@ -149,7 +152,8 @@ public:
 				option.first = true;
 				capabilities.definitionProvider = option;
 				FoldingRangeOptions foldingRangeProvider;
-				capabilities.foldingRangeProvider = foldingRangeProvider;
+				capabilities.foldingRangeProvider = std::pair< boost::optional<bool>, boost::optional<FoldingRangeOptions> >();
+				capabilities.foldingRangeProvider->first = true;
 				capabilities.referencesProvider = option;
 			
 				capabilities.documentSymbolProvider = option;
@@ -175,16 +179,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit =GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
+				auto unit =GetUnit(req.params.textDocument.uri.GetAbsolutePath());
 				td_symbol::response rsp;
-				process_symbol(unit, rsp.result);
-			    
+				if (unit){
+					process_symbol(unit, rsp.result);
+				}
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
@@ -193,16 +192,12 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
 				td_definition::response rsp;
 				rsp.result.first = std::vector<lsLocation>();
-				process_definition(unit, req.params.position, rsp.result.first.value());
+				if (unit){
+					process_definition(unit, req.params.position, rsp.result.first.value());
+				}
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_hover::request& req)
@@ -211,41 +206,47 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
 				td_hover::response rsp;
-				process_hover(unit, req.params.position, rsp.result);
+				if (unit)
+				{
+					process_hover(unit, req.params.position, rsp.result);
+				}
+				else
+				{
+					rsp.result.contents.first = TextDocumentHover::Left();
+				}
+
 				return std::move(rsp);
 			});
-		
+		protocol_json_handler->SetRequestJsonHandler(td_completion::request::kMethodInfo,
+			[](Reader& visitor)
+		{
+				return td_completion::request::ReflectReader(visitor);
+		});
+
 		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
 			->lsp::ResponseOrError< td_completion::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					return  std::move(error);
-				}
 				td_completion::response rsp;
-				CompletionHandler(unit, rsp.result, req.params);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),true);
+				if (unit){
+					CompletionHandler(unit, rsp.result, req.params);
+				}
+				
+				
 				return std::move(rsp);
 				
 			});
-		//server.remote_end_point_.registerRequestHandler([&](const completionItem_resolve::request& req)
-		//	{
-		//		completionItem_resolve::response rsp;
-		//		rsp.result = req.params;
-		//		return std::move(rsp);
-		//	});
+		server.remote_end_point_.registerRequestHandler([&](const completionItem_resolve::request& req)
+			{
+				completionItem_resolve::response rsp;
+				rsp.result = req.params;
+				return std::move(rsp);
+			});
 		
 		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
 			->lsp::ResponseOrError< td_foldingRange::response > {
@@ -253,16 +254,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
 				td_foldingRange::response rsp;
-				FoldingRangeHandler(unit, rsp.result, req.params);
-
+				if (unit){
+					FoldingRangeHandler(unit, rsp.result, req.params);
+				}
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_formatting::request& req)
@@ -271,15 +267,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					return  std::move(error);
-				}
 				td_formatting::response rsp;
-				DocumentFormatHandler(unit, rsp.result, req.params.options);
-
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				if (unit){
+					DocumentFormatHandler(unit, rsp.result, req.params.options);
+				}
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_documentColor::request& req)
@@ -288,16 +280,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
 				td_documentColor::response rsp;
-				DocumentColorHandler(unit, rsp.result);
-
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				if (unit){
+					DocumentColorHandler(unit, rsp.result);
+				}
 				return std::move(rsp);
 			});
 		server.remote_end_point_.registerRequestHandler([&](const td_references::request& req)
@@ -306,16 +293,11 @@ public:
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetLatestUnit(req.params.textDocument.uri.GetAbsolutePath());
-				if (!unit)
-				{
-					Rsp_Error error;
-					error.error.message = "can find file";
-					return  std::move(error);
-				}
 				td_references::response rsp;
-				ReferencesHandler(unit, req.params.position,rsp.result);
-
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				if (unit){
+					ReferencesHandler(unit, req.params.position, rsp.result);
+				}
 				return std::move(rsp);
 			});
 		
@@ -339,6 +321,7 @@ public:
 		{
 
 		});
+
 		server.remote_end_point_.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
 			if (need_initialize_error) {
@@ -350,29 +333,30 @@ public:
 				return;
 			if(auto work_file= working_files.OnChange(params))
 			{
-				std::lock_guard lock(mutex_);
-				toReconcile.insert(path);
-				
-				timer = std::make_unique<SimpleTimer<>>(500,[&](){
-					std::set<AbsolutePath> cusToReconcile;
-						{
-							std::lock_guard lock2(mutex_);
-							cusToReconcile.swap(toReconcile);
-						}
-						for(auto& file_info : cusToReconcile)
-						{
-							std::wstring context;
-							if(auto file = working_files.GetFileByFilename(file_info); file)
-							{
-								if(_monitor.isCancelled())
-								{
-									return;
-								}
-								work_space_mgr.OnChange(file);
-								
-							}
-						}
-				});	
+				//{
+				//	std::lock_guard lock(mutex_);
+				//	toReconcile.insert(path);
+				//}
+				//timer = std::make_unique<SimpleTimer<>>(500,[&](){
+				//	std::set<AbsolutePath> cusToReconcile;
+				//		{
+				//			std::lock_guard lock2(mutex_);
+				//			cusToReconcile.swap(toReconcile);
+				//		}
+				//		for(auto& file_info : cusToReconcile)
+				//		{
+				//			std::wstring context;
+				//			if(auto file = working_files.GetFileByFilename(file_info); file)
+				//			{
+				//				if(_monitor.isCancelled())
+				//				{
+				//					return;
+				//				}
+				//				work_space_mgr.OnChange(file);
+				//				
+				//			}
+				//		}
+				//});	
 			}
 			
 		});
@@ -381,7 +365,7 @@ public:
 				if (need_initialize_error) {
 					return;
 				}
-				Timer time;
+				//Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
@@ -396,7 +380,7 @@ public:
 				if (need_initialize_error) {
 					return;
 				}
-				Timer time;
+				//Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
@@ -454,13 +438,14 @@ public:
 
 };
 
-
+const char* _PORT_STR = "port";
 int main(int argc, char* argv[])
 {
 
 	using namespace  boost::program_options;
 	options_description desc("Allowed options");
 	desc.add_options()
+		(_PORT_STR, value<int>(), "tcp port")
 		("help,h", "produce help message");
 
 
@@ -481,9 +466,24 @@ int main(int argc, char* argv[])
 		cout << desc << endl;
 		return 1;
 	}
-	Server server;
-	auto ddd =server.esc_event.wait();
-	return 0;
+	int  _port = 9333;
+	if (vm.count(_PORT_STR))
+	{
+		cout << "Tcp port was set to " << vm[_PORT_STR].as<int>() << "." << endl;
+		_port = vm[_PORT_STR].as<int>();
+	}
+	else
+	{
+		cout << "Please set TCP port ."  << endl;
+		return -1;
+	}
+	Server server(stringex().format("%d",_port));
+	auto ret =server.esc_event.wait();
+	if(ret)
+	{
+		return 0;
+	}
+	return -1;
 }
 
 

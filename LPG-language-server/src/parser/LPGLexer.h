@@ -44,6 +44,8 @@
         delete lexParser;
     }
 
+    wchar_t escape_token='$';
+
      inline  static ParseTable* prs = new LPGLexerprs();
      ParseTable* getParseTable() { return prs; }
 
@@ -913,6 +915,7 @@
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
                   makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                  escape_token = *(lexStream->getInputChars().data() + getRhsFirstTokenIndex(5));
                     break;
             }
       

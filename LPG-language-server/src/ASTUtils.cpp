@@ -54,13 +54,30 @@ void ASTUtils::findRefsOf(std::vector<ASTNode*>& result, terminal* term)
     }
 }
 
+std::wstring ASTUtils::getLine(ILexStream* lex, int line)
+{
+    auto start_offset = lex->getLineOffsetOfLine(line);
+    int count = lex->getLineCount();
+
+    int end_offset = 0;
+	if(count <= line +1)
+	{
+        end_offset = lex->getStreamLength()-1;
+	}
+    else
+    {
+        end_offset = lex->getLineOffsetOfLine(line+1);
+    }
+   return  lex->toString(start_offset, end_offset);
+}
+
 int ASTUtils::toOffset(ILexStream* lex, int line, int column)
 {
     if (!lex)
         return -1;
 	try
 	{
-        return   lex->getLineOffset(line) + column;
+        return   lex->getLineOffsetOfLine(line) + column;
 	}
 	catch (std::out_of_range&)
 	{

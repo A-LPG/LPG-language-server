@@ -121,10 +121,11 @@ std::string stripName(const std::string& rawId) {
 
 	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
 }
-std::vector<Object*>  WorkSpaceManager::findDefOf_internal(ASTNodeToken* s,
+std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
                                               const std::shared_ptr<CompilationUnit>& refUnit)
 {
-	 auto     id = stripName(s->toString());
+
+	 auto     id = stripName(_word);
 	 std::vector<std::string> includedFiles;
 	collectIncludedFiles(includedFiles,refUnit);
 	 for (auto& fileName : includedFiles) 
@@ -148,6 +149,8 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal(ASTNodeToken* s,
 	
 }
 
+
+
 std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath& fileName)
 {
 	auto  unit = find(AbsolutePath(fileName, false));
@@ -169,7 +172,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	std::shared_ptr<WorkingFile> _open=d_ptr->working_files.OnOpen(item);
 	if (!_open)
 		return {};
-	return OnOpen(_open);
+	return OnChange(_open,std::move(content));
 }
 
 void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit)
@@ -268,6 +271,24 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
+std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit)
+{
+	auto& symbolTable = (unit->root->environment->symtab);
+	auto  range = symbolTable.equal_range(id);
+	ASTNode* decl = nullptr;
+	std::vector<Object*> candidates;
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.emplace_back(it->second);
+	}
+	if (candidates.empty()) {
+		// try a little harder
+		auto def_set = findDefOf_internal(id, unit);
+		if (!def_set.empty())
+			return def_set;
+	}
+	return  candidates;
+}
+
 std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit)
 {
 	auto     id = stripName(s->toString());
@@ -281,7 +302,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 	
 	if (candidates.empty()) {
 		// try a little harder
-		auto def_set =  findDefOf_internal(s, unit);
+		auto def_set =  findDefOf_internal(s->toString(), unit);
 		if (!def_set.empty())
 			return def_set;
 	}
@@ -292,7 +313,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 			if (s->parent != it)
 				continue;
 			// just found the same spot;
-			auto def_set = findDefOf_internal(s, unit);
+			auto def_set = findDefOf_internal(s->toString(), unit);
 			if (!def_set.empty())
 				return def_set;	
 		}
@@ -406,9 +427,13 @@ struct MessageHandle : public IMessageHandler
 	}
 };
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change)
+
+{
+	return OnChange(_change,{});
+}
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
 {
 
-	
 	if (!_change)
 		return {};
 	if (d_ptr->monitor.isCancelled())
@@ -423,11 +448,14 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 			return  findIt->second;
 		}
 	}
-	std::wstring content;
-	if(!_change->parent.GetFileBufferContent(_change, content))
+	if(content.empty())
 	{
-		return {};
+		if (!_change->parent.GetFileBufferContent(_change, content))
+		{
+			return {};
+		}
 	}
+
 	
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
 	unit->counter.store(_change->counter.load(std::memory_order_relaxed));

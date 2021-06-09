@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ASTUtils.cpp" />
+    <ClCompile Include="src\code.cpp" />
     <ClCompile Include="src\CompilationUnit.cpp" />
     <ClCompile Include="src\LPG-language-server.cpp" />
     <ClCompile Include="src\message\CompletionHandler.cpp" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ASTUtils.h" />
+    <ClInclude Include="src\code.h" />
     <ClInclude Include="src\CompilationUnit.h" />
     <ClInclude Include="src\message\MessageHandler.h" />
     <ClInclude Include="src\parser\LPGKWLexer.h" />

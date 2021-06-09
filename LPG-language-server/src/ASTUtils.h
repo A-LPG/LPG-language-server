@@ -45,10 +45,10 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 
 	static void findRefsOf(std::vector<ASTNode*>& result, terminal* term);
 
-	
+	static std::wstring getLine(ILexStream* lex, int line);
 	static int toOffset(ILexStream* lex, const lsPosition& pos)
 	{
-		return  toOffset(lex, pos.line, pos.character);
+		return  toOffset(lex, pos.line+1, pos.character);
 	}
 	static int toOffset(ILexStream* lex, int line, int column);
 	static boost::optional<lsPosition> toPosition(ILexStream* lex, int offset);
