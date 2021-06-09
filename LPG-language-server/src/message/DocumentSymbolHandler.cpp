@@ -482,7 +482,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
 	 }
      auto lex = unit->_lexer.getILexStream();
 	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
-	if(lpg_options_)
+	if(lpg_options_ && lpg_options_->list.size())
 	{
         children.push_back({});
 		lsDocumentSymbol& lpg_options_segment = children[children.size()-1];
@@ -507,7 +507,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
 	 if(auto _input =  unit->root->getLPG_INPUT(); _input)
     {
         lsDocumentSymbol root;
-        root.children = {};
+        root.children = std::vector<lsDocumentSymbol>();
         LPGModelVisitor visitor(&root, lex);
         _input->accept(&visitor);
 
