@@ -32,6 +32,7 @@
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
 #include "Monitor.h"
+#include "LibLsp/lsp/ParentProcessWatcher.h"
 #include "LibLsp/lsp/textDocument/resolveCompletionItem.h"
 #include "LibLsp/lsp/textDocument/formatting.h"
 #include "LibLsp/lsp/textDocument/documentColor.h"
@@ -111,10 +112,16 @@ public:
 		}
 		return  unit;
 	}
-	
-	Server(const std::string& _port) :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor),
-	
-	server(_address, _port, protocol_json_handler, endpoint, _log)
+	void on_exit()
+	{
+		_monitor.Cancel();
+		server.stop();
+		esc_event.notify(std::make_unique<bool>(true));
+	}
+	bool enable_watch_parent_process = false;
+	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
+	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor),
+	server(_address, _port, protocol_json_handler, endpoint, _log), enable_watch_parent_process(_enable_watch_parent_process)
 	{
 
 		need_initialize_error = Rsp_Error();
@@ -167,6 +174,14 @@ public:
 				capabilities.colorProvider = option;
 	
 				rsp.result.capabilities.swap(capabilities);
+
+			    if(req.params.processId.has_value() && _enable_watch_parent_process)
+			    {
+					parent_process_watcher = std::make_unique<ParentProcessWatcher>(_log,req.params.processId.value(),
+						[&](){
+							on_exit();
+					});
+			    }
 				return  std::move(rsp);
 			});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_InitializedNotification::notify& notify)
@@ -415,9 +430,7 @@ public:
 		});
 		server.remote_end_point_.registerNotifyHandler([&](Notify_Exit::notify& notify)
 		{
-				_monitor.Cancel();
-				server.stop();
-				esc_event.notify(std::make_unique<bool>(true));
+				on_exit();
 		});
 
 		std::thread([&]()
@@ -446,6 +459,7 @@ int main(int argc, char* argv[])
 	options_description desc("Allowed options");
 	desc.add_options()
 		(_PORT_STR, value<int>(), "tcp port")
+		("watchParentProcess", "enable watch parent process")
 		("help,h", "produce help message");
 
 
@@ -466,6 +480,11 @@ int main(int argc, char* argv[])
 		cout << desc << endl;
 		return 1;
 	}
+	bool  enable_watch_parent_process = false;
+	if (vm.count("watchParentProcess"))
+	{
+		enable_watch_parent_process = true;
+	}
 	int  _port = 9333;
 	if (vm.count(_PORT_STR))
 	{
@@ -477,7 +496,7 @@ int main(int argc, char* argv[])
 		cout << "Please set TCP port ."  << endl;
 		return -1;
 	}
-	Server server(stringex().format("%d",_port));
+	Server server(stringex().format("%d",_port), enable_watch_parent_process);
 	auto ret =server.esc_event.wait();
 	if(ret)
 	{
