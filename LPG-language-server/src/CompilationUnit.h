@@ -66,7 +66,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
  * Get the target for a given source node in the AST represented by a given
  * Parse Controller.
  */
-	std::vector<Object*> getLinkTarget(Object* node);
+	std::vector<Object*> getLinkTarget(Object* node, Monitor* monitor);
 
 	std::set<std::string> local_macro_name_table;
 
@@ -76,7 +76,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 		std::wstring macro_name;
 	};
 	std::unique_ptr<FindMacroInBlockResult> FindMacroInBlock(
-		Object* , const lsPosition& );
+		Object* , const lsPosition&, Monitor* monitor);
 
 	bool is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken* node);
 };

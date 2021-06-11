@@ -60,13 +60,13 @@ void CompilationUnit::parser(Monitor* monitor)
 	root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(_parser.parser(monitor,1000));
 }
 
-std::vector<Object*> CompilationUnit::getLinkTarget(Object* node)
+std::vector<Object*> CompilationUnit::getLinkTarget(Object* node, Monitor* monitor)
 {
 	if (!dynamic_cast<LPGParser_top_level_ast::ASTNodeToken*>(node))
 	{
 		return {};
 	}
-	auto def = parent.findDefOf(static_cast<LPGParser_top_level_ast::ASTNodeToken*>(node), shared_from_this());
+	auto def = parent.findDefOf(static_cast<LPGParser_top_level_ast::ASTNodeToken*>(node), shared_from_this(),monitor);
 	return def;
 }
 
@@ -89,7 +89,7 @@ namespace
 
 
 std::unique_ptr< CompilationUnit::FindMacroInBlockResult>
-CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position)
+CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Monitor* monitor)
 {
     do
     {
@@ -114,7 +114,7 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position)
         if (macro_name.empty()) break;
 		std::unique_ptr< FindMacroInBlockResult> result = std::make_unique<FindMacroInBlockResult>();
 		
-		result->def_set= parent.findDefOf(macro_name, shared_from_this());
+		result->def_set= parent.findDefOf(macro_name, shared_from_this(), monitor);
 		result->macro_name .swap(macro_name) ;
 		return  result;
     } while (false);

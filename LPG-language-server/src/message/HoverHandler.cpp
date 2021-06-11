@@ -17,7 +17,7 @@ struct DocumentationProvider
         const std::wstring  temp(buf.data(), start, end - start + 1);
         return IcuUtil::ws2s(temp);
     }
-    std::string getDocumentation(std::shared_ptr<CompilationUnit>& ast_unit, Object* target)
+    std::string getDocumentation(std::shared_ptr<CompilationUnit>& ast_unit, Object* target, Monitor* monitor)
     {
         if (target == nullptr || !ast_unit)
             return {};
@@ -38,7 +38,7 @@ struct DocumentationProvider
             }
         	
             ASTNode* def = nullptr;
-        	auto set = ast_unit->parent.findDefOf(node, ast_unit);
+        	auto set = ast_unit->parent.findDefOf(node, ast_unit, monitor);
             if(!set.empty())
             {
                 def = dynamic_cast<ASTNode*>(set[0]);
@@ -81,7 +81,8 @@ struct DocumentationProvider
 
 };
 
-void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& temp_position, TextDocumentHover::Result& out)
+void process_hover(std::shared_ptr<CompilationUnit>& unit,
+    const lsPosition& temp_position, TextDocumentHover::Result& out, Monitor* monitor)
 {
 
     TextDocumentHover::Left content = std::vector< std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>> >();
@@ -102,7 +103,7 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& tem
     if (selNode == nullptr) return;
    
     Object* target = nullptr;
-	auto set = unit->getLinkTarget(selNode);
+	auto set = unit->getLinkTarget(selNode,monitor);
 	if(!set.empty())
 	{
         target = set[0];
@@ -121,7 +122,7 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& tem
 
 	do
     {
-        auto result = unit->FindMacroInBlock(target, temp_position);
+        auto result = unit->FindMacroInBlock(target, temp_position,monitor);
         
 		if(!result)break;
         if (!result->def_set.empty())
@@ -146,7 +147,7 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit, const lsPosition& tem
     } while (false);
 
     DocumentationProvider docProvider;
-   auto doc= docProvider.getDocumentation( unit, target);
+   auto doc= docProvider.getDocumentation( unit, target,monitor);
    std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;
 	item .first= doc;
    content->push_back(item);

@@ -5,6 +5,7 @@
 #include <LibLsp/lsp/textDocument/foldingRange.h>
 #include <LibLsp/lsp/textDocument/documentColor.h>
 
+struct Monitor;
 struct lsFormattingOptions;
 struct FoldingRangeRequestParams;
 struct lsCompletionParams;
@@ -17,13 +18,17 @@ namespace TextDocumentHover
 
 }
 void process_symbol(std::shared_ptr<CompilationUnit>&, std::vector< lsDocumentSymbol >&);
-void process_definition(std::shared_ptr<CompilationUnit>&,const  lsPosition& position, std::vector<lsLocation>&);
-void process_hover(std::shared_ptr<CompilationUnit>&, const lsPosition& , TextDocumentHover::Result&);
+
+void process_definition(std::shared_ptr<CompilationUnit>&,const  lsPosition& position,
+	std::vector<lsLocation>&, Monitor* monitor);
+
+void process_hover(std::shared_ptr<CompilationUnit>&, const lsPosition& , 
+	TextDocumentHover::Result&, Monitor* monitor);
 
 struct CompletionHandler
 {
 	
-	CompletionHandler(std::shared_ptr<CompilationUnit>&, CompletionList& out, const lsCompletionParams&);
+	CompletionHandler(std::shared_ptr<CompilationUnit>&, CompletionList& out, const lsCompletionParams&, Monitor* monitor);
 private:
 
 	struct Region
@@ -99,7 +104,7 @@ struct ReferencesHandlerData;
 struct ReferencesHandler
 {
 
-	ReferencesHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&);
+	ReferencesHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&, Monitor* monitor);
 	~ReferencesHandler();
 	ReferencesHandlerData* d_ptr;
 

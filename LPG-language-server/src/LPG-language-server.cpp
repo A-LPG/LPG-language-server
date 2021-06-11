@@ -82,10 +82,10 @@ public:
 	WorkSpaceManager   work_space_mgr;
 	std::unique_ptr<SimpleTimer<>>  timer;
 
-	struct ServerMonitor : Monitor
+	struct ExitMsgMonitor : Monitor
 	{
 		std::atomic_bool is_running_= true;
-		bool isCancelled() override
+		bool isCancelled()  override
 		{
 			return  !is_running_.load(std::memory_order_relaxed);
 		}
@@ -94,33 +94,52 @@ public:
 			is_running_.store(false, std::memory_order_relaxed);
 		}
 	};
-	ServerMonitor _monitor;
+	struct RequestMonitor : Monitor
+	{
+		RequestMonitor( ExitMsgMonitor& _exit,const CancelMonitor& _cancel):exit(_exit),cancel(_cancel)
+		{
+			
+		}
+
+		bool isCancelled() override
+		{
+			if (exit.isCancelled()) return  true;
+			if(cancel && cancel())
+			{
+				return  true;
+			}
+			return  false;
+		}
+		 ExitMsgMonitor& exit;
+		const CancelMonitor&  cancel;
+	};
+	ExitMsgMonitor exit_monitor;
 	boost::optional<Rsp_Error> need_initialize_error;
-	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path,bool keep_consist= true)
+	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path, Monitor* monitor ,bool keep_consist= true)
 	{
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
 			if (unit->NeedToCompile() && keep_consist)
 			{
-				unit = work_space_mgr.OnChange(unit->working_file);
+				unit = work_space_mgr.OnChange(unit->working_file, monitor);
 			}
 		}
 		else
 		{
-			unit=  work_space_mgr.CreateUnit(path);
+			unit=  work_space_mgr.CreateUnit(path, monitor);
 		}
 		return  unit;
 	}
 	void on_exit()
 	{
-		_monitor.Cancel();
+		exit_monitor.Cancel();
 		server.stop();
 		esc_event.notify(std::make_unique<bool>(true));
 	}
 	bool enable_watch_parent_process = false;
 	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
-	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files,server.remote_end_point_, _log,_monitor),
+	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files,server.remote_end_point_, _log),
 	server(_address, _port, protocol_json_handler, endpoint, _log), enable_watch_parent_process(_enable_watch_parent_process)
 	{
 
@@ -188,44 +207,50 @@ public:
 		{
 
 		});
-		server.remote_end_point_.registerRequestHandler([&](const td_symbol::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+			[&](const td_symbol::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_symbol::response > {
 				if(need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit =GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit =GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
 				td_symbol::response rsp;
 				if (unit){
 					process_symbol(unit, rsp.result);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandler([&](const td_definition::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+			[&](const td_definition::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_definition::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
 				td_definition::response rsp;
 				rsp.result.first = std::vector<lsLocation>();
 				if (unit){
-					process_definition(unit, req.params.position, rsp.result.first.value());
+					process_definition(unit, req.params.position, rsp.result.first.value(), &_requestMonitor);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandler([&](const td_hover::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+			[&](const td_hover::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_hover::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
 				td_hover::response rsp;
 				if (unit)
 				{
-					process_hover(unit, req.params.position, rsp.result);
+					process_hover(unit, req.params.position, rsp.result, &_requestMonitor);
 				}
 				else
 				{
@@ -240,16 +265,18 @@ public:
 				return td_completion::request::ReflectReader(visitor);
 		});
 
-		server.remote_end_point_.registerRequestHandler([&](const td_completion::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_completion::request& req
+			, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_completion::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor,true);
 				td_completion::response rsp;
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),true);
 				if (unit){
-					CompletionHandler(unit, rsp.result, req.params);
+					CompletionHandler(unit, rsp.result, req.params,&_requestMonitor);
 				}
 				
 				
@@ -263,55 +290,63 @@ public:
 				return std::move(rsp);
 			});
 		
-		server.remote_end_point_.registerRequestHandler([&](const td_foldingRange::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_foldingRange::request& req,
+			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_foldingRange::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
 				td_foldingRange::response rsp;
 				if (unit){
 					FoldingRangeHandler(unit, rsp.result, req.params);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandler([&](const td_formatting::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_formatting::request& req,
+			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_formatting::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				td_formatting::response rsp;
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
 				if (unit){
 					DocumentFormatHandler(unit, rsp.result, req.params.options);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandler([&](const td_documentColor::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_documentColor::request& req 	,
+			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_documentColor::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
 				td_documentColor::response rsp;
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor);
 				if (unit){
 					DocumentColorHandler(unit, rsp.result);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandler([&](const td_references::request& req)
+		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_references::request& req,
+			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_references::response > {
 				if (need_initialize_error)
 				{
 					return need_initialize_error.value();
 				}
 				td_references::response rsp;
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath());
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor);
 				if (unit){
-					ReferencesHandler(unit, req.params.position, rsp.result);
+					ReferencesHandler(unit, req.params.position, rsp.result,&_requestMonitor);
 				}
 				return std::move(rsp);
 			});
@@ -327,7 +362,7 @@ public:
 					return;
 				if(auto work_file = working_files.OnOpen(params.textDocument))
 			    {
-					work_space_mgr.OnOpen(work_file);
+					work_space_mgr.OnOpen(work_file,&exit_monitor);
 			    }
 					
 				// 解析 
@@ -363,7 +398,7 @@ public:
 				//			std::wstring context;
 				//			if(auto file = working_files.GetFileByFilename(file_info); file)
 				//			{
-				//				if(_monitor.isCancelled())
+				//				if(exit_monitor.isCancelled())
 				//				{
 				//					return;
 				//				}

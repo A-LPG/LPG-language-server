@@ -219,7 +219,7 @@ void CompletionHandler::computeTerminalCompletions(const string& prefix) {
 
 }
 
-CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, CompletionList& o, const lsCompletionParams& params)
+CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, CompletionList& o, const lsCompletionParams& params , Monitor* monitor)
 :unit(u), out(o)
 {
     out.isIncomplete = false;

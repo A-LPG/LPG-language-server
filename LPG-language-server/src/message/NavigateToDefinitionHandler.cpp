@@ -52,7 +52,7 @@ struct DefinitionProvider
             }
         	
             ASTNode* def = nullptr;
-            auto set = ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit);
+            auto set = ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit, monitor);
             if (!set.empty())
             {
                 def = dynamic_cast<ASTNode*>(set[0]);
@@ -99,9 +99,14 @@ struct DefinitionProvider
         return {};
 
     }
-
+    DefinitionProvider(Monitor* m):monitor(m)
+    {
+	    
+    }
+    Monitor* monitor = nullptr;
 };
-void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition& position, std::vector<lsLocation>& out)
+void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition& position, 
+    std::vector<lsLocation>& out, Monitor* monitor)
 {
     if (!unit ||!unit->root)
     {
@@ -116,7 +121,7 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return ;
     Object* target = nullptr;
-  auto set = unit->getLinkTarget(selNode);
+  auto set = unit->getLinkTarget(selNode,monitor);
 
   if (!set.empty()){
       target = set[0];
@@ -126,7 +131,7 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
 	
   do
   {
-    auto result = unit->FindMacroInBlock(target, position);
+    auto result = unit->FindMacroInBlock(target, position,monitor);
 
     if (!result)break;
     if (result->def_set.empty())
@@ -149,7 +154,7 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
       set.push_back(selNode);
   }
 	
-  DefinitionProvider provider;
+  DefinitionProvider provider(monitor);
   for(auto it: set)
   {
       auto link = provider.getLocation(unit, it);

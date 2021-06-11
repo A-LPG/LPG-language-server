@@ -11,6 +11,7 @@
 struct ReferencesHandlerData
 {
     std::vector<lsLocation>& out;
+	Monitor* monitor = nullptr;
 	void  getLocation(IToken* left_token, IToken* right_token)
 	{
 		auto lex = left_token->getILexStream();
@@ -47,8 +48,9 @@ struct ReferencesHandlerData
 		   getLocation(it->getLeftIToken(), it->getRightIToken());
 	   }
    }
-	ReferencesHandlerData(std::shared_ptr<CompilationUnit>& u, const lsPosition& position, std::vector<lsLocation>& o):
-	    out(o), unit(u)
+	ReferencesHandlerData(std::shared_ptr<CompilationUnit>& u, const lsPosition& position, 
+		std::vector<lsLocation>& o  ,Monitor* _monitor):
+	    out(o), unit(u),monitor(_monitor)
     {
 	    if (!unit || !unit->root)
 	    {
@@ -87,7 +89,7 @@ struct ReferencesHandlerData
    		if(!dynamic_cast<ASTNodeToken*>(node))return;
 		auto nTok = static_cast<ASTNodeToken*>(node);
 		bool  had_add_node = false;
-		auto def_set = unit->parent.findDefOf(nTok, unit);
+		auto def_set = unit->parent.findDefOf(nTok, unit, monitor);
    		for(auto& def : def_set)
    		{
    			if(!def) continue;
@@ -128,7 +130,7 @@ struct ReferencesHandlerData
 	std::shared_ptr<CompilationUnit>& unit;
 };
 ReferencesHandler::ReferencesHandler(std::shared_ptr<CompilationUnit>&u, const lsPosition& position,
-	std::vector<lsLocation>& o):d_ptr(new ReferencesHandlerData(u,position,o))
+	std::vector<lsLocation>& o, Monitor* monitor):d_ptr(new ReferencesHandlerData(u,position,o, monitor))
 {
 
 }

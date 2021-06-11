@@ -26,16 +26,16 @@ using namespace LPGParser_top_level_ast;
 using namespace lsp;
 struct WorkSpaceManagerData
 {
-	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log,Monitor& m): working_files(_w),
+	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log): working_files(_w),
 		end_point(_end_point),
-		logger(_log), monitor(m)
+		logger(_log)
 	{
 	}
 
 	WorkingFiles& working_files;
 	RemoteEndPoint& end_point;
 	lsp::Log& logger;
-	Monitor& monitor;
+
 	typedef boost::shared_lock<boost::shared_mutex> readLock;
 	typedef boost::unique_lock<boost::shared_mutex> writeLock;
 	boost::shared_mutex _rw_mutex;
@@ -122,17 +122,18 @@ std::string stripName(const std::string& rawId) {
 	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
 }
 std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
-                                              const std::shared_ptr<CompilationUnit>& refUnit)
+                                              const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
 
 	 auto     id = stripName(_word);
 	 std::vector<std::string> includedFiles;
-	collectIncludedFiles(includedFiles,refUnit);
+	collectIncludedFiles(includedFiles,refUnit, monitor);
 	 for (auto& fileName : includedFiles) 
 	 {
-		 auto include_unit= lookupImportedFile(refUnit->working_file->directory,fileName);
+		 auto include_unit= lookupImportedFile(refUnit->working_file->directory,fileName,monitor);
 		 if(!include_unit)continue;
-
+		 if (monitor && monitor->isCancelled())
+			 return {};
 		 if (LPG * includedRoot = include_unit->root; includedRoot != nullptr) {
 			 auto& symbolTable = includedRoot->environment->symtab;
 		
@@ -151,7 +152,7 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
 
 
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath& fileName)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath& fileName, Monitor* monitor)
 {
 	auto  unit = find(AbsolutePath(fileName, false));
 	if (unit) return unit;
@@ -172,10 +173,10 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	std::shared_ptr<WorkingFile> _open=d_ptr->working_files.OnOpen(item);
 	if (!_open)
 		return {};
-	return OnChange(_open,std::move(content));
+	return OnChange(_open,std::move(content), monitor);
 }
 
-void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit)
+void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
 	if(!refUnit){
 		return;
@@ -184,7 +185,7 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 	if (!root){
 		return;
 	}
-	if(d_ptr->monitor.isCancelled())
+	if(monitor && monitor->isCancelled())
 		return;
 	
 	auto optSeg = static_cast<option_specList*>(root->getoptions_segment());
@@ -207,12 +208,12 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 					result.emplace_back(fileName);
 					if (optName == (L"import_terminals")) {
 						// pick up defs from the filter
-						if (d_ptr->monitor.isCancelled())
+						if (monitor && monitor->isCancelled())
 							return;
-						auto filterUnit = lookupImportedFile(refUnit->working_file->directory, fileName);
-						if (d_ptr->monitor.isCancelled())
+						auto filterUnit = lookupImportedFile(refUnit->working_file->directory, fileName,monitor);
+						if (monitor && monitor->isCancelled())
 							return;
-						 collectIncludedFiles(result, filterUnit);
+						 collectIncludedFiles(result, filterUnit,monitor);
 					}
 				}
 			}
@@ -222,7 +223,7 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 
 
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory& directory, const std::string& fileName)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory& directory, const std::string& fileName, Monitor* monitor)
 {
 	boost::system::error_code ec;
 	
@@ -231,7 +232,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 	
 	if(boost::filesystem::exists(fileName, ec))
 	{
-		return  CreateUnit(AbsolutePath(fileName, false));
+		return  CreateUnit(AbsolutePath(fileName, false),monitor);
 	}
 	
 	{
@@ -243,7 +244,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 		
 		if (boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath, false));
+			return  CreateUnit(AbsolutePath(refPath, false),monitor);
 		}
 	}
 
@@ -256,14 +257,14 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 		if (unit) return unit;
 		if (!boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath, false));
+			return  CreateUnit(AbsolutePath(refPath, false),monitor);
 		}
 	}
 	return {};
 }
-Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std::string& fileName)
+Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor)
 {
-	auto unit = lookupImportedFile(directory, fileName);
+	auto unit = lookupImportedFile(directory, fileName,monitor);
 	if(unit && unit->root)
 	{
 		return  unit->root;
@@ -271,7 +272,7 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
-std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit)
+std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
 	auto& symbolTable = (unit->root->environment->symtab);
 	auto  range = symbolTable.equal_range(id);
@@ -282,14 +283,14 @@ std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::sha
 	}
 	if (candidates.empty()) {
 		// try a little harder
-		auto def_set = findDefOf_internal(id, unit);
+		auto def_set = findDefOf_internal(id, unit,monitor);
 		if (!def_set.empty())
 			return def_set;
 	}
 	return  candidates;
 }
 
-std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit)
+std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
 	auto     id = stripName(s->toString());
 	auto& symbolTable = (unit->root->environment->symtab);
@@ -302,7 +303,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 	
 	if (candidates.empty()) {
 		// try a little harder
-		auto def_set =  findDefOf_internal(s->toString(), unit);
+		auto def_set =  findDefOf_internal(s->toString(), unit, monitor);
 		if (!def_set.empty())
 			return def_set;
 	}
@@ -313,7 +314,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 			if (s->parent != it)
 				continue;
 			// just found the same spot;
-			auto def_set = findDefOf_internal(s->toString(), unit);
+			auto def_set = findDefOf_internal(s->toString(), unit, monitor);
 			if (!def_set.empty())
 				return def_set;	
 		}
@@ -337,7 +338,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 			|| optName==(L"template")
 			|| optName ==(L"filter")) 
 		{
-			auto temp_file =lookupImportedFile(unit->working_file->directory, IcuUtil::ws2s(id) ).get();
+			auto temp_file =lookupImportedFile(unit->working_file->directory, IcuUtil::ws2s(id), monitor).get();
 			if(temp_file)
 			{
 				return { temp_file };
@@ -354,7 +355,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 		auto includeFile = static_cast<include_segment*>(iseg->getinclude_segment())->getSYMBOL()
 			->to_utf8_string();
 
-		auto temp_file= lookupImportedFile(unit->working_file->directory, includeFile).get();
+		auto temp_file= lookupImportedFile(unit->working_file->directory, includeFile, monitor).get();
 		if (temp_file)
 		{
 			return { temp_file };
@@ -374,17 +375,17 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path
 	return  d_ptr->find(temp);
 }
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePath& path)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePath& path, Monitor* monitor)
 {
 	auto unit = find(path);
 	if(!unit)
 	{
-		unit = CreateUnit(path);
+		unit = CreateUnit(path, monitor);
 	}
 	return  unit;
 }
 
-WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log, Monitor& m):d_ptr(new WorkSpaceManagerData(_w , end_point, _log,m))
+WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(_w , end_point, _log))
 {
 	
 }
@@ -394,9 +395,9 @@ WorkSpaceManager::~WorkSpaceManager()
 	delete d_ptr;
 }
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open, Monitor* monitor)
 {
-	return OnChange(_open);
+	return OnChange(_open, monitor);
 }
 struct MessageHandle : public IMessageHandler
 {
@@ -426,17 +427,17 @@ struct MessageHandle : public IMessageHandler
 		notify.params.diagnostics.emplace_back(std::move(diagnostic));
 	}
 };
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
 
 {
-	return OnChange(_change,{});
+	return OnChange(_change,{}, monitor);
 }
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
 
 	if (!_change)
 		return {};
-	if (d_ptr->monitor.isCancelled())
+	if (monitor && monitor->isCancelled())
 		return {};
 	WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
 
@@ -469,11 +470,11 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	
 	unit->_lexer.getLexStream()->setMessageHandler(&handle);
 	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
-	if (d_ptr->monitor.isCancelled())
+	if (monitor  &&monitor->isCancelled())
 		return {};
 
-	unit->parser(&d_ptr->monitor);
-	if (d_ptr->monitor.isCancelled())
+	unit->parser(monitor);
+	if (monitor && monitor->isCancelled())
 		return {};
 	d_ptr->update_unit(_change->filename, unit);
 
