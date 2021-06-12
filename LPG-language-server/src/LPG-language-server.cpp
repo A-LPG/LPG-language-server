@@ -81,7 +81,7 @@ public:
 	WorkingFiles working_files;
 	WorkSpaceManager   work_space_mgr;
 	std::unique_ptr<SimpleTimer<>>  timer;
-
+	RemoteEndPoint& _sp;
 	struct ExitMsgMonitor : Monitor
 	{
 		std::atomic_bool is_running_= true;
@@ -115,8 +115,9 @@ public:
 	};
 	ExitMsgMonitor exit_monitor;
 	boost::optional<Rsp_Error> need_initialize_error;
-	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path, Monitor* monitor ,bool keep_consist= true)
+	std::shared_ptr<CompilationUnit> GetUnit(const lsTextDocumentIdentifier& uri, Monitor* monitor, bool keep_consist = true)
 	{
+		const AbsolutePath& path = uri.uri.GetAbsolutePath();
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
@@ -139,28 +140,28 @@ public:
 	}
 	bool enable_watch_parent_process = false;
 	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
-	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files,server.remote_end_point_, _log),
-	server(_address, _port, protocol_json_handler, endpoint, _log), enable_watch_parent_process(_enable_watch_parent_process)
+	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files, server.point, _log),
+	_sp(server.point), enable_watch_parent_process(_enable_watch_parent_process), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
 
 		need_initialize_error = Rsp_Error();
 		need_initialize_error->error.code = lsErrorCodes::ServerNotInitialized;
 		need_initialize_error->error.message = "Server is not initialized";
-		Server* this_server = this;
-		server.remote_end_point_.registerRequestHandler([=](const td_initialize::request& req)
-			->lsp::ResponseOrError< td_initialize::response > {
-				this_server->need_initialize_error.reset();
+		
+		
+		_sp.registerRequestHandler([=](const td_initialize::request& req)
+			{
+				need_initialize_error.reset();
 				td_initialize::response rsp;
 				lsServerCapabilities capabilities;
 			
 		/*		CodeLensOptions code_lens_options;
 				code_lens_options.resolveProvider = false;
 				capabilities.codeLensProvider = code_lens_options;*/
-			
-				std::pair<boost::optional<lsTextDocumentSyncKind>,
-				boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
-				
+
 				{
+					std::pair<boost::optional<lsTextDocumentSyncKind>,
+					          boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
 					lsTextDocumentSyncOptions options;
 					options.openClose = true;
 					options.change = lsTextDocumentSyncKind::Incremental;
@@ -203,11 +204,11 @@ public:
 			    }
 				return  std::move(rsp);
 			});
-		server.remote_end_point_.registerNotifyHandler([&](Notify_InitializedNotification::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_InitializedNotification::notify& notify)
 		{
 
 		});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+		_sp.registerRequestHandlerWithCancelMonitor(
 			[&](const td_symbol::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_symbol::response > {
 				if(need_initialize_error)
@@ -215,14 +216,14 @@ public:
 					return need_initialize_error.value();
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit =GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
+				auto unit =GetUnit(req.params.textDocument,&_requestMonitor);
 				td_symbol::response rsp;
 				if (unit){
 					process_symbol(unit, rsp.result);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+		_sp.registerRequestHandlerWithCancelMonitor(
 			[&](const td_definition::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_definition::response > {
 				if (need_initialize_error)
@@ -230,7 +231,7 @@ public:
 					return need_initialize_error.value();
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument,&_requestMonitor);
 				td_definition::response rsp;
 				rsp.result.first = std::vector<lsLocation>();
 				if (unit){
@@ -238,7 +239,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor(
+		_sp.registerRequestHandlerWithCancelMonitor(
 			[&](const td_hover::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_hover::response > {
 				if (need_initialize_error)
@@ -246,7 +247,7 @@ public:
 					return need_initialize_error.value();
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument,&_requestMonitor);
 				td_hover::response rsp;
 				if (unit)
 				{
@@ -259,13 +260,7 @@ public:
 
 				return std::move(rsp);
 			});
-		protocol_json_handler->SetRequestJsonHandler(td_completion::request::kMethodInfo,
-			[](Reader& visitor)
-		{
-				return td_completion::request::ReflectReader(visitor);
-		});
-
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_completion::request& req
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_completion::request& req
 			, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_completion::response > {
 				if (need_initialize_error)
@@ -273,7 +268,7 @@ public:
 					return need_initialize_error.value();
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor,true);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor,true);
 				td_completion::response rsp;
 				if (unit){
 					CompletionHandler(unit, rsp.result, req.params,&_requestMonitor);
@@ -283,14 +278,14 @@ public:
 				return std::move(rsp);
 				
 			});
-		server.remote_end_point_.registerRequestHandler([&](const completionItem_resolve::request& req)
+		_sp.registerRequestHandler([&](const completionItem_resolve::request& req)
 			{
 				completionItem_resolve::response rsp;
 				rsp.result = req.params;
 				return std::move(rsp);
 			});
 		
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_foldingRange::request& req,
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_foldingRange::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_foldingRange::response > {
 				if (need_initialize_error)
@@ -298,14 +293,14 @@ public:
 					return need_initialize_error.value();
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument,&_requestMonitor);
 				td_foldingRange::response rsp;
 				if (unit){
 					FoldingRangeHandler(unit, rsp.result, req.params);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_formatting::request& req,
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_formatting::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_formatting::response > {
 				if (need_initialize_error)
@@ -314,13 +309,13 @@ public:
 				}
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				td_formatting::response rsp;
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(),&_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument,&_requestMonitor);
 				if (unit){
 					DocumentFormatHandler(unit, rsp.result, req.params.options);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_documentColor::request& req 	,
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_documentColor::request& req 	,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_documentColor::response > {
 				if (need_initialize_error)
@@ -329,13 +324,13 @@ public:
 				}
 				td_documentColor::response rsp;
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit){
 					DocumentColorHandler(unit, rsp.result);
 				}
 				return std::move(rsp);
 			});
-		server.remote_end_point_.registerRequestHandlerWithCancelMonitor([&](const td_references::request& req,
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_references::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_references::response > {
 				if (need_initialize_error)
@@ -344,14 +339,14 @@ public:
 				}
 				td_references::response rsp;
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
-				auto unit = GetUnit(req.params.textDocument.uri.GetAbsolutePath(), &_requestMonitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit){
 					ReferencesHandler(unit, req.params.position, rsp.result,&_requestMonitor);
 				}
 				return std::move(rsp);
 			});
 		
-		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidOpen::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{
 				if (need_initialize_error){
 					return ;
@@ -367,12 +362,12 @@ public:
 					
 				// 解析 
 			});
-		server.remote_end_point_.registerNotifyHandler([&](Notify_Cancellation::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_Cancellation::notify& notify)
 		{
 
 		});
 
-		server.remote_end_point_.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
+		_sp.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
 			if (need_initialize_error) {
 				return;
@@ -410,7 +405,7 @@ public:
 			}
 			
 		});
-		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidClose::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_TextDocumentDidClose::notify& notify)
 		{
 				if (need_initialize_error) {
 					return;
@@ -425,7 +420,7 @@ public:
 			    // 通知消失了
 		});
 		
-		server.remote_end_point_.registerNotifyHandler([&](Notify_TextDocumentDidSave::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_TextDocumentDidSave::notify& notify)
 			{
 				if (need_initialize_error) {
 					return;
@@ -440,12 +435,12 @@ public:
 				// 通知消失了
 			});
 		
-		server.remote_end_point_.registerNotifyHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
 		{
 			
 		});
 
-		server.remote_end_point_.registerNotifyHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
 		{
 				if (need_initialize_error) {
 					return;
@@ -459,11 +454,11 @@ public:
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
 		
-		server.remote_end_point_.registerRequestHandler([&](const td_shutdown::request& notify) {
+		_sp.registerRequestHandler([&](const td_shutdown::request& notify) {
 			td_shutdown::response rsp;
 			return rsp;
 		});
-		server.remote_end_point_.registerNotifyHandler([&](Notify_Exit::notify& notify)
+		_sp.registerNotifyHandler([&](Notify_Exit::notify& notify)
 		{
 				on_exit();
 		});
