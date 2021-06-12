@@ -72,6 +72,9 @@
     <ClCompile Include="src\code.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\message\SemanticTokensHandler.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">

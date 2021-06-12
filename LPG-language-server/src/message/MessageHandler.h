@@ -12,6 +12,9 @@ struct lsCompletionParams;
 struct CompletionList;
 struct CompilationUnit;
 struct WorkSpaceManager;
+
+struct SemanticTokens;
+
 namespace TextDocumentHover
 {
 	struct Result;
@@ -98,6 +101,15 @@ struct DocumentColorHandler
 	DocumentColorHandler(std::shared_ptr<CompilationUnit>&, std::vector<ColorInformation>&);
 	~DocumentColorHandler();
 	DocumentColorHandlerData* d_ptr;
+
+};
+struct SemanticTokensHandler
+{
+	struct Data;
+
+	SemanticTokensHandler(std::shared_ptr<CompilationUnit>&, SemanticTokens&);
+	~SemanticTokensHandler();
+	Data* d_ptr;
 
 };
 struct ReferencesHandlerData;

@@ -7,6 +7,7 @@
 #include "LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
 #include "CharOperation.h"
+#include "Adjunct.h"
 using namespace LPGParser_top_level_ast;
 
 
@@ -14,10 +15,10 @@ struct FoldingVisitor :public AbstractVisitor {
    
     FoldingRangeHandler* handler= nullptr;
     ILexStream* lex = nullptr;
-    IPrsStream* prsStream= nullptr;
+    PrsStream* prsStream= nullptr;
 
     void unimplementedVisitor(const std::string& s) { }
-    FoldingVisitor(FoldingRangeHandler* _handler, ILexStream* _lex, IPrsStream* _prsStream):handler(_handler), lex(_lex),prsStream(_prsStream)
+    FoldingVisitor(FoldingRangeHandler* _handler, ILexStream* _lex, PrsStream* _prsStream):handler(_handler), lex(_lex),prsStream(_prsStream)
     {
       
     }
@@ -223,6 +224,62 @@ struct FoldingVisitor :public AbstractVisitor {
    void makeFoldable(IAst* n) {
         makeFoldable(n->getLeftIToken(), n->getRightIToken());
    }
+   void makeAdjunctsFoldable() {
+       auto lexStream = prsStream->getILexStream();
+       if (lexStream == nullptr)
+           return;
+      auto adjuncts = prsStream->getAdjuncts();
+       for (int i = 0; i < adjuncts.size(); ) {
+           Adjunct* adjunct = static_cast<Adjunct*>(adjuncts[i]);
+
+           auto previous_token = prsStream->getIToken(adjunct->getTokenIndex());
+           auto   next_token = prsStream->getIToken(prsStream->getNext(previous_token->getTokenIndex()));
+           auto  comments = previous_token->getFollowingAdjuncts();
+
+           for (int k = 0; k < comments.size(); k++)
+           {
+               Adjunct* comment = static_cast<Adjunct*>(comments[k]);
+               if (comment->getEndLine() > comment->getLine())
+               {
+                   auto gate_token = k + 1 < comments.size() ? comments[k + 1] : next_token;
+                   makeFoldableByOffsets(comment->getStartOffset(),
+                       gate_token->getLine() > comment->getEndLine()
+                       ? lexStream->getLineOffset(gate_token->getLine() - 1)
+                       : comment->getEndOffset());
+               }
+           }
+
+           i += comments.size();
+       }
+   }
+   void makeLpgAdjunctsFoldable() {
+       auto lexStream = prsStream->getILexStream();
+       if (lexStream == nullptr)
+           return;
+       auto& adjuncts = prsStream->adjuncts;
+       for (int i = 0; i < adjuncts.size(); ) {
+           Adjunct* adjunct = static_cast<Adjunct*>(adjuncts[i]);
+
+           auto previous_token = prsStream->getIToken(adjunct->getTokenIndex());
+           auto   next_token = prsStream->getIToken(prsStream->getNext(previous_token->getTokenIndex()));
+           auto  comments = previous_token->getFollowingAdjuncts();
+
+           for (int k = 0; k < comments.size(); k++)
+           {
+               Adjunct* comment = static_cast<Adjunct*>(comments[k]);
+               if (comment->getEndLine() > comment->getLine())
+               {
+                   auto gate_token = k + 1 < comments.size() ? comments[k + 1] : next_token;
+                   makeFoldableByOffsets(comment->getStartOffset(),
+                       gate_token->getLine() > comment->getEndLine()
+                       ? lexStream->getLineOffset(gate_token->getLine() - 1)
+                       : comment->getEndOffset());
+               }
+           }
+
+           i += comments.size();
+       }
+   }
 };
 
 
@@ -233,7 +290,8 @@ FoldingRangeHandler::FoldingRangeHandler(std::shared_ptr<CompilationUnit>& u, st
     {
         return;
     }
-    FoldingVisitor visitor(this,unit->_lexer.getILexStream(),unit->_parser.getIPrsStream());
+    FoldingVisitor visitor(this,unit->_lexer.getILexStream(),unit->_parser.prsStream);
     unit->root->accept(&visitor);
+    visitor.makeAdjunctsFoldable();
 }
 

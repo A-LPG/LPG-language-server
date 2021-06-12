@@ -256,10 +256,10 @@ namespace
 		TextDocument::Color Convert() const
 		{
 			TextDocument::Color _color;
-			_color.alpha = alpha;
-			_color.red =  GetRValue(handle);
-			_color.green = GetGValue(handle);
-			_color.blue = GetBValue(handle);
+			_color.alpha = alpha / 255.0;
+			_color.red =  GetRValue(handle)/255.0;
+			_color.green = GetGValue(handle) / 255.0;
+			_color.blue = GetBValue(handle) / 255.0;
 			return  _color;
 		}
 		static Color win32_new(int handle, int alpha) {
@@ -372,15 +372,13 @@ struct DocumentColorHandlerData
 		}
 		Init();
 		auto lex = unit->_lexer.getILexStream();
-		Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
-		for (int i = 1; i < tokens.size(); ++i)
+		auto process_token = [&](IToken* token)
 		{
-			IToken* token = tokens[i];
 			ColorInformation information;
 			information.color = getColoring(token);
-			
+
 			auto pos = ASTUtils::toPosition(lex, token->getStartOffset());
-			if(pos)
+			if (pos)
 			{
 				information.range.start = pos.value();
 			}
@@ -390,6 +388,22 @@ struct DocumentColorHandlerData
 				information.range.end = pos.value();
 			}
 			o.emplace_back(information);
+		};
+		{
+			Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
+			for (int i = 0; i < tokens.size(); ++i)
+			{
+				IToken* token = tokens[i];
+				process_token(token);
+			}
+		}
+		{
+			Tuple<IToken*>& tokens = u->_parser.prsStream->adjuncts;
+			for (int i = 0; i < tokens.size(); ++i)
+			{
+				IToken* token = tokens[i];
+				process_token(token);
+			}
 		}
 	}
 	void Init()
@@ -413,12 +427,12 @@ struct DocumentColorHandlerData
 	}
 	TextDocument::Color getColoring(IToken* token) {
 
-
-		if (token->getKind() == LPGParsersym::TK_EMPTY_KEY)
+		auto kind = token->getKind();
+		if (kind == LPGParsersym::TK_EMPTY_KEY)
 			return EMPTY;
 		if (isKeyword(token->getKind()))
 			return KEYWORD;
-		if (token->getKind() == LPGParsersym::TK_SYMBOL)
+		if (kind == LPGParsersym::TK_SYMBOL)
 		{
 			int tokStartOffset = token->getStartOffset();
 			wchar_t ch = buffer[tokStartOffset];
@@ -426,9 +440,9 @@ struct DocumentColorHandlerData
 				return LITERAL;
 			return SYMBOL;
 		}
-		if (token->getKind() == LPGParsersym::TK_SINGLE_LINE_COMMENT)
+		if (kind == LPGParsersym::TK_SINGLE_LINE_COMMENT)
 			return COMMENT;
-		if (token->getKind() == LPGParsersym::TK_MACRO_NAME)
+		if (kind == LPGParsersym::TK_MACRO_NAME)
 			return ANNOTATION;
 
 		return Other;

@@ -40,6 +40,7 @@
 #include "LibLsp/lsp/workspace/did_change_watched_files.h"
 #include "LibLsp/lsp/general/initialized.h"
 #include "LibLsp/JsonRpc/cancellation.h"
+#include "LibLsp/lsp/textDocument/SemanticTokens.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -177,8 +178,9 @@ public:
 			
 				std::pair< boost::optional<bool>, boost::optional<WorkDoneProgressOptions> > option;
 				option.first = true;
+			
 				capabilities.definitionProvider = option;
-				FoldingRangeOptions foldingRangeProvider;
+		
 				capabilities.foldingRangeProvider = std::pair< boost::optional<bool>, boost::optional<FoldingRangeOptions> >();
 				capabilities.foldingRangeProvider->first = true;
 				capabilities.referencesProvider = option;
@@ -187,12 +189,38 @@ public:
 
 				capabilities.documentFormattingProvider = option;
 			
-				std::pair< boost::optional<bool>, boost::optional<RenameOptions> > renameopt;
-				renameopt.first = true;
-				capabilities.renameProvider = renameopt;
+				std::pair< boost::optional<bool>, boost::optional<RenameOptions> > rename_opt;
+				rename_opt.first = true;
+				capabilities.renameProvider = rename_opt;
 			
-				capabilities.colorProvider = option;
-	
+				{
+					
+				}
+
+				
+				
+				
+				SemanticTokensWithRegistrationOptions semantic_tokens_opt;
+				auto  semanticTokenTypes = [] {
+					std::vector< std::string>  _type;
+					for (unsigned i = 0; i <= static_cast<unsigned>(SemanticTokenType::lastKind);
+						++i)
+						_type.push_back(to_string(static_cast<SemanticTokenType>(i)));
+					return _type;
+				};
+			
+				semantic_tokens_opt.legend.tokenTypes = semanticTokenTypes();
+			
+				std::pair< boost::optional<bool>, boost::optional<lsp::Any> > rang;
+				rang.first = false;
+				semantic_tokens_opt.range = rang;
+			
+				std::pair< boost::optional<bool>,
+					boost::optional<SemanticTokensServerFull> > full;
+				full.first = true;
+			
+				semantic_tokens_opt.full = full;
+				capabilities.semanticTokensProvider = std::move(semantic_tokens_opt);
 				rsp.result.capabilities.swap(capabilities);
 
 			    if(req.params.processId.has_value() && _enable_watch_parent_process)
@@ -330,6 +358,24 @@ public:
 				}
 				return std::move(rsp);
 			});
+		_sp.registerRequestHandlerWithCancelMonitor([&](const td_semanticTokens_full::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< td_semanticTokens_full::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				td_semanticTokens_full::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					SemanticTokens tokens;
+					SemanticTokensHandler(unit, tokens);
+					rsp.result = std::move(tokens);
+				}
+				
+				return std::move(rsp);
+			});
 		_sp.registerRequestHandlerWithCancelMonitor([&](const td_references::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_references::response > {
@@ -362,11 +408,7 @@ public:
 					
 				// 解析 
 			});
-		_sp.registerNotifyHandler([&](Notify_Cancellation::notify& notify)
-		{
-
-		});
-
+	
 		_sp.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
 			if (need_initialize_error) {

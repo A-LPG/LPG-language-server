@@ -72,7 +72,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto& children = parent->children.value();
         children.emplace_back(lsDocumentSymbol());
         lsDocumentSymbol* treeNode = &children[children.size() - 1];
-        treeNode->kind = lsSymbolKind::Struct;
+        treeNode->kind = lsSymbolKind::Class;
         auto token = n->getLeftIToken();
         treeNode->name =  token->to_utf8_string();
         auto pos =  ASTUtils::toPosition(lex, token->getStartOffset());
@@ -337,6 +337,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(defineSpec* n) {
         auto node = static_cast<ASTNode*>(n->getmacro_name_symbol());
         auto symbol = createSubItem(node);
+        symbol->kind = lsSymbolKind::Variable;
         symbol->name = node->to_utf8_string();
         auto pos =  ASTUtils::toPosition(lex, node->getRightIToken()->getEndOffset());
     	if(pos)
@@ -347,20 +348,24 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(terminal_symbol1* n) {
-        createSubItem((ASTNode*)n->getMACRO_NAME());
+       auto  sym=  createSubItem((ASTNode*)n->getMACRO_NAME());
+       sym->kind = lsSymbolKind::Macro;
         return false;
     }
 
     void endVisit(start_symbol0* n) {
-        createSubItem(n);
+        auto  sym = createSubItem(n);
+        sym->kind = lsSymbolKind::Macro;
     }
 
     void endVisit(start_symbol1* n) {
-        createSubItem(n);
+        auto  sym = createSubItem(n);
+        sym->kind = lsSymbolKind::Macro;
     }
 
     void endVisit(terminal* n) {
         auto symbol = n->getterminal_symbol();
+      
         auto alias = n->getoptTerminalAlias();
         std::string label;
         if (alias != nullptr) {
@@ -372,11 +377,15 @@ struct LPGModelVisitor :public AbstractVisitor {
             label = symbolImage(symbol);
        auto item = createSubItem(symbol);
        item->name.swap(label);
+       item->kind = lsSymbolKind::String;
     }
 
     bool visit(nonTerm* n) {
         if (n->getruleList()->size() > 1)
-            pushSubItem(n);
+        {
+	        auto item = pushSubItem(n);
+            item->kind = lsSymbolKind::Field;
+        }
         return true;
     }
 
@@ -398,6 +407,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     void endVisit(rule* n) {
        auto item =  createSubItem(n);
        item->name.swap(fRHSLabel);
+       item->kind = lsSymbolKind::Field;
        fRHSLabel.clear();
     }
 
