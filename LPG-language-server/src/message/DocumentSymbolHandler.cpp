@@ -31,7 +31,9 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 			
 			lsDocumentSymbol children;
 			children.name = _opt->to_utf8_string();
-			if(children.name.find("template") == 0 || children.name.find("import_terminals") == 0 )
+			if(children.name.find("template") == 0 ||
+                children.name.find("import_terminals") == 0 ||
+                children.name.find("filter") == 0)
 			{
                 children.kind = lsSymbolKind::File;
 			}else
