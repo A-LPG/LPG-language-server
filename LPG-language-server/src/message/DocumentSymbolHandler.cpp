@@ -166,6 +166,15 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(ExportSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Export ";
+        for(auto& it : n->lpg_export_segment->list)
+        {
+           auto item =  pushSubItem(it);
+           item->kind = lsSymbolKind::Interface;
+           popSubItem();
+        }
+
+
+    	
         return true;
     }
 
@@ -215,7 +224,9 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(include_segment* n) {
         auto symbol = pushSubItem(n);
-        symbol->name = "include_segment";
+        symbol->name = "include ";
+        symbol->kind = lsSymbolKind::File;
+        symbol->name += n->getSYMBOL()->to_utf8_string();
         return true;
     }
 
@@ -496,7 +507,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
 	{
         children.push_back({});
 		lsDocumentSymbol& lpg_options_segment = children[children.size()-1];
-		lpg_options_segment.kind = lsSymbolKind::Module;
+		lpg_options_segment.kind = lsSymbolKind::Package;
 		lpg_options_segment.name = "options";
 		auto pos = ASTUtils::toPosition(lex,
 			lpg_options_->getLeftIToken()->getStartOffset());
