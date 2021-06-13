@@ -103,10 +103,10 @@ struct SemanticTokensHandler::Data
 			//}
 		};
 	
-		IPrsStream::Range  range(u->_parser.getIPrsStream(), u->_parser.getLeftIToken(), u->_parser.getRightIToken());
-		auto tokens = range.getTokenList();
-		
-		for (int i = 0; i < tokens.size(); ++i)
+		//IPrsStream::Range  range(u->_parser.getIPrsStream(), u->_parser.getLeftIToken(), u->_parser.getRightIToken());
+		//auto tokens = range.getTokenList();
+		auto& tokens = u->_parser.prsStream->rangeTokens;
+		for (size_t i = 0; i < tokens.size(); ++i)
 		{
 			IToken* token = tokens[i];
 			process_token(token);

@@ -252,33 +252,44 @@ struct FoldingVisitor :public AbstractVisitor {
            i += comments.size();
        }
    }
-   void makeLpgAdjunctsFoldable() {
+   void makeLpgAdjunctsFoldable(std::shared_ptr<CompilationUnit>& u) {
        auto lexStream = prsStream->getILexStream();
        if (lexStream == nullptr)
            return;
-       auto& adjuncts = prsStream->adjuncts;
-       for (int i = 0; i < adjuncts.size(); ) {
-           Adjunct* adjunct = static_cast<Adjunct*>(adjuncts[i]);
-
-           auto previous_token = prsStream->getIToken(adjunct->getTokenIndex());
-           auto   next_token = prsStream->getIToken(prsStream->getNext(previous_token->getTokenIndex()));
-           auto  comments = previous_token->getFollowingAdjuncts();
-
-           for (int k = 0; k < comments.size(); k++)
+       auto& tokens = u->_parser.prsStream->rangeTokens;
+       auto find_next_comment = [&](size_t start)
+       {
+           size_t index = start;
+           for ( ;index < tokens.size(); ++index)
            {
-               Adjunct* comment = static_cast<Adjunct*>(comments[k]);
-               if (comment->getEndLine() > comment->getLine())
+               IToken* token = tokens[index];
+               if (token->getKind() != LPGParsersym::TK_SINGLE_LINE_COMMENT)
                {
-                   auto gate_token = k + 1 < comments.size() ? comments[k + 1] : next_token;
-                   makeFoldableByOffsets(comment->getStartOffset(),
-                       gate_token->getLine() > comment->getEndLine()
-                       ? lexStream->getLineOffset(gate_token->getLine() - 1)
-                       : comment->getEndOffset());
+                   return index;
                }
            }
-
-           i += comments.size();
+           return  index-1;
+       };
+       
+       for (size_t index = 0; index < tokens.size(); ++index)
+       {
+           IToken* token = tokens[index];
+       	   if(token->getKind() == LPGParsersym::TK_SINGLE_LINE_COMMENT)
+       	   {
+               auto start = index + 1;
+                 auto end =  find_next_comment(start);
+       	   	     if(end != start)
+       	   	     {
+                     makeFoldableByOffsets(token->getStartOffset(), tokens[end]->getEndOffset());
+                     index = end;
+       	   	     }
+                 else
+                 {
+                     index = start;
+                 }
+       	   }
        }
+
    }
 };
 
@@ -292,6 +303,6 @@ FoldingRangeHandler::FoldingRangeHandler(std::shared_ptr<CompilationUnit>& u, st
     }
     FoldingVisitor visitor(this,unit->_lexer.getILexStream(),unit->_parser.prsStream);
     unit->root->accept(&visitor);
-    visitor.makeAdjunctsFoldable();
+    visitor.makeLpgAdjunctsFoldable(u);
 }
 
