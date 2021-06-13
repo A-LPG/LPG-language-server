@@ -432,6 +432,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 {
 	return OnChange(_change,{}, monitor);
 }
+extern  void process_symbol(std::shared_ptr<CompilationUnit>&);
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
 
@@ -478,6 +479,8 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	d_ptr->update_unit(_change->filename, unit);
 
+	process_symbol(unit);
+	
 	d_ptr->end_point.sendNotification(handle.notify);
 	return unit;
 }

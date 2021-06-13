@@ -20,7 +20,7 @@ namespace TextDocumentHover
 	struct Result;
 
 }
-void process_symbol(std::shared_ptr<CompilationUnit>&, std::vector< lsDocumentSymbol >&);
+
 
 void process_definition(std::shared_ptr<CompilationUnit>&,const  lsPosition& position,
 	std::vector<lsLocation>&, Monitor* monitor);

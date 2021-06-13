@@ -54,11 +54,13 @@ struct DocumentationProvider
         }
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
-            buff = "non-terminal " + nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+            //buff = "non-terminal " + nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+            buff = "non-terminal: \n" + nt->to_utf8_string();
         }
         else if (dynamic_cast<terminal*>(target)) {
             auto  term = static_cast<terminal*>(target);
-            buff = "terminal " + term->getterminal_symbol()->to_utf8_string();
+           // buff = "terminal " + term->getterminal_symbol()->to_utf8_string();
+            buff = "terminal:\n" + term->to_utf8_string();
         }
         else if (dynamic_cast<CompilationUnit*>(target)) {
             auto icu = static_cast<CompilationUnit*>(target);

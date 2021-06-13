@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <LibLsp/lsp/symbol.h>
 #include <LibLsp/lsp/working_files.h>
 
 #include "parser/LPGLexer.h"
@@ -68,13 +69,17 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
  */
 	std::vector<Object*> getLinkTarget(Object* node, Monitor* monitor);
 
-	std::set<std::string> local_macro_name_table;
 
+	std::set<std::string> local_macro_name_table;
+	std::unordered_multimap<std::string, Object*> export_macro_table;
+	std::vector< lsDocumentSymbol > document_symbols;
 	struct FindMacroInBlockResult
 	{
 		std::vector<Object*> def_set;
 		std::wstring macro_name;
 	};
+
+	std::vector<Object*> FindExportMacro(const std::string& name);
 	std::unique_ptr<FindMacroInBlockResult> FindMacroInBlock(
 		Object* , const lsPosition&, Monitor* monitor);
 

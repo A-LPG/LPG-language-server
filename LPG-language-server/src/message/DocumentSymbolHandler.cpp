@@ -31,7 +31,14 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 			
 			lsDocumentSymbol children;
 			children.name = _opt->to_utf8_string();
-			children.kind = lsSymbolKind::Property;
+			if(children.name.find("template") == 0 || children.name.find("import_terminals") == 0 )
+			{
+                children.kind = lsSymbolKind::File;
+			}else
+			{
+                children.kind = lsSymbolKind::Property;
+			}
+			
 			auto pos = ASTUtils::toPosition(lex,
 				_opt->getSYMBOL()->getLeftIToken()->getStartOffset());
 			if (pos)
@@ -55,10 +62,10 @@ struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
 
     ILexStream* lex= nullptr;
-
+    std::shared_ptr<CompilationUnit>& unit;
     std::stack< lsDocumentSymbol*> fItemStack;
     void unimplementedVisitor(const std::string& s) { }
-    LPGModelVisitor(lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l)
+    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u,lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l), unit(u)
     {
         fItemStack.push(rootSymbol);
     }
@@ -166,10 +173,14 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(ExportSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Export ";
+        std::string prefix;
+        prefix.push_back(static_cast<char>(unit->_lexer.escape_token));
+        prefix.push_back('_');
         for(auto& it : n->lpg_export_segment->list)
         {
            auto item =  pushSubItem(it);
            item->kind = lsSymbolKind::Interface;
+           unit->export_macro_table.insert({ prefix + item->name, it});
            popSubItem();
         }
 
@@ -495,12 +506,13 @@ struct LPGModelVisitor :public AbstractVisitor {
         return block.getLeftIToken()->to_utf8_string();
     }
 };
-void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocumentSymbol >& children)
+void process_symbol(std::shared_ptr<CompilationUnit>& unit)
 {
 	 if(!unit->root)
 	 {
 		 return;
 	 }
+     std::vector< lsDocumentSymbol >& children = unit->document_symbols;
      auto lex = unit->_lexer.getILexStream();
 	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
 	if(lpg_options_ && lpg_options_->list.size())
@@ -529,7 +541,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocum
     {
         lsDocumentSymbol root;
         root.children = std::vector<lsDocumentSymbol>();
-        LPGModelVisitor visitor(&root, lex);
+        LPGModelVisitor visitor(unit,&root, lex);
         _input->accept(&visitor);
 
     	for(auto& it :root.children.value())

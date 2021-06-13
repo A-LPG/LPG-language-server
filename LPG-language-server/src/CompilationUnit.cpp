@@ -88,6 +88,16 @@ namespace
 }
 
 
+std::vector<Object*> CompilationUnit::FindExportMacro(const std::string& name)
+{
+	auto  range = export_macro_table.equal_range(name);
+	std::vector<Object*> candidates;
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.emplace_back(it->second);
+	}
+	return  candidates;
+}
+
 std::unique_ptr< CompilationUnit::FindMacroInBlockResult>
 CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Monitor* monitor)
 {
@@ -113,8 +123,11 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
         std::wstring macro_name(cursor, end_cursor);
         if (macro_name.empty()) break;
 		std::unique_ptr< FindMacroInBlockResult> result = std::make_unique<FindMacroInBlockResult>();
-		
+		auto def_set = FindExportMacro(IcuUtil::ws2s(macro_name));
+    	
 		result->def_set= parent.findDefOf(macro_name, shared_from_this(), monitor);
+		result->def_set.insert(result->def_set.end(), def_set.begin(), def_set.end());
+    	
 		result->macro_name .swap(macro_name) ;
 		return  result;
     } while (false);
