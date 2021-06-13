@@ -19,9 +19,6 @@
     <Filter Include="message">
       <UniqueIdentifier>{4bdee5b2-4467-4b36-8542-5cfe3c60f5cc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="clangd">
-      <UniqueIdentifier>{c4cbf680-c43b-4822-8791-55b0a3433c5b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\LPG-language-server.cpp">

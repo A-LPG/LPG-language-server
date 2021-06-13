@@ -280,6 +280,10 @@ public:
 				if (unit)
 				{
 					process_hover(unit, req.params.position, rsp.result, &_requestMonitor);
+					if(!rsp.result.contents.first.has_value() && !rsp.result.contents.second.has_value())
+					{
+						rsp.result.contents.first = TextDocumentHover::Left();
+					}
 				}
 				else
 				{

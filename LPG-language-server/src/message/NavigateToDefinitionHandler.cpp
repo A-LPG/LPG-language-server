@@ -120,45 +120,48 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
     LPGSourcePositionLocator locator;
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return ;
-    Object* target = nullptr;
-  auto set = unit->getLinkTarget(selNode,monitor);
+  
+  auto targets = unit->getLinkTarget(selNode,monitor);
 
-  if (!set.empty()){
-      target = set[0];
+  if (targets.empty()){
+      targets.push_back(selNode);
   }
+  const auto set = targets;
+	
+  for (auto& target : set) {
 
-  if (target == nullptr) target = selNode;
-	
-  do
-  {
-    auto result = unit->FindMacroInBlock(target, position,monitor);
+      std::vector<Object*> collector;
+      do
+      {
+          auto result = unit->FindMacroInBlock(target, position, monitor);
 
-    if (!result)break;
-    if (result->def_set.empty())
-    {
-        std::wstringex name = result->macro_name;
-        name.trim_left(unit->_lexer.escape_token);
-        auto key = IcuUtil::ws2s(name);
-        if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()){
-            return;
-        }
-    	break;
-    }
-    for(auto& it : result->def_set)
-    {
-        set.emplace_back(it);
-    }    
-  } while (false);
-	
-  if (set.empty()){
-      set.push_back(selNode);
-  }
-	
-  DefinitionProvider provider(monitor);
-  for(auto it: set)
-  {
-      auto link = provider.getLocation(unit, it);
-  	  if(link.has_value())
-		out.emplace_back(link.value());
+          if (!result)break;
+          if (result->def_set.empty())
+          {
+              std::wstringex name = result->macro_name;
+              name.trim_left(unit->_lexer.escape_token);
+              auto key = IcuUtil::ws2s(name);
+              if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
+                  return;
+              }
+              break;
+          }
+          for (auto& it : result->def_set)
+          {
+              collector.emplace_back(it);
+          }
+      } while (false);
+
+      if (collector.empty()) {
+          collector.push_back(target);
+      }
+
+      DefinitionProvider provider(monitor);
+      for (auto it : collector)
+      {
+          auto link = provider.getLocation(unit, it);
+          if (link.has_value())
+              out.emplace_back(link.value());
+      }
   }
 }

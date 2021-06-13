@@ -3,6 +3,7 @@
 ![avatar](doc/img/dianosic.png)
 ![avatar](doc/img/outline.png)
 ![avatar](doc/img/refenrence.png)
+![avatar](doc/img/hover.png)
 ## About LPG-cpp-runtime
 C++ runtime for LPG 2.0. This project is a c++ target for LPG2.0
 * [LPG-cpp-runtime](https://github.com/kuafuwang/LPG-cpp-runtime)
