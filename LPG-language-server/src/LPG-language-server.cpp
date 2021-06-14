@@ -150,7 +150,7 @@ public:
 		need_initialize_error->error.message = "Server is not initialized";
 		
 		
-		_sp.registerRequestHandler([=](const td_initialize::request& req)
+		_sp.registerHandler([=](const td_initialize::request& req)
 			{
 				need_initialize_error.reset();
 				td_initialize::response rsp;
@@ -232,11 +232,11 @@ public:
 			    }
 				return  std::move(rsp);
 			});
-		_sp.registerNotifyHandler([&](Notify_InitializedNotification::notify& notify)
+		_sp.registerHandler([&](Notify_InitializedNotification::notify& notify)
 		{
 
 		});
-		_sp.registerRequestHandlerWithCancelMonitor(
+		_sp.registerHandler(
 			[&](const td_symbol::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_symbol::response > {
 				if(need_initialize_error)
@@ -251,7 +251,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor(
+		_sp.registerHandler(
 			[&](const td_definition::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_definition::response > {
 				if (need_initialize_error)
@@ -267,7 +267,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor(
+		_sp.registerHandler(
 			[&](const td_hover::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_hover::response > {
 				if (need_initialize_error)
@@ -292,7 +292,7 @@ public:
 
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_completion::request& req
+		_sp.registerHandler([&](const td_completion::request& req
 			, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_completion::response > {
 				if (need_initialize_error)
@@ -310,14 +310,14 @@ public:
 				return std::move(rsp);
 				
 			});
-		_sp.registerRequestHandler([&](const completionItem_resolve::request& req)
+		_sp.registerHandler([&](const completionItem_resolve::request& req)
 			{
 				completionItem_resolve::response rsp;
 				rsp.result = req.params;
 				return std::move(rsp);
 			});
 		
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_foldingRange::request& req,
+		_sp.registerHandler([&](const td_foldingRange::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_foldingRange::response > {
 				if (need_initialize_error)
@@ -332,7 +332,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_formatting::request& req,
+		_sp.registerHandler([&](const td_formatting::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_formatting::response > {
 				if (need_initialize_error)
@@ -347,7 +347,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_documentColor::request& req 	,
+		_sp.registerHandler([&](const td_documentColor::request& req 	,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_documentColor::response > {
 				if (need_initialize_error)
@@ -362,7 +362,7 @@ public:
 				}
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_semanticTokens_full::request& req,
+		_sp.registerHandler([&](const td_semanticTokens_full::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_semanticTokens_full::response > {
 				if (need_initialize_error)
@@ -380,7 +380,7 @@ public:
 				
 				return std::move(rsp);
 			});
-		_sp.registerRequestHandlerWithCancelMonitor([&](const td_references::request& req,
+		_sp.registerHandler([&](const td_references::request& req,
 			const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_references::response > {
 				if (need_initialize_error)
@@ -396,7 +396,7 @@ public:
 				return std::move(rsp);
 			});
 		
-		_sp.registerNotifyHandler([&](Notify_TextDocumentDidOpen::notify& notify)
+		_sp.registerHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{
 				if (need_initialize_error){
 					return ;
@@ -413,7 +413,7 @@ public:
 				// 解析 
 			});
 	
-		_sp.registerNotifyHandler([&]( Notify_TextDocumentDidChange::notify& notify)
+		_sp.registerHandler([&]( Notify_TextDocumentDidChange::notify& notify)
 		{
 			if (need_initialize_error) {
 				return;
@@ -451,7 +451,7 @@ public:
 			}
 			
 		});
-		_sp.registerNotifyHandler([&](Notify_TextDocumentDidClose::notify& notify)
+		_sp.registerHandler([&](Notify_TextDocumentDidClose::notify& notify)
 		{
 				if (need_initialize_error) {
 					return;
@@ -466,7 +466,7 @@ public:
 			    // 通知消失了
 		});
 		
-		_sp.registerNotifyHandler([&](Notify_TextDocumentDidSave::notify& notify)
+		_sp.registerHandler([&](Notify_TextDocumentDidSave::notify& notify)
 			{
 				if (need_initialize_error) {
 					return;
@@ -481,12 +481,12 @@ public:
 				// 通知消失了
 			});
 		
-		_sp.registerNotifyHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
+		_sp.registerHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
 		{
 			
 		});
 
-		_sp.registerNotifyHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
+		_sp.registerHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
 		{
 				if (need_initialize_error) {
 					return;
@@ -500,11 +500,11 @@ public:
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
 		
-		_sp.registerRequestHandler([&](const td_shutdown::request& notify) {
+		_sp.registerHandler([&](const td_shutdown::request& notify) {
 			td_shutdown::response rsp;
 			return rsp;
 		});
-		_sp.registerNotifyHandler([&](Notify_Exit::notify& notify)
+		_sp.registerHandler([&](Notify_Exit::notify& notify)
 		{
 				on_exit();
 		});
