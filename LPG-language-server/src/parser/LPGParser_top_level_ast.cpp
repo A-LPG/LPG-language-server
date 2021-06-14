@@ -202,5 +202,5 @@ void LPGParser_top_level_ast::type_declarationsList::enter(Visitor* v)
 
 void LPGParser_top_level_ast::terminal_symbol0::initialize()
 {
-	environment->symtab.insert({getSYMBOL()->toString(), this});
+//	environment->symtab.insert({getSYMBOL()->toString(), this});
 }

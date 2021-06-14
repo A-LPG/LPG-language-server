@@ -112,7 +112,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\LPG-language-server\third_party\llvm\include;..\third_party\llvm-project\build\include;..\third_party\rapidjson\include;..\third_party\LPG-cpp-runtime\lpgRuntimeCpp\src;..\third_party\LspCpp;$(IncludePath)</IncludePath>
+    <IncludePath>..\third_party\loguru;..\third_party\rapidjson\include;..\third_party\LPG-cpp-runtime\lpgRuntimeCpp\src;..\third_party\LspCpp;$(IncludePath)</IncludePath>
     <LibraryPath>..\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
