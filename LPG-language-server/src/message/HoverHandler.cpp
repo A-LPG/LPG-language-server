@@ -18,7 +18,7 @@ struct DocumentationProvider
         const std::wstring  temp(buf.data(), start, end - start + 1);
         return IcuUtil::ws2s(temp);
     }
-    void getDocumentation(lsp::Document& Output,std::shared_ptr<CompilationUnit>& ast_unit, Object* target, Monitor* monitor)
+    void getDocumentation(lsp::Document& markdown_output,std::shared_ptr<CompilationUnit>& ast_unit, Object* target, Monitor* monitor)
     {
         if (target == nullptr || !ast_unit)
             return ;
@@ -48,7 +48,7 @@ struct DocumentationProvider
 	                const auto temp = getSubstring(def->getLeftIToken()->getIPrsStream()->getInputChars(),
 	                                               def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
                     // https://github.com/microsoft/vscode/issues/88417 for details.
-                    auto& header = Output.addHeading(3);
+                    auto& header = markdown_output.addHeading(3);
                     header.appendText(temp);
                   
             	}
@@ -66,30 +66,59 @@ struct DocumentationProvider
                 const auto temp = getSubstring(def->getLeftIToken()->getIPrsStream()->getInputChars(),
                     def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
 
-					 Output.addCodeBlock(temp);
+					 markdown_output.addCodeBlock(temp);
                   
             }
             // https://github.com/microsoft/vscode/issues/88417 for details.
-           // auto& header = Output.addHeading(3);
-            Output.addCodeBlock(node->to_utf8_string());
+           // auto& header = markdown_output.addHeading(3);
+            markdown_output.addCodeBlock(node->to_utf8_string());
           
             
         }
         // https://github.com/microsoft/vscode/issues/88417 for details.
-        auto& header = Output.addHeading(3);
+        auto& header = markdown_output.addHeading(3);
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
-            //buff = "non-terminal " + nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
             header.appendText("non-terminal " + nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
-            Output.addRuler();
-            Output.addCodeBlock(nt->to_utf8_string());
-        
+            markdown_output.addRuler();
+          
+            auto lex = nt->getLeftIToken()->getILexStream();
+            auto  original_unit =  ast_unit->parent.FindFile(lex);
+            {
+                std::unordered_set<ASTNodeToken*> fFirstSet;
+                original_unit->collectFirstSet(nt, fFirstSet);
+            	if(fFirstSet.size())
+            	{
+                    std::string firstset_str("First set: ");
+                    for (auto& it : fFirstSet)
+                    {
+                        firstset_str += it->to_utf8_string() + " ";
+                    }
+                    markdown_output.addHeading(5).appendText(firstset_str);
+            	}
+            }
+          /*  {
+                std::unordered_set<ASTNodeToken*> fFirstSet;
+                original_unit->collectFollowSet(nt, fFirstSet);
+                if (fFirstSet.size())
+                {
+                    std::string firstset_str("Follow Set:");
+                    for (auto& it : fFirstSet)
+                    {
+                        firstset_str += it->to_utf8_string() + " ";
+                    }
+                    markdown_output.addHeading(5).appendText(firstset_str);
+                }
+            }
+        	*/
+            markdown_output.addCodeBlock(nt->to_utf8_string() + " ");
+        	
         }
         else if (dynamic_cast<terminal*>(target)) {
             auto  term = static_cast<terminal*>(target);
             header.appendText("terminal: " + term->getterminal_symbol()->to_utf8_string());
-            Output.addRuler();
-            Output.addCodeBlock(term->to_utf8_string());
+            markdown_output.addRuler();
+            markdown_output.addCodeBlock(term->to_utf8_string());
         }
         else if (dynamic_cast<CompilationUnit*>(target)) {
             auto icu = static_cast<CompilationUnit*>(target);

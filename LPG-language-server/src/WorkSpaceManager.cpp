@@ -135,14 +135,8 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
 		 if (monitor && monitor->isCancelled())
 			 return {};
 		 if (LPG * includedRoot = include_unit->root; includedRoot != nullptr) {
-			 auto& symbolTable = includedRoot->environment->symtab;
-		
-			 auto  range = symbolTable.equal_range(id);
-			 std::vector<Object*> candidates;
-			 for (auto it = range.first; it != range.second; ++it) {
-				 candidates.emplace_back(it->second);
-			 }
-			 if (candidates.size())
+			 std::vector<Object*> candidates = include_unit->FindDefine(id);
+			 if (!candidates.empty())
 				 return candidates;
 		 }
 	 }
@@ -274,13 +268,7 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 
 std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
-	auto& symbolTable = (unit->root->environment->symtab);
-	auto  range = symbolTable.equal_range(id);
-	ASTNode* decl = nullptr;
-	std::vector<Object*> candidates;
-	for (auto it = range.first; it != range.second; ++it) {
-		candidates.emplace_back(it->second);
-	}
+	std::vector<Object*> candidates = unit->FindDefine(id);;
 	if (candidates.empty()) {
 		// try a little harder
 		auto def_set = findDefOf_internal(id, unit,monitor);
@@ -293,14 +281,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::sha
 std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
 	auto     id = stripName(s->toString());
-	auto& symbolTable = (unit->root->environment->symtab);
-	auto  range  = symbolTable.equal_range(id);
-	ASTNode* decl = nullptr;
-	std::vector<Object*> candidates;
-	for (auto it = range.first; it != range.second; ++it) {
-		candidates.emplace_back(it->second);
-	}
-	
+	std::vector<Object*> candidates = unit->FindDefine(id);;
 	if (candidates.empty()) {
 		// try a little harder
 		auto def_set =  findDefOf_internal(s->toString(), unit, monitor);

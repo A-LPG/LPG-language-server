@@ -118,7 +118,7 @@ public:
         return i;
     }
 
-    static inline bool IsNewline(char c) // \r characters are replaced by \x0a in read_input.
+    static inline bool IsNewline(int c) // \r characters are replaced by \x0a in read_input.
     {
         return code[(unsigned char) c] == NEWLINE_CODE; // '\x0a' or '\x0d'
     }
@@ -128,37 +128,37 @@ public:
         return code[(unsigned char) c] == SPACE_CODE;
     }
 
-    static inline bool IsSpace(char c)
+    static inline bool IsSpace(int c)
     {
         return code[(unsigned char) c] <= SPACE_CODE;
     }
 
-    static inline bool IsDigit(char c)
+    static inline bool IsDigit(int c)
     {
         return code[(unsigned char) c] == DIGIT_CODE;
     }
 
-    static inline bool IsHexDigit(char c)
+    static inline bool IsHexDigit(int c)
     {
         return IsDigit(c) || (IsAlpha(c) && ToUpper(c) <= 'F');
     }
 
-    static inline bool IsUpper(char c)
+    static inline bool IsUpper(int c)
     {
         return code[(unsigned char) c] == UPPER_CODE;
     }
 
-    static inline bool IsLower(char c)
+    static inline bool IsLower(int c)
     {
         return code[(unsigned char) c] == LOWER_CODE;
     }
 
-    static inline bool IsAlpha(char c)
+    static inline bool IsAlpha(int c)
     {
         return code[(unsigned char) c] >= LOWER_CODE;
     }
 
-    static inline bool IsAlnum(char c)
+    static inline bool IsAlnum(int c)
     {
         return code[(unsigned char) c] >= DIGIT_CODE;
     }

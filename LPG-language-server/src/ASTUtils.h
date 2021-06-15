@@ -32,13 +32,20 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 	static void getNonTerminals(LPG* root, std::vector<nonTerm*>& vec) {
 		if (!root || !root->environment) return;
 		// TODO: pick up non-terminals from imported files
-		vec = root->environment->_non_terms;
+		for(auto& it : root->environment->_non_terms)
+		{
+			vec.push_back(it.second);
+		}
+		
 		
 	}
 	static void getTerminals(LPG* root, std::vector<terminal*>& vec) {
 		if (!root || !root->environment) return;
 		// TODO: pick up non-terminals from imported files
-		vec = root->environment->_terms;
+		for (auto& it : root->environment->_terms)
+		{
+			vec.push_back(it.second);
+		}
 	}
 
 	static void findRefsOf(std::vector<ASTNode*>& result, nonTerm* nonTerm);

@@ -58,6 +58,7 @@ void CompilationUnit::parser(Monitor* monitor)
 {
 	_lexer.lexer(monitor, _parser.getIPrsStream());
 	root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(_parser.parser(monitor,1000));
+	collectEpsilonSet();
 }
 
 std::vector<Object*> CompilationUnit::getLinkTarget(Object* node, Monitor* monitor)
@@ -141,4 +142,258 @@ bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken
 		if (it == node)return true;
 	}
 	return false;
+}
+
+void CompilationUnit::FindIn_noTerm(const std::wstring& name, std::vector<Object*>& candidates)
+{
+	auto range = _parser._non_terms.equal_range(name);
+	for (auto it = range.first; it != range.second; ++it)
+	{
+		candidates.push_back(it->second);
+	}
+}
+void CompilationUnit::FindIn_Term(const std::wstring& name, std::vector<Object*>& candidates)
+{
+	auto  range = _parser._terms.equal_range(name);
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.push_back(it->second);
+	}
+}
+void CompilationUnit::FindIn_define(const std::wstring& name, std::vector<Object*>& candidates)
+{
+	auto  range = _parser._define_specs.equal_range(name);
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.push_back(it->second);
+	}
+}
+std::vector<Object*>  CompilationUnit::FindDefine(const std::wstring& name)
+{
+	std::vector<Object*> candidates;
+	FindIn_noTerm(name, candidates);
+	FindIn_Term(name, candidates);
+	FindIn_define(name, candidates);
+
+	return  candidates;
+}
+
+std::vector<Object*>  CompilationUnit::FindDefineIn_Term_and_noTerms(const std::wstring& name )
+{
+	std::vector<Object*> candidates;
+	FindIn_noTerm(name, candidates);
+	FindIn_Term(name, candidates);
+	return candidates;
+}
+
+//https://blog.csdn.net/liujian20150808/article/details/72998039
+
+//https://www.jianshu.com/p/210fda081c76
+void CompilationUnit::collectEpsilonSet()
+{
+	fEpsilonSet.clear();
+	Stack<nonTerm*> workList;
+	std::unordered_set<nonTerm*> processed;
+
+	std::unordered_set<nonTerm*> epsilonSet;
+	
+	std::vector<nonTerm*> allNonTerms;
+	ASTUtils::getNonTerminals(root, allNonTerms);
+
+	// Seed the epsilon set with all non-terminals that directly derive
+	// epsilon
+	for (auto nt : allNonTerms) {
+		auto rules = nt->getruleList();
+		for (int i = 0; i < rules->size(); i++) {
+			auto r = rules->getruleAt(i);
+			symWithAttrsList* syms = r->getsymWithAttrsList();
+			if (syms->size() == 1) {
+				auto  onlySym = syms->getsymWithAttrsAt(0);
+				if (onlySym->toString()==(L"$empty")) {
+					auto temp = static_cast<nonTerm*>(nt);
+					fEpsilonSet.insert({ temp->getruleNameWithAttributes()->getSYMBOL()->toString() ,temp });
+					break;
+				}
+			}
+		}
+	}
+	for (auto &nt : fEpsilonSet) {
+		workList.Push(nt.second);
+	}
+	while (!workList.IsEmpty()) {
+		auto nt = workList.Pop();
+
+		// Find references to 'nt'
+		// The following is BOGUS!!!
+		auto rules = nt->getruleList();
+
+		for (int i = 0; i < rules->size(); i++) {
+			auto r = rules->getruleAt(i);
+			auto syms = r->getsymWithAttrsList();
+			bool nextRule_continue = false;
+			for (int symIdx = 0; symIdx < syms->size(); symIdx++) {
+				auto sym = syms->getsymWithAttrsAt(symIdx);
+				
+				auto candidates = FindDefineIn_Term_and_noTerms(sym->toString());
+				for(auto& node : candidates)
+				{
+					if(!dynamic_cast<nonTerm*>(node))continue;
+					auto _temp_name = ((nonTerm*)node)->getruleNameWithAttributes()->getSYMBOL()->toString();
+					if (!(sym->toString() == L"$empty") && !(fEpsilonSet.find(_temp_name) != fEpsilonSet.end())) {
+						// This rule doesn't appear to derive epsilon
+						nextRule_continue = true;
+						break;
+					}
+				}
+				if (nextRule_continue)
+					break;
+			}
+			if(nextRule_continue)
+				continue;
+			// This rule derives epsilon
+			fEpsilonSet.insert({ nt->getruleNameWithAttributes()->getSYMBOL()->toString() ,nt });
+			workList.Push(nt);
+		}
+	}
+}
+
+bool CompilationUnit::IsNullable(const std::wstring& name)
+{
+	auto findIt =   fEpsilonSet.find(name);
+	if(findIt  == fEpsilonSet.end())
+	{
+		return  false;
+	}
+	return true;
+}
+
+void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFirstSet)
+{
+	Stack<nonTerm*> workList;
+	std::unordered_set<nonTerm*> processed;
+	workList.Push(fNonTerm);
+	while (!workList.IsEmpty()) {
+		auto nt = workList.Pop();
+		processed.insert(nt);
+		auto rules = nt->getruleList();
+		for (int i = 0; i < rules->size(); i++) {
+			auto r = rules->getruleAt(i);
+			auto syms = r->getsymWithAttrsList();
+			ASTNode* firstSym = nullptr;
+			
+			int symIdx = 0;
+
+			// The following really needs to be replaced by something that
+			// computes the
+			// set of non-terminals that *transitively* produce epsilon,
+			// *before* doing
+			// any of this processing.
+			std::vector<Object*> no_term_with_same_name;
+			do {
+				firstSym = syms->getsymWithAttrsAt(symIdx++);
+				std::vector<Object*> candidates= FindDefineIn_Term_and_noTerms(firstSym->toString());
+				for (auto& it : candidates)
+				{
+					if (dynamic_cast<terminal*>(it))
+					{
+						no_term_with_same_name.push_back(it);
+					    continue;	
+					}
+					if (!dynamic_cast<nonTerm*>(it) )continue;
+					auto temp = (nonTerm*)(it);
+					if(!IsNullable(temp->getruleNameWithAttributes()->getSYMBOL()->toString() ))
+					{
+						no_term_with_same_name.push_back(it);
+					}
+				}
+				if(!no_term_with_same_name.empty())
+					break;
+			} while (symIdx < syms->size() && firstSym->toString()==(L"$empty") );
+
+			if(no_term_with_same_name.empty())
+			{
+				if (!(firstSym->toString() == L"$empty"))
+				{
+					fFirstSet.insert(static_cast<ASTNodeToken*>(firstSym));
+				}
+			   continue;
+			}
+			for(auto& node : no_term_with_same_name)
+			{
+				if (dynamic_cast<terminal*>(node)) {
+					auto thisTerm = static_cast<ASTNodeToken*>(static_cast<terminal*>(node)->getterminal_symbol());
+					if (!(fFirstSet.find(thisTerm) != fFirstSet.end())) {
+
+						fFirstSet.insert(thisTerm);
+					}
+				}
+				else if (dynamic_cast<nonTerm*>(node)) {
+					if (!(processed.find(static_cast<nonTerm*>(node)) != processed.end())) {
+						workList.Push(static_cast<nonTerm*>(node));
+					}
+				}
+		    }
+		}
+	}
+}
+
+void CompilationUnit::collectFollowSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFollowSet)
+{
+	Stack<nonTerm*> workList;
+	std::unordered_set<nonTerm*> processed;
+
+//	const std::unordered_set<nonTerm*>& epsilonSet = fEpsilonSet;
+
+	workList.Push(fNonTerm);
+	while (!workList.IsEmpty()) {
+		auto nt = workList.Pop();
+		processed.insert(nt);
+		auto rules = nt->getruleList();
+		for (int i = 0; i < rules->size(); i++) {
+			auto r = rules->getruleAt(i);
+			auto syms = r->getsymWithAttrsList();
+			ASTNode* firstSym = nullptr;
+			ASTNode* node = nullptr;
+			int symIdx = 0;
+
+			do {
+				
+				firstSym = syms->getsymWithAttrsAt(symIdx++);
+
+				std::vector<Object*> candidates = FindDefine(firstSym->toString());
+				bool break_first_while = false;
+				for (auto& it : candidates)
+				{
+					if (!dynamic_cast<nonTerm*>(it))continue;
+					node = static_cast<ASTNode*>(it);
+					auto temp = (nonTerm*)(it);
+					if (!IsNullable(temp->getruleNameWithAttributes()->getSYMBOL()->toString()))
+					{
+						break_first_while = true;
+						break;
+					}
+				}
+				if (break_first_while)
+					break;
+				
+			} while (symIdx < syms->size() && firstSym->toString()==(L"$empty"));
+
+			
+			if (node == nullptr) {
+				if (!(firstSym->toString() == L"$empty"))
+				{
+					fFollowSet.insert(static_cast<ASTNodeToken*>(firstSym));
+				}
+			}
+			else if (dynamic_cast<terminal*>(node)) {
+				if (!(fFollowSet.find(static_cast<ASTNodeToken*>(node)) != fFollowSet.end())) {
+					auto thisTerm = static_cast<terminal*>(node);
+					fFollowSet.insert(static_cast<ASTNodeToken*>(thisTerm->getterminal_symbol()));
+				}
+			}
+			else if (dynamic_cast<nonTerm*>(node)) {
+				if (!(processed.find(static_cast<nonTerm*>(node)) != processed.end())) {
+					workList.Push(static_cast<nonTerm*>(node));
+				}
+			}
+		}
+	}
 }

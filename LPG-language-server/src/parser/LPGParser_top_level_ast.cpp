@@ -52,7 +52,7 @@ void LPGParser_top_level_ast::defineSpecList::enter(Visitor* v)
 
 void LPGParser_top_level_ast::defineSpec::initialize()
 {
-	environment->symtab.insert({getmacro_name_symbol()->toString(), this});
+	environment->_define_specs.insert({getmacro_name_symbol()->toString(), this});
 	environment->_macro_name_symbo.push_back(static_cast<ASTNodeToken*>(getmacro_name_symbol()));
 }
 
@@ -122,8 +122,7 @@ void LPGParser_top_level_ast::nonTermList::enter(Visitor* v)
 
 void LPGParser_top_level_ast::nonTerm::initialize()
 {
-	environment->symtab.insert({getruleNameWithAttributes()->getSYMBOL()->toString(), this});
-	environment->_non_terms.push_back(this);
+	environment->_non_terms.insert({getruleNameWithAttributes()->getSYMBOL()->toString(), this});
 }
 
 void LPGParser_top_level_ast::ruleList::enter(Visitor* v)
@@ -160,8 +159,8 @@ void LPGParser_top_level_ast::terminalList::enter(Visitor* v)
 
 void LPGParser_top_level_ast::terminal::initialize()
 {
-	environment->symtab.insert({getterminal_symbol()->toString(), this});
-	environment->_terms.push_back(this);
+	environment->_terms.insert({getterminal_symbol()->toString(), this});
+	
 }
 
 void LPGParser_top_level_ast::type_declarationsList::enter(Visitor* v)
@@ -197,10 +196,10 @@ void LPGParser_top_level_ast::type_declarationsList::enter(Visitor* v)
 }
   void LPGParser_top_level_ast::recover_symbol::initialize()
  {
-	 environment->symtab.insert({ getSYMBOL()->toString(), this });
+	 environment->_recover_symbols.insert({ getSYMBOL()->toString(), this });
  }
 
 void LPGParser_top_level_ast::terminal_symbol0::initialize()
 {
-//	environment->symtab.insert({getSYMBOL()->toString(), this});
+	environment->terminal_symbol_produce_SYMBOL.insert({getSYMBOL()->toString(), this});
 }
