@@ -2,8 +2,10 @@
 #include <LibLsp/lsp/symbol.h>
 #include <vector>
 #include <LibLsp/lsp/lsp_completion.h>
+#include <LibLsp/lsp/lsWorkspaceEdit.h>
 #include <LibLsp/lsp/textDocument/foldingRange.h>
 #include <LibLsp/lsp/textDocument/documentColor.h>
+#include <LibLsp/lsp/textDocument/rename.h>
 
 struct Monitor;
 struct lsFormattingOptions;
@@ -112,12 +114,18 @@ struct SemanticTokensHandler
 	Data* d_ptr;
 
 };
-struct ReferencesHandlerData;
-struct ReferencesHandler
+
+struct ReferencesOrRenameHandler
 {
 
-	ReferencesHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&, Monitor* monitor);
-	~ReferencesHandler();
-	ReferencesHandlerData* d_ptr;
+	ReferencesOrRenameHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&, Monitor* monitor);
+	ReferencesOrRenameHandler(std::shared_ptr<CompilationUnit>&, const TextDocumentRename::Params& position,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor* monitor);
+	
+	~ReferencesOrRenameHandler();
+
+	struct Data;
+	
+	Data* d_ptr;
 
 };

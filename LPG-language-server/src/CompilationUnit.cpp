@@ -187,6 +187,10 @@ std::vector<Object*>  CompilationUnit::FindDefineIn_Term_and_noTerms(const std::
 //https://blog.csdn.net/liujian20150808/article/details/72998039
 
 //https://www.jianshu.com/p/210fda081c76
+bool IsEmptyRule(const std::wstring& name)
+{
+	return  name == L"$empty" || name == L"%empty";
+}
 void CompilationUnit::collectEpsilonSet()
 {
 	fEpsilonSet.clear();
@@ -207,20 +211,40 @@ void CompilationUnit::collectEpsilonSet()
 			symWithAttrsList* syms = r->getsymWithAttrsList();
 			if (syms->size() == 1) {
 				auto  onlySym = syms->getsymWithAttrsAt(0);
-				if (onlySym->toString()==(L"$empty")) {
-					auto temp = static_cast<nonTerm*>(nt);
-					fEpsilonSet.insert({ temp->getruleNameWithAttributes()->getSYMBOL()->toString() ,temp });
+				if ( IsEmptyRule(onlySym->toString()) ) {
+					fEpsilonSet_back.insert(nt);
+					processed.insert(nt);
 					break;
 				}
 			}
 		}
 	}
+	
+	for (auto nt : allNonTerms)
+	{
+		if (processed.find(nt) == processed.end())
+			processed.insert(nt);
+		else
+		{
+			continue;
+		}
+
+
+		
+	}
 	for (auto &nt : fEpsilonSet) {
 		workList.Push(nt.second);
 	}
+	
 	while (!workList.IsEmpty()) {
 		auto nt = workList.Pop();
-
+		if(processed.find(nt) == processed.end())
+			processed.insert(nt);
+		else
+		{
+			continue;
+		}
+		auto nt_name = nt->getruleNameWithAttributes()->getSYMBOL()->toString();
 		// Find references to 'nt'
 		// The following is BOGUS!!!
 		auto rules = nt->getruleList();
@@ -231,13 +255,19 @@ void CompilationUnit::collectEpsilonSet()
 			bool nextRule_continue = false;
 			for (int symIdx = 0; symIdx < syms->size(); symIdx++) {
 				auto sym = syms->getsymWithAttrsAt(symIdx);
+				auto sym_name = sym->toString();
+				if(sym_name == nt_name)
+					continue;
 				
-				auto candidates = FindDefineIn_Term_and_noTerms(sym->toString());
+				auto candidates = FindDefineIn_Term_and_noTerms(sym_name);
 				for(auto& node : candidates)
 				{
+					if (!dynamic_cast<terminal*>(node))break;
+					
 					if(!dynamic_cast<nonTerm*>(node))continue;
+					
 					auto _temp_name = ((nonTerm*)node)->getruleNameWithAttributes()->getSYMBOL()->toString();
-					if (!(sym->toString() == L"$empty") && !(fEpsilonSet.find(_temp_name) != fEpsilonSet.end())) {
+					if (!( IsEmptyRule(sym_name) ) && !(fEpsilonSet.find(_temp_name) != fEpsilonSet.end())) {
 						// This rule doesn't appear to derive epsilon
 						nextRule_continue = true;
 						break;
@@ -253,17 +283,34 @@ void CompilationUnit::collectEpsilonSet()
 			workList.Push(nt);
 		}
 	}
+	for(auto& it : fEpsilonSet)
+	{
+		fEpsilonSet_back.insert(it.second);
+	}
 }
 
 bool CompilationUnit::IsNullable(const std::wstring& name)
 {
-	auto findIt =   fEpsilonSet.find(name);
+	auto findIt = fEpsilonSet.find(name);
 	if(findIt  == fEpsilonSet.end())
 	{
 		return  false;
 	}
 	return true;
 }
+
+bool CompilationUnit::IsNullable(LPGParser_top_level_ast::nonTerm* node)
+{
+	return  fEpsilonSet_back.find(node) != fEpsilonSet_back.end();
+}
+//计算FIRST(X)的方法
+//
+//如果 X 是终结符号，那么FIRST(X) = { X }
+//如果 X 是非终结符号，且 X->Y1 Y2 Y3 … Yk 是产生式
+//如果a在FIRST(Yi)中，且 ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yi - 1)中，那么a也在FIRST(X)中；
+//如果ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yk)中，那么ε在FIRST(X)中；
+//如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
+
 
 void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFirstSet)
 {
@@ -272,6 +319,7 @@ void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTN
 	workList.Push(fNonTerm);
 	while (!workList.IsEmpty()) {
 		auto nt = workList.Pop();
+		auto nt_name = nt->getruleNameWithAttributes()->getSYMBOL()->toString();
 		processed.insert(nt);
 		auto rules = nt->getruleList();
 		for (int i = 0; i < rules->size(); i++) {
@@ -286,37 +334,57 @@ void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTN
 			// set of non-terminals that *transitively* produce epsilon,
 			// *before* doing
 			// any of this processing.
-			std::vector<Object*> no_term_with_same_name;
+			std::vector<Object*> candidates;
 			do {
 				firstSym = syms->getsymWithAttrsAt(symIdx++);
-				std::vector<Object*> candidates= FindDefineIn_Term_and_noTerms(firstSym->toString());
-				for (auto& it : candidates)
+				auto firstSym_name = firstSym->toString();
+				if (nt_name == firstSym_name)
+					continue;
+				bool have_nullable = false;
+				for (auto& it : FindDefineIn_Term_and_noTerms(firstSym_name))
 				{
 					if (dynamic_cast<terminal*>(it))
 					{
-						no_term_with_same_name.push_back(it);
-					    continue;	
+						candidates.push_back(it);
+					    break;	
 					}
 					if (!dynamic_cast<nonTerm*>(it) )continue;
 					auto temp = (nonTerm*)(it);
-					if(!IsNullable(temp->getruleNameWithAttributes()->getSYMBOL()->toString() ))
+					if(!IsNullable(temp))
 					{
-						no_term_with_same_name.push_back(it);
+						candidates.push_back(it);
+					}
+					else
+					{
+						have_nullable = true;
+						//如果a在FIRST(Yi)中，且 ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yi - 1)中，那么a也在FIRST(X)中；
+						//如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
 					}
 				}
-				if(!no_term_with_same_name.empty())
-					break;
-			} while (symIdx < syms->size() && firstSym->toString()==(L"$empty") );
 
-			if(no_term_with_same_name.empty())
+				if(!have_nullable)
+				{
+					if (!candidates.empty())
+						break;
+				}
+				
+				if(!IsEmptyRule(firstSym_name) )
+				{
+					break;
+				}
+				
+			} while (symIdx < syms->size());
+
+			if(candidates.empty())
 			{
-				if (!(firstSym->toString() == L"$empty"))
+				if (!IsEmptyRule(firstSym->toString()))
 				{
 					fFirstSet.insert(static_cast<ASTNodeToken*>(firstSym));
 				}
 			   continue;
 			}
-			for(auto& node : no_term_with_same_name)
+			
+			for(auto& node : candidates)
 			{
 				if (dynamic_cast<terminal*>(node)) {
 					auto thisTerm = static_cast<ASTNodeToken*>(static_cast<terminal*>(node)->getterminal_symbol());
@@ -337,63 +405,4 @@ void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTN
 
 void CompilationUnit::collectFollowSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFollowSet)
 {
-	Stack<nonTerm*> workList;
-	std::unordered_set<nonTerm*> processed;
-
-//	const std::unordered_set<nonTerm*>& epsilonSet = fEpsilonSet;
-
-	workList.Push(fNonTerm);
-	while (!workList.IsEmpty()) {
-		auto nt = workList.Pop();
-		processed.insert(nt);
-		auto rules = nt->getruleList();
-		for (int i = 0; i < rules->size(); i++) {
-			auto r = rules->getruleAt(i);
-			auto syms = r->getsymWithAttrsList();
-			ASTNode* firstSym = nullptr;
-			ASTNode* node = nullptr;
-			int symIdx = 0;
-
-			do {
-				
-				firstSym = syms->getsymWithAttrsAt(symIdx++);
-
-				std::vector<Object*> candidates = FindDefine(firstSym->toString());
-				bool break_first_while = false;
-				for (auto& it : candidates)
-				{
-					if (!dynamic_cast<nonTerm*>(it))continue;
-					node = static_cast<ASTNode*>(it);
-					auto temp = (nonTerm*)(it);
-					if (!IsNullable(temp->getruleNameWithAttributes()->getSYMBOL()->toString()))
-					{
-						break_first_while = true;
-						break;
-					}
-				}
-				if (break_first_while)
-					break;
-				
-			} while (symIdx < syms->size() && firstSym->toString()==(L"$empty"));
-
-			
-			if (node == nullptr) {
-				if (!(firstSym->toString() == L"$empty"))
-				{
-					fFollowSet.insert(static_cast<ASTNodeToken*>(firstSym));
-				}
-			}
-			else if (dynamic_cast<terminal*>(node)) {
-				if (!(fFollowSet.find(static_cast<ASTNodeToken*>(node)) != fFollowSet.end())) {
-					auto thisTerm = static_cast<terminal*>(node);
-					fFollowSet.insert(static_cast<ASTNodeToken*>(thisTerm->getterminal_symbol()));
-				}
-			}
-			else if (dynamic_cast<nonTerm*>(node)) {
-				if (!(processed.find(static_cast<nonTerm*>(node)) != processed.end())) {
-					workList.Push(static_cast<nonTerm*>(node));
-				}
-			}
-		}
-	}
 }

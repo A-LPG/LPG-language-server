@@ -86,13 +86,18 @@ struct DocumentationProvider
             auto  original_unit =  ast_unit->parent.FindFile(lex);
             {
                 std::unordered_set<ASTNodeToken*> fFirstSet;
+                std::unordered_set<std::string> token_strings;
                 original_unit->collectFirstSet(nt, fFirstSet);
-            	if(fFirstSet.size())
+            	if(!fFirstSet.empty())
             	{
-                    std::string firstset_str("First set: ");
                     for (auto& it : fFirstSet)
                     {
-                        firstset_str += it->to_utf8_string() + " ";
+                        token_strings.insert(it->to_utf8_string());           
+                    }
+                    std::string firstset_str("First set: ");
+                    for (auto& it : token_strings)
+                    {
+                        firstset_str += it + " ";
                     }
                     markdown_output.addHeading(5).appendText(firstset_str);
             	}

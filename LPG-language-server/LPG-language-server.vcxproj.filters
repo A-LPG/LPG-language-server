@@ -63,7 +63,7 @@
     <ClCompile Include="src\message\NavigateToDefinitionHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="src\message\ReferencesHandler.cpp">
+    <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
     <ClCompile Include="src\code.cpp">

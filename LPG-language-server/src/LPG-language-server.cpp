@@ -41,6 +41,7 @@
 #include "LibLsp/lsp/general/initialized.h"
 #include "LibLsp/JsonRpc/cancellation.h"
 #include "LibLsp/lsp/textDocument/SemanticTokens.h"
+#include "LibLsp/lsp/textDocument/rename.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -391,7 +392,25 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit){
-					ReferencesHandler(unit, req.params.position, rsp.result,&_requestMonitor);
+					ReferencesOrRenameHandler(unit, req.params.position, rsp.result,&_requestMonitor);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const td_rename::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< td_rename::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				td_rename::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					std::vector< lsWorkspaceEdit::Either >  edits;
+					ReferencesOrRenameHandler(unit, req.params, edits, &_requestMonitor);
+					rsp.result.documentChanges = std::move(edits);
+				
 				}
 				return std::move(rsp);
 			});
