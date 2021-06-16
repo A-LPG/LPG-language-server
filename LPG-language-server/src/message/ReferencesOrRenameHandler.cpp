@@ -39,7 +39,7 @@ struct ReferenceData : ReferencesOrRenameHandler::Data
         if (pos)
         {
             location.range.start = pos.value();
-			location.range.start.character -= 1;
+		
         }
         pos = ASTUtils::toPosition(lex, right_token->getEndOffset());
         if (pos)
@@ -173,7 +173,7 @@ struct RenameData : ReferencesOrRenameHandler::Data
 		if (pos)
 		{
 			document_edit.range.start = pos.value();
-			document_edit.range.start.character -= 1;
+			
 		}
 		pos = ASTUtils::toPosition(lex, right_token->getEndOffset());
 		if (pos)

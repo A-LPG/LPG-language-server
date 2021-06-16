@@ -30,13 +30,13 @@ struct SemanticTokensHandler::Data
 
 
 			SemanticToken semantic_token;
-			int line;
-			int column;
+			int line=0;
+			int column=0;
 			
 			auto pos = ASTUtils::toPosition(lex, token->getStartOffset());
 			if (pos)
 			{
-				column = pos.value().character-1;
+			
 				line = pos.value().line;
 			}
 			else
