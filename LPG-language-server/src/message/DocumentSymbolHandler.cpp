@@ -6,6 +6,7 @@
 #include <stack>
 #include "LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
+#include "../parser/LpgData.h"
 using namespace LPGParser_top_level_ast;
 void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILexStream* lex)
 {
@@ -62,7 +63,7 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 
 struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
-
+    LpgData jikspg_data;
     ILexStream* lex= nullptr;
     std::shared_ptr<CompilationUnit>& unit;
     std::stack< lsDocumentSymbol*> fItemStack;
@@ -70,6 +71,16 @@ struct LPGModelVisitor :public AbstractVisitor {
     LPGModelVisitor(std::shared_ptr<CompilationUnit>& u,lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l), unit(u)
     {
         fItemStack.push(rootSymbol);
+       
+        Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
+        for (int i = 0; i < tokens.size(); ++i)
+        {
+            IToken* token = tokens[i];
+            if(LPGParsersym::TK_BLOCK == token->getKind())
+            {
+                jikspg_data.initial_blocks.Next() = token->getTokenIndex();
+            }
+        }
     }
     lsDocumentSymbol*  createSubItem(IAst* n)
     {
@@ -120,7 +131,11 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(AstSeg* n) {
        auto symbol = pushSubItem(n);
-
+       auto list = n->getast_segment();
+    	for(int i = 0 ; i < list->size(); ++i)
+    	{
+            jikspg_data.ast_blocks.Next() = list->getaction_segmentAt(i)->getLeftIToken()->getTokenIndex();
+    	}
         return true;
     }
 
@@ -139,7 +154,44 @@ struct LPGModelVisitor :public AbstractVisitor {
         popSubItem();
     }
 
+	bool visit(aliasSpec0* n) override
+    {
+       jikspg_data.  SetErrorIndex(n->getalias_rhs()->getRightIToken()->getTokenIndex());
+	    return true;
+    }
+    bool visit(aliasSpec1* n) override
+    {
+        jikspg_data.SetEolIndex(n->getalias_rhs()->getRightIToken()->getTokenIndex());
+        return true;
+    }
+    bool visit(aliasSpec2* n) override
+    {
+        jikspg_data.SetEofIndex(n->getalias_rhs()->getRightIToken()->getTokenIndex());
+        return true;
+    }
+    bool visit(aliasSpec3* n) override
+    {
+        jikspg_data.SetIdentifierIndex(n->getalias_rhs()->getRightIToken()->getTokenIndex());
+        return true;
+    }
+    bool visit(aliasSpec4* n) override
+    {
+        auto& aliases = jikspg_data.aliases;
+        int index = aliases.nextIndex();
+        aliases[index].lhs_index = n->getSYMBOL()->getLeftIToken()->getTokenIndex();
+        aliases[index].rhs_index = n->getalias_rhs()->getRightIToken()->getTokenIndex();
+        return true;
+    }
+    bool visit(aliasSpec5* n) override
+    {
+        auto& aliases = jikspg_data.aliases;
+        int index = aliases.nextIndex();
+        aliases[index].lhs_index = n->getalias_lhs_macro_name()->getLeftIToken()->getTokenIndex();
+        aliases[index].rhs_index = n->getalias_rhs()->getRightIToken()->getTokenIndex();
+        return true;
+    }
     bool visit(EofSeg* n) {
+        jikspg_data.SetEofIndex(n->geteof_segment()->getLeftIToken()->getTokenIndex());
         auto symbol = pushSubItem(n);
         symbol->name = "Eof ";
 
@@ -154,6 +206,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(EolSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Eol ";
+        jikspg_data.SetEolIndex((n->geteol_segment()->getLeftIToken()->getTokenIndex()));
         return true;
     }
 
@@ -162,7 +215,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(ErrorSeg* n) {
-    	
+        jikspg_data.SetErrorIndex(n->geterror_segment()->getLeftIToken()->getTokenIndex());
         auto symbol = pushSubItem(n);
         symbol->name = "Error ";
         return true;
@@ -170,6 +223,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(ErrorSeg* n) {
         popSubItem();
+      
     }
 
     bool visit(ExportSeg* n) {
@@ -180,6 +234,8 @@ struct LPGModelVisitor :public AbstractVisitor {
         prefix.push_back('_');
         for(auto& it : n->lpg_export_segment->list)
         {
+          jikspg_data.exports.Next() = it->getLeftIToken()->getTokenIndex();
+        	
            auto item =  pushSubItem(it);
            item->kind = lsSymbolKind::Interface;
            unit->export_macro_table.insert({ prefix + item->name, it});
@@ -198,6 +254,11 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(GlobalsSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Globals";
+        auto list = n->getglobals_segment();
+    	for(int i = 0 ; i < list->size() ; ++i)
+    	{
+            jikspg_data.global_blocks.Next() = list->getaction_segmentAt(i)->getLeftIToken()->getTokenIndex();
+    	}
         return true;
     }
 
@@ -208,6 +269,13 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(HeadersSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Headers";
+
+        auto list = n->getheaders_segment();
+    	for(int i = 0; i < list->size(); ++i)
+    	{
+            auto item = list->getaction_segmentAt(i);
+            jikspg_data.header_blocks.Next() = item->getLeftIToken()->getTokenIndex();
+    	}
         return true;
     }
 
@@ -216,6 +284,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(IdentifierSeg* n) {
+       jikspg_data.SetIdentifierIndex(n->getidentifier_segment()->getLeftIToken()->getTokenIndex());
         auto symbol = pushSubItem(n);
         symbol->name = "Identifier";
         return true;
@@ -254,6 +323,12 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     void endVisit(KeywordsSeg* n) {
+
+        for(int i = 0 ; i < n->lpg_keywords_segment->size(); ++i)
+        {
+            auto node = n->lpg_keywords_segment->getkeywordSpecAt(i);
+           jikspg_data.keywords.Next() = node->getLeftIToken()->getTokenIndex();
+        }
     	
         popSubItem();
     }
@@ -263,7 +338,13 @@ struct LPGModelVisitor :public AbstractVisitor {
         symbol->name = "Names ";
         return true;
     }
-
+    bool visit(nameSpec* n) {
+        auto& names = jikspg_data.names;
+        int index = names.nextIndex();
+        names[index].lhs_index = n->getname()->getLeftIToken()->getTokenIndex();
+        names[index].rhs_index = n->getname3()->getLeftIToken()->getTokenIndex();;
+        return false;
+    }
     void endVisit(NamesSeg* n) {
         popSubItem();
     }
@@ -271,6 +352,9 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(NoticeSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Notice ";
+    	
+        jikspg_data.notice_blocks.Next() = n->getnotice_segment()->getLeftIToken()->getTokenIndex();
+    	
         return false;
     }
 
@@ -283,7 +367,15 @@ struct LPGModelVisitor :public AbstractVisitor {
         symbol->name = "Predecessor ";
         return true;
     }
-
+    bool visit(symbol_pair* n)
+    {
+        auto& predecessor_candidates = jikspg_data.predecessor_candidates;
+        int index = predecessor_candidates.nextIndex();
+        predecessor_candidates[index].lhs_index = n->getSYMBOL()->getLeftIToken()->getTokenIndex();
+        predecessor_candidates[index].rhs_index = n->getSYMBOL2()->getLeftIToken()->getTokenIndex();
+	    return false;
+    }
+    
     void endVisit(PredecessorSeg* n) {
         popSubItem();
     }
@@ -291,6 +383,12 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(RecoverSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Recover ";
+
+        auto recover_segment = n->getrecover_segment();
+    	for(int i = 0 ; i < recover_segment->size(); ++i)
+    	{
+            jikspg_data.recovers.Next() = recover_segment->getSYMBOLAt(i)->getLeftIToken()->getTokenIndex();
+    	}
         return true;
     }
 
@@ -316,11 +414,40 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(SoftKeywordsSeg* n) {
         popSubItem();
+    	for(int i = 0 ; i < n->lpg_keywords_segment->size(); ++i)
+    	{
+            auto node = n->lpg_keywords_segment->getkeywordSpecAt(i);
+            auto keyword_spec =  dynamic_cast<keywordSpec*>(n);
+    		if(!keyword_spec)
+    		{
+                jikspg_data.keywords.Next() = node->getLeftIToken()->getTokenIndex();
+    			continue;
+    		}
+            auto   _terminal_index =  keyword_spec->getterminal_symbol()->getLeftIToken()->getTokenIndex();
+            jikspg_data.keywords.Next() = _terminal_index;
+            auto& names = jikspg_data.names;
+            auto& aliases = jikspg_data.aliases;
+            int index = names.nextIndex();
+            names[index].lhs_index = _terminal_index;
+            names[index].rhs_index = keyword_spec->getname()->rightIToken->getTokenIndex();
+
+            index = aliases.nextIndex();
+            aliases[index].lhs_index = keyword_spec->getname()->rightIToken->getTokenIndex();
+            aliases[index].rhs_index = _terminal_index;
+            
+    	}
     }
 
     bool visit(StartSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Start ";
+
+       auto list =  n->getstart_segment();
+    	for(int i = 0 ; i < list->size(); ++i)
+    	{
+            auto start_symbol = list->getstart_symbolAt(i);
+            jikspg_data. start_indexes.Next() = start_symbol->getLeftIToken()->getTokenIndex();
+    	}
         return true;
     }
 
@@ -341,6 +468,12 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(TrailersSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Trailers ";
+        auto list = n->gettrailers_segment();
+        for (int i = 0; i < list->size(); ++i)
+        {
+            auto start_symbol = list->getaction_segmentAt(i);
+            jikspg_data.trailer_blocks.Next() = start_symbol->getLeftIToken()->getTokenIndex();
+        }
         return true;
     }
 
@@ -389,13 +522,26 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(terminal* n) {
         auto symbol = n->getterminal_symbol();
-      
+        auto terminal_symbol_index = symbol->getLeftIToken()->getTokenIndex();
+        jikspg_data.terminals.Next() = terminal_symbol_index;
+    	
         auto alias = n->getoptTerminalAlias();
         std::string label;
         if (alias != nullptr) {
+          
+        	
             auto prod = alias->getproduces();
             auto name = alias->getname();
             label = nameImage(name) + " " + producesImage(prod) + " " + symbolImage(symbol);
+
+        	
+            int index = jikspg_data.names.nextIndex();
+            jikspg_data.names[index].lhs_index = terminal_symbol_index;
+            jikspg_data.names[index].rhs_index = name->getLeftIToken()->getTokenIndex();
+
+            index = jikspg_data.aliases.nextIndex();
+            jikspg_data.aliases[index].lhs_index = name->getLeftIToken()->getTokenIndex();
+            jikspg_data.aliases[index].rhs_index = terminal_symbol_index;
         }
         else
             label = symbolImage(symbol);
@@ -403,12 +549,89 @@ struct LPGModelVisitor :public AbstractVisitor {
        item->name.swap(label);
        item->kind = lsSymbolKind::String;
     }
+    
+    bool visit(drop_command1* n) {
+        auto& dropped_rules = jikspg_data.dropped_rules;
+    	for(int i = 0 ; i < n->lpg_drop_rules->size(); ++i)
+    	{
+           auto rule= n->lpg_drop_rules->getdrop_ruleAt(i);
+           int index = dropped_rules.nextIndex();
+           dropped_rules[index].lhs_index = rule->getSYMBOL()->getLeftIToken()->getTokenIndex();
+           dropped_rules[index].separator_index =rule->lpg_produces->getLeftIToken()->getTokenIndex();
+           dropped_rules[index].end_rhs_index = rule->lpg_ruleList->getLeftIToken()->getTokenIndex();
 
+         
+           ruleList* rule_list = rule->lpg_ruleList;
+           auto size = rule_list->size();
+    	   for(int k = 0; k < size; k++)
+    	   {
+    	   	   if(k+1 < size)
+    	   	   {
+    	   	   		// drop_rule ::= drop_rule '|' rhs 针对这种情况
+    	   	   	   auto  rhs_item = rule_list->getruleAt(k+1);
+                   dropped_rules[index].lhs_index = dropped_rules[index - 1].lhs_index;
+                   dropped_rules[index].separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
+                   dropped_rules[index].end_rhs_index = rhs_item->getLeftIToken()->getTokenIndex();
+    	   	   }
+    	   }
+    	}
+        return false;
+    }
+    bool visit(drop_command0* n) {
+        for (size_t i = 0; i < n->lpg_drop_symbols->size(); ++i)
+        {
+            auto symbol = n->lpg_drop_symbols->getSYMBOLAt(i);
+            int index = jikspg_data.dropped_rules.nextIndex();
+            jikspg_data.dropped_rules[index].lhs_index = symbol->getLeftIToken()->getTokenIndex();
+            jikspg_data.dropped_rules[index].separator_index = 0;
+            jikspg_data.dropped_rules[index].end_rhs_index = 0;
+        }
+        return false;
+    }
     bool visit(nonTerm* n) {
         if (n->getruleList()->size() > 1)
         {
 	        auto item = pushSubItem(n);
             item->kind = lsSymbolKind::Field;
+        }
+        auto& rules = jikspg_data.rules;
+        int index = rules.nextIndex();
+        auto lpg_ruleNameWithAttributes = n->getruleNameWithAttributes();
+        rules[index].lhs_index = lpg_ruleNameWithAttributes->getSYMBOL()->getLeftIToken()->getTokenIndex();
+    	if(lpg_ruleNameWithAttributes->lpg_className)
+    	{
+            rules[index].classname_index = lpg_ruleNameWithAttributes->lpg_className->getLeftIToken()->getTokenIndex();
+    	}
+        else
+        {
+            rules[index].classname_index = 0;
+        }
+       if(lpg_ruleNameWithAttributes->lpg_arrayElement)
+       {
+           rules[index].array_element_type_index = lpg_ruleNameWithAttributes->lpg_arrayElement->getLeftIToken()->getTokenIndex();
+       }
+       else
+       {
+           rules[index].array_element_type_index = 0;
+       }
+        rules[index].separator_index = n->getproduces()->getLeftIToken()->getTokenIndex();
+        rules[index].end_rhs_index = n->getruleList()->getLeftIToken()->getTokenIndex();
+
+
+        ruleList* rule_list = n->getruleList();
+        auto size = rule_list->size();
+        for (int k = 0; k < size; k++)
+        {
+            if (k + 1 < size)
+            {
+                // drop_rule ::= drop_rule '|' rhs 针对这种情况
+                auto  rhs_item = rule_list->getruleAt(k + 1);
+            	
+                rules[index].lhs_index = rules[index - 1].lhs_index;
+                rules[index].classname_index = rules[index - 1].classname_index;
+                rules[index].separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
+                rules[index].end_rhs_index = rhs_item->getLeftIToken()->getTokenIndex();
+            }
         }
         return true;
     }
@@ -417,10 +640,13 @@ struct LPGModelVisitor :public AbstractVisitor {
         if (n->getruleList()->size() > 1)
             popSubItem();
     }
-
+    
     bool visit(rule* n) {
-        fRHSLabel.clear();
-         nonTerm* parentNonTerm = static_cast<nonTerm*>(n->getParent()->getParent());
+       
+         nonTerm* parentNonTerm = dynamic_cast<nonTerm*>(n->getParent()->getParent());
+         if (!parentNonTerm)return true;
+    	
+         fRHSLabel.clear();
         if (parentNonTerm->getruleList()->size() == 1) {
             fRHSLabel.append(parentNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
             fRHSLabel.append(" ::= ");
@@ -434,7 +660,13 @@ struct LPGModelVisitor :public AbstractVisitor {
        item->kind = lsSymbolKind::Field;
        fRHSLabel.clear();
     }
-
+    bool visit(name2* n)
+    {
+    	// TO DO
+       // option->EmitError(Token(1), "Illegal use of empty name or empty keyword");
+    	
+	    return true;
+    }
     void endVisit(symWithAttrs0* n) {
         fRHSLabel.push_back(' ');
         fRHSLabel.append(n->getIToken()->to_utf8_string());
@@ -449,6 +681,33 @@ struct LPGModelVisitor :public AbstractVisitor {
     // return true;
     // }
     bool visit(type_declarations* n) {
+        auto& types = jikspg_data.types;
+        int index = types.nextIndex();
+        types[index].type_index =n->getSYMBOL()->getLeftIToken()->getTokenIndex();
+        types[index].separator_index = n->getproduces()->getLeftIToken()->getTokenIndex();
+        types[index].symbol_index = n->getbarSymbolList()->getLeftIToken()->getTokenIndex();
+        int block_index = 0;
+    	if(n->lpg_opt_action_segment)
+    	{
+            block_index = n->lpg_opt_action_segment->getLeftIToken()->getTokenIndex();
+    	}
+        types[index].block_index = block_index;
+        auto rule_list = n->getbarSymbolList();
+        auto size = rule_list->size();
+        for (int k = 0; k < size; k++)
+        {
+            if (k + 1 < size)
+            {
+                index = types.nextIndex();
+                // drop_rule ::= drop_rule '|' rhs 针对这种情况
+                auto  rhs_item = rule_list->getSYMBOLAt(k + 1);
+                types[index].type_index = types[index - 1].type_index;
+                types[index].separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
+                types[index].symbol_index = rhs_item->getLeftIToken()->getTokenIndex();
+                types[index].block_index = block_index;
+            }
+        }
+    	
         pushSubItem(n);
         return true;
     }

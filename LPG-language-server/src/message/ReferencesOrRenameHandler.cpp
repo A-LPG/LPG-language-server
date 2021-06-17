@@ -45,6 +45,7 @@ struct ReferenceData : ReferencesOrRenameHandler::Data
         if (pos)
         {
             location.range.end = pos.value();
+			location.range.end.character += 1;
         }
 		out.emplace_back(location);
     }

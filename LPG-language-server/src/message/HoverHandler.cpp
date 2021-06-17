@@ -48,9 +48,8 @@ struct DocumentationProvider
 	                const auto temp = getSubstring(def->getLeftIToken()->getIPrsStream()->getInputChars(),
 	                                               def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
                     // https://github.com/microsoft/vscode/issues/88417 for details.
-                    auto& header = markdown_output.addHeading(3);
-                    header.appendText(temp);
-                  
+                    markdown_output.addCodeBlock(temp);
+                  return;
             	}
             }
         	
@@ -67,14 +66,15 @@ struct DocumentationProvider
                     def->getLeftIToken()->getStartOffset(), def->getRightIToken()->getEndOffset());
 
 					 markdown_output.addCodeBlock(temp);
-                  
+                  return;
             }
             // https://github.com/microsoft/vscode/issues/88417 for details.
            // auto& header = markdown_output.addHeading(3);
             markdown_output.addCodeBlock(node->to_utf8_string());
           
-            
+            return;
         }
+    	
         // https://github.com/microsoft/vscode/issues/88417 for details.
         auto& header = markdown_output.addHeading(3);
         if (dynamic_cast<nonTerm*>(target)) {
@@ -134,7 +134,7 @@ struct DocumentationProvider
         {
             auto node = (defineSpec*)target;
             buff = node->to_utf8_string();
-            header.appendText(buff);
+            markdown_output.addCodeBlock(buff);
         }
 
     }
