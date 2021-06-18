@@ -1,7 +1,7 @@
-#ifndef PARTITION_INCLUDED
-#define PARTITION_INCLUDED
+#pragma once
+
 #include "tuple.h"
-#include "../ASTUtils.h"
+
 #include <limits.h>
 
 //
@@ -287,5 +287,3 @@ public:
         return;
     }
 };
-
-#endif /* PARTITION_INCLUDED */

@@ -179,6 +179,7 @@ void Produce::Process(void)
         //
         // First, compute the set of names that are useful
         //
+       
         Array<bool> name_used(grammar -> num_names + 1, false);
         {
             for (int symbol = 1; symbol <= grammar -> num_symbols; symbol++)
@@ -220,8 +221,8 @@ void Produce::Process(void)
     //
     if (option -> list)
     {
-        control -> PrintHeading();
-        fprintf(option -> syslis, "\nName map:\n");
+     //   control -> PrintHeading();
+      //  fprintf(option -> syslis, "\nName map:\n");
 
         {
             for (int symbol = 1; symbol <= grammar -> num_symbols; symbol++)
@@ -288,24 +289,24 @@ void Produce::compute_produces(BoundedArray<BitSetWithOffset> &produces, int sym
 //
 void Produce::print_name_map(int symbol)
 {
-    char line[PRINT_LINE_SIZE],
-         tok[SYMBOL_SIZE + 1];
+    //char line[PRINT_LINE_SIZE],
+    //     tok[SYMBOL_SIZE + 1];
 
-    grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
+    //grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
 
-    int len = PRINT_LINE_SIZE - 5;
-    grammar -> PrintLargeToken(line, tok, "", len);
-    strcat(line, " ::= ");
-    grammar -> RestoreSymbol(tok, grammar -> RetrieveName(grammar -> symbol_index[symbol].external_name_index));
-    if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 1)
-    {
-        fprintf(option -> syslis, "\n%s", line);
-        len = PRINT_LINE_SIZE - 4;
-        grammar -> PrintLargeToken(line, tok, "    ", len);
-    }
-    else strcat(line, tok);
+    //int len = PRINT_LINE_SIZE - 5;
+    //grammar -> PrintLargeToken(line, tok, "", len);
+    //strcat(line, " ::= ");
+    //grammar -> RestoreSymbol(tok, grammar -> RetrieveName(grammar -> symbol_index[symbol].external_name_index));
+    //if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 1)
+    //{
+    //    fprintf(option -> syslis, "\n%s", line);
+    //    len = PRINT_LINE_SIZE - 4;
+    //    grammar -> PrintLargeToken(line, tok, "    ", len);
+    //}
+    //else strcat(line, tok);
 
-    fprintf(option -> syslis, "\n%s", line);
+    //fprintf(option -> syslis, "\n%s", line);
 
     return;
 }
@@ -489,22 +490,22 @@ void Produce::process_scopes(void)
             }
             else
             {
-                char tok[SYMBOL_SIZE + 1];
+              /*  char tok[SYMBOL_SIZE + 1];
                 grammar -> RestoreSymbol(tok, grammar -> RetrieveString(dot_symbol));
 
                 int rule_no = base -> item_table[item_no].rule_number,
                     error_location = control -> lex_stream -> StartLocation(grammar -> rules[rule_no].first_token_index);
                 InputFileSymbol *input_file_symbol = control -> lex_stream -> GetFileSymbol(grammar -> rules[rule_no].first_token_index);
                 int error_token_index = control -> lex_stream -> GetNextToken(input_file_symbol, error_location);
-                Token *current_token = control -> lex_stream -> GetTokenReference(error_token_index);
-                current_token -> SetEndLocation(control -> lex_stream -> EndLocation(grammar -> rules[rule_no].last_token_index));
-                current_token -> SetKind(0);
+                auto current_token = control -> lex_stream -> GetTokenReference(error_token_index);
+                current_token -> setEndOffset(control -> lex_stream -> EndLocation(grammar -> rules[rule_no].last_token_index));
+                current_token -> setKind(0);
 
                 Tuple<const char *> msg;
                 msg.Next() = "This rule is not processed as a scope because the prefix preceding the recovery symbol \"";
                 msg.Next() = tok;
                 msg.Next() = "\" is nullable";
-                option -> EmitInformative(error_token_index, msg);
+                option -> EmitInformative(error_token_index, msg);*/
             }
         }
         else if (grammar -> IsNonTerminal(dot_symbol))
@@ -1158,66 +1159,66 @@ bool Produce::is_suffix_equal(int item_no1, int item_no2)
 //
 void Produce::print_scopes(void)
 {
-    char line[PRINT_LINE_SIZE + 1],
-         tok[SYMBOL_SIZE + 1],
-         tmp[PRINT_LINE_SIZE];
+    //char line[PRINT_LINE_SIZE + 1],
+    //     tok[SYMBOL_SIZE + 1],
+    //     tmp[PRINT_LINE_SIZE];
 
-    control -> PrintHeading();
-    fprintf(option -> syslis, "\nScopes:\n");
+    //control -> PrintHeading();
+    //fprintf(option -> syslis, "\nScopes:\n");
 
-    for (int k = 0; k < scope_lhs_symbol.Size(); k++)
-    {
-        int symbol = scope_lhs_symbol[k];
-        grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
-        int len = PRINT_LINE_SIZE - 5;
-        grammar -> PrintLargeToken(line, tok, "", len);
-        strcat(line, " ::= ");
-        int i = (PRINT_LINE_SIZE / 2) - 1,
-            offset = Util::Min(strlen(line) - 1, i);
-        len = PRINT_LINE_SIZE - (offset + 4);
+    //for (int k = 0; k < scope_lhs_symbol.Size(); k++)
+    //{
+    //    int symbol = scope_lhs_symbol[k];
+    //    grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
+    //    int len = PRINT_LINE_SIZE - 5;
+    //    grammar -> PrintLargeToken(line, tok, "", len);
+    //    strcat(line, " ::= ");
+    //    int i = (PRINT_LINE_SIZE / 2) - 1,
+    //        offset = Util::Min(strlen(line) - 1, i);
+    //    len = PRINT_LINE_SIZE - (offset + 4);
 
-        // locate end of list
-        for (i = scope_prefix[k]; scope_right_side[i] != 0; i++)
-            ;
+    //    // locate end of list
+    //    for (i = scope_prefix[k]; scope_right_side[i] != 0; i++)
+    //        ;
 
-        for (i = i - 1; i >= scope_prefix[k]; i--) // symbols before dot
-        {
-            int symbol = scope_right_side[i];
-            grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
-            if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 4)
-            {
-                fprintf(option -> syslis, "\n%s", line);
-                FillIn(tmp, offset, ' ');
-                grammar -> PrintLargeToken(line, tok, tmp, len);
-            }
-            else
-                strcat(line, tok);
-            strcat(line, " ");
-        }
+    //    for (i = i - 1; i >= scope_prefix[k]; i--) // symbols before dot
+    //    {
+    //        int symbol = scope_right_side[i];
+    //        grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
+    //        if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 4)
+    //        {
+    //            fprintf(option -> syslis, "\n%s", line);
+    //            FillIn(tmp, offset, ' ');
+    //            grammar -> PrintLargeToken(line, tok, tmp, len);
+    //        }
+    //        else
+    //            strcat(line, tok);
+    //        strcat(line, " ");
+    //    }
 
-        //
-        // We now add a dot "." to the output line, and print the remaining
-        // symbols in the right hand side.
-        //
-        strcat(line, " .");
-        len = PRINT_LINE_SIZE - (offset + 1);
+    //    //
+    //    // We now add a dot "." to the output line, and print the remaining
+    //    // symbols in the right hand side.
+    //    //
+    //    strcat(line, " .");
+    //    len = PRINT_LINE_SIZE - (offset + 1);
 
-        for (i = scope_suffix[k]; scope_right_side[i] != 0; i++)
-        {
-            int symbol = scope_right_side[i];
-            grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
-            if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 1)
-            {
-                fprintf(option -> syslis, "\n%s", line);
-                FillIn(tmp, offset, ' ');
-                grammar -> PrintLargeToken(line, tok, tmp, len);
-            }
-            else
-                strcat(line, tok);
-            strcat(line, " ");
-        }
-        fprintf(option -> syslis, "\n%s", line);
-    }
+    //    for (i = scope_suffix[k]; scope_right_side[i] != 0; i++)
+    //    {
+    //        int symbol = scope_right_side[i];
+    //        grammar -> RestoreSymbol(tok, grammar -> RetrieveString(symbol));
+    //        if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 1)
+    //        {
+    //            fprintf(option -> syslis, "\n%s", line);
+    //            FillIn(tmp, offset, ' ');
+    //            grammar -> PrintLargeToken(line, tok, tmp, len);
+    //        }
+    //        else
+    //            strcat(line, tok);
+    //        strcat(line, " ");
+    //    }
+    //    fprintf(option -> syslis, "\n%s", line);
+    //}
 
     return;
 }

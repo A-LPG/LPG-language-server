@@ -1,5 +1,4 @@
-#ifndef NODE_INCLUDED
-#define NODE_INCLUDED
+#pragma once
 
 #include "tuple.h"
 
@@ -49,4 +48,3 @@ public:
         return;
     }
 };
-#endif

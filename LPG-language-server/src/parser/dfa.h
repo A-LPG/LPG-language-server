@@ -1,9 +1,13 @@
-#ifndef DFA_INCLUDED
-#define DFA_INCLUDED
+#pragma once
 
+
+#include "JikesPGUtil.h"
+#include "node.h"
 #include "tuple.h"
 
-#include "JiksPGControl.h"
+
+class Grammar;
+class JiksPgOption;
 class Control;
 class Base;
 class Dfa : public Util
@@ -131,6 +135,11 @@ public:
             }
             return Util::OMEGA;
         }
+        ReduceHeader const& operator=(ReduceHeader& rhs)
+        {
+            Tuple<Reduce>::operator=(rhs);
+            return *this;
+        }
     };
 
     class Conflict
@@ -256,4 +265,4 @@ private:
     int lr0_state_map(Array<int> &, Tuple<int> &, Node *);
 };
 
-#endif
+

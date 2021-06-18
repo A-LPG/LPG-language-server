@@ -1,5 +1,5 @@
-#ifndef SP_INCLUDED
-#define SP_INCLUDED
+#pragma once
+
 #include <tuple.h>
 
 #include "grammar.h"
@@ -102,4 +102,4 @@ public:
 
     void RemoveSingleProductions(void);
 };
-#endif
+

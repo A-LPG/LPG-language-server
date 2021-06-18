@@ -224,8 +224,8 @@ void Resolve::print_root_path(int item_no)
     symbol_seen.Resize(grammar -> num_terminals + 1, grammar -> num_symbols);
     symbol_seen.MemReset();
 
-    if (trace_root(grammar -> rules[base -> item_table[item_no].rule_number].lhs))
-        fprintf(option -> syslis, "\n"); // Leave one blank line after root trace.
+    //if (trace_root(grammar -> rules[base -> item_table[item_no].rule_number].lhs))
+    //    fprintf(option -> syslis, "\n"); // Leave one blank line after root trace.
 
     return;
 }
@@ -256,7 +256,7 @@ bool Resolve::lalr_path_retraced(int state_no,
         int item = p -> value - 1;
         if (base -> First(base -> item_table[item].suffix_index)[conflict_symbol]) // Conflict_symbol can be read in state?
         {
-            if (option -> trace == Option::FULL)
+            if (option -> trace == JiksPgOption::FULL)
                 print_root_path(item);
             pda -> PrintItem(item);
             return true;
@@ -328,7 +328,7 @@ bool Resolve::slr_trace(int lhs_symbol, int conflict_symbol)
     {
         if (base -> First(base -> item_table[item].suffix_index)[conflict_symbol])
         {
-            if (option -> trace == Option::FULL)
+            if (option -> trace == JiksPgOption::FULL)
                 print_root_path(item);
              pda -> PrintItem(item);
              return(true);
@@ -523,9 +523,9 @@ void Resolve::ConflictsInitialization(void)
 
     int k = (PRINT_LINE_SIZE - 11) / 2 - 1;
     char msg_line[PRINT_LINE_SIZE];
-    control -> PrintHeading();
+  //  control -> PrintHeading();
     FillIn(msg_line, k, '-');
-    fprintf(option -> syslis, "\n%s CONFLICTS %s\n", msg_line, msg_line);
+  //  fprintf(option -> syslis, "\n%s CONFLICTS %s\n", msg_line, msg_line);
 
     //
     //   SLR conflicts may be caused by a symbol in the FOLLOW set of a
@@ -562,230 +562,230 @@ void Resolve::ConflictsInitialization(void)
 //
 void Resolve::process_conflicts(int state_no)
 {
-    if (nt_items.Size() == 0)
-        ConflictsInitialization();
-
-    //
-    // Flush whatever output is still left in the buffer
-    //
-    option -> FlushReport();
-
-    //
-    // Print a header in the output console and print the state
-    // information in the listing file.
-    //
-    option -> report.Put("\n*** In state ");
-    option -> report.Put(state_no);
-    option -> report.Put(":\n\n");
-    option -> report.Flush(stdout);
-
-    pda -> PrintShiftState(state_no); // Print state containing conflicts
-    fprintf(option -> syslis, "\n\n"); // Leave some space after printing state
-
-    //
-    // Process shift-reduce conflicts.
-    //
-    for (int i = 0; i < sr_conflicts.Length(); i++)
-    {
-        SrConflictElement *p = &sr_conflicts[i];
-        int symbol = p -> symbol,
-            rule_no = base -> item_table[p -> item].rule_number;
-        char temp[SYMBOL_SIZE + 1];
-        grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
-
-//      option -> report.Put("*** Shift/reduce conflict on \"");
-//      option -> report.Put(temp);
-//      option -> report.Put("\" with rule ");
-//      option -> report.Put(rule_no);
-//      option -> report.PutChar('\n');
-
-	// RMF 4/25/2008 - Print location information for the rule involved
-        Grammar::RuleElement thisRule = grammar -> rules[rule_no];
-        int ruleTokenStart = thisRule.first_token_index;
-        int ruleTokenEnd   = thisRule.last_token_index;
-	LexStream *ls = grammar -> GetLexStream();
-	Token *startToken = ls -> GetTokenReference(ruleTokenStart);
-        Token *endToken   = ls -> GetTokenReference(ruleTokenEnd);
-
-	Tuple<const char *> msg;
-	IntToString state_no_str(state_no);
-	IntToString rule_no_str(rule_no);
-
-	msg.Next() = "Shift/reduce conflict in state ";
-	msg.Next() = state_no_str.String();
-	msg.Next() = " on \"";
-	msg.Next() = temp;
-	msg.Next() = "\" with rule ";
-	msg.Next() = rule_no_str.String();
-
-	option -> EmitWarning(startToken, endToken, msg);
-
-        option -> FlushReport();
-
-        if (option -> trace != Option::NONE)
-        {
-            if (! option -> slr)
-                 print_relevant_lalr_items(state_no, p -> item, symbol);
-            else print_relevant_slr_items(p -> item, symbol);
-            pda -> PrintItem(p -> item);
-            fprintf(option -> syslis, "\n\n"); // Leave some space after printing items
-        }
-    }
-
-    //
-    // Process reduce-reduce conflicts.
-    //
-    for (int j = 0; j < rr_conflicts.Length(); j++)
-    {
-        RrConflictElement *p = &rr_conflicts[j];
-
-        int symbol = p -> symbol,
-            n = base -> item_table[p -> item1].rule_number,
-            rule_no = base -> item_table[p -> item2].rule_number;
-        char temp[SYMBOL_SIZE + 1];
-        grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
-
-//      option -> report.Put("*** Reduce/reduce conflict on \"");
-//      option -> report.Put(temp);
-//      option -> report.Put("\" between rule ");
-//      option -> report.Put(n);
-//      option -> report.Put(" and ");
-//      option -> report.Put(rule_no);
-//      option -> report.PutChar('\n');
-
-	// RMF 4/25/2008 - Print location information for the rules involved
-	Grammar::RuleElement thisRule  = grammar -> rules[n];
-        Grammar::RuleElement otherRule = grammar -> rules[rule_no];
-        int ruleTokenStart  = thisRule.first_token_index;
-        int ruleTokenEnd    = thisRule.last_token_index;
-        int otherTokenStart = otherRule.first_token_index;
-        // int otherTokenEnd   = otherRule.last_token_index;
-	LexStream *ls = grammar -> GetLexStream();
-	Token *startToken      = ls -> GetTokenReference(ruleTokenStart);
-        Token *endToken        = ls -> GetTokenReference(ruleTokenEnd);
-        Token *otherStartToken = ls -> GetTokenReference(otherTokenStart);
-        // Token *otherEndToken   = ls -> GetTokenReference(otherTokenEnd);
-
-	Tuple<const char *> msg;
-	IntToString state_no_str(state_no);
-	IntToString n_str(n);
-	IntToString rule_no_str(rule_no);
-	IntToString other_start_line_str(otherStartToken -> Line());
-	IntToString other_start_col_str(otherStartToken -> Column());
-
-	msg.Next() = "Reduce/reduce conflict in state ";
-	msg.Next() = state_no_str.String();
-	msg.Next() = " on \"";
-	msg.Next() = temp;
-	msg.Next() = "\" between rule ";
-	msg.Next() = n_str.String();
-	msg.Next() = " and rule ";
-	msg.Next() = rule_no_str.String();
-	msg.Next() = " starting at line ";
-	msg.Next() = other_start_line_str.String();
-	msg.Next() = ", column ";
-	msg.Next() = other_start_col_str.String();
-
-	option -> EmitWarning(startToken, endToken, msg);
-
-        option -> FlushReport();
-
-        if (option -> trace != Option::NONE)
-        {
-            if (! option -> slr)
-                 print_relevant_lalr_items(state_no, p -> item1, symbol);
-            else print_relevant_slr_items(p -> item1, symbol);
-            pda -> PrintItem(p -> item1);
-            char msg_line[PRINT_LINE_SIZE];
-            FillIn(msg_line, PRINT_LINE_SIZE - 3, '-');
-            fprintf(option -> syslis, "\n%s", msg_line);
-            if (! option -> slr)
-                 print_relevant_lalr_items(state_no, p -> item2, symbol);
-            else print_relevant_slr_items(p -> item2, symbol);
-            pda -> PrintItem(p -> item2);
-            fprintf(option -> syslis, "\n\n"); // Leave some space after printing items
-        }
-    }
-
-    //
-    // Process Keyword/Identifier conflicts.
-    //
-    if (option -> verbose)
-    {
-        {
-            for (int i = 0; i < soft_ss_conflicts.Length(); i++)
-            {
-                SsConflictElement *p = &soft_ss_conflicts[i];
-                int symbol = p -> symbol;
-                char temp[SYMBOL_SIZE + 1];
-                grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
-
-                option -> report.Put("*** Keyword/Identifier Shift conflict on \"");
-                option -> report.Put(temp);
-                option -> report.Put("\"\n");
-            }
-        }
-
-        {
-            for (int i = 0; i < soft_sr_conflicts.Length(); i++)
-            {
-                SrConflictElement *p = &soft_sr_conflicts[i];
-                int symbol = p -> symbol,
-                    rule_no = base -> item_table[p -> item].rule_number;
-                char temp[SYMBOL_SIZE + 1];
-                grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
-
-                option -> report.Put("*** Keyword/Identifier Shift/reduce conflict on \"");
-                option -> report.Put(temp);
-                option -> report.Put("\" with rule ");
-                option -> report.Put(rule_no);
-                option -> report.PutChar('\n');
-            }
-        }
-
-        for (int i = 0; i < soft_rr_conflicts.Length(); i++)
-        {
-            RrConflictElement *p = &soft_rr_conflicts[i];
-            int symbol = p -> symbol,
-                n = base -> item_table[p -> item1].rule_number,
-                rule_no = base -> item_table[p -> item2].rule_number;
-            char temp[SYMBOL_SIZE + 1];
-            grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
-
-            option -> report.Put("*** Keyword/Identifier Reduce/reduce conflict on \"");
-            option -> report.Put(temp);
-            option -> report.Put("\" between rule ");
-            option -> report.Put(n);
-            option -> report.Put(" and ");
-            option -> report.Put(rule_no);
-            option -> report.PutChar('\n');
-        }
-    }
-    else
-    {
-        if (soft_ss_conflicts.Length() > 0)
-        {
-            option -> report.Put("*** ");
-            option -> report.Put(soft_ss_conflicts.Length());
-            option -> report.Put(" Keyword/Identifier Shift/shift conflicts detected\n");
-        }
-
-        if (soft_sr_conflicts.Length() > 0)
-        {
-            option -> report.Put("*** ");
-            option -> report.Put(soft_sr_conflicts.Length());
-            option -> report.Put(" Keyword/Identifier Shift/reduce conflicts detected\n");
-        }
-
-        if (soft_rr_conflicts.Length() > 0)
-        {
-            option -> report.Put("*** ");
-            option -> report.Put(soft_rr_conflicts.Length());
-            option -> report.Put(" Keyword/Identifier Reduce/reduce conflicts detected\n");
-        }
-    }
-
-    option -> FlushReport();
+//    if (nt_items.Size() == 0)
+//        ConflictsInitialization();
+//
+//    //
+//    // Flush whatever output is still left in the buffer
+//    //
+//    option -> FlushReport();
+//
+//    //
+//    // Print a header in the output console and print the state
+//    // information in the listing file.
+//    //
+//    option -> report.Put("\n*** In state ");
+//    option -> report.Put(state_no);
+//    option -> report.Put(":\n\n");
+//    option -> report.Flush(stdout);
+//
+//    pda -> PrintShiftState(state_no); // Print state containing conflicts
+//    fprintf(option -> syslis, "\n\n"); // Leave some space after printing state
+//
+//    //
+//    // Process shift-reduce conflicts.
+//    //
+//    for (int i = 0; i < sr_conflicts.Length(); i++)
+//    {
+//        SrConflictElement *p = &sr_conflicts[i];
+//        int symbol = p -> symbol,
+//            rule_no = base -> item_table[p -> item].rule_number;
+//        char temp[SYMBOL_SIZE + 1];
+//        grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
+//
+////      option -> report.Put("*** Shift/reduce conflict on \"");
+////      option -> report.Put(temp);
+////      option -> report.Put("\" with rule ");
+////      option -> report.Put(rule_no);
+////      option -> report.PutChar('\n');
+//
+//	// RMF 4/25/2008 - Print location information for the rule involved
+//        Grammar::RuleElement thisRule = grammar -> rules[rule_no];
+//        int ruleTokenStart = thisRule.first_token_index;
+//        int ruleTokenEnd   = thisRule.last_token_index;
+//	LexStream *ls = grammar -> GetLexStream();
+//	Token *startToken = ls -> GetTokenReference(ruleTokenStart);
+//        Token *endToken   = ls -> GetTokenReference(ruleTokenEnd);
+//
+//	Tuple<const char *> msg;
+//	IntToString state_no_str(state_no);
+//	IntToString rule_no_str(rule_no);
+//
+//	msg.Next() = "Shift/reduce conflict in state ";
+//	msg.Next() = state_no_str.String();
+//	msg.Next() = " on \"";
+//	msg.Next() = temp;
+//	msg.Next() = "\" with rule ";
+//	msg.Next() = rule_no_str.String();
+//
+//	option -> EmitWarning(startToken, endToken, msg);
+//
+//        option -> FlushReport();
+//
+//        if (option -> trace != JiksPgOption::NONE)
+//        {
+//            if (! option -> slr)
+//                 print_relevant_lalr_items(state_no, p -> item, symbol);
+//            else print_relevant_slr_items(p -> item, symbol);
+//            pda -> PrintItem(p -> item);
+//            fprintf(option -> syslis, "\n\n"); // Leave some space after printing items
+//        }
+//    }
+//
+//    //
+//    // Process reduce-reduce conflicts.
+//    //
+//    for (int j = 0; j < rr_conflicts.Length(); j++)
+//    {
+//        RrConflictElement *p = &rr_conflicts[j];
+//
+//        int symbol = p -> symbol,
+//            n = base -> item_table[p -> item1].rule_number,
+//            rule_no = base -> item_table[p -> item2].rule_number;
+//        char temp[SYMBOL_SIZE + 1];
+//        grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
+//
+////      option -> report.Put("*** Reduce/reduce conflict on \"");
+////      option -> report.Put(temp);
+////      option -> report.Put("\" between rule ");
+////      option -> report.Put(n);
+////      option -> report.Put(" and ");
+////      option -> report.Put(rule_no);
+////      option -> report.PutChar('\n');
+//
+//	// RMF 4/25/2008 - Print location information for the rules involved
+//	Grammar::RuleElement thisRule  = grammar -> rules[n];
+//        Grammar::RuleElement otherRule = grammar -> rules[rule_no];
+//        int ruleTokenStart  = thisRule.first_token_index;
+//        int ruleTokenEnd    = thisRule.last_token_index;
+//        int otherTokenStart = otherRule.first_token_index;
+//        // int otherTokenEnd   = otherRule.last_token_index;
+//	auto ls = grammar -> GetLexStream();
+//	auto *startToken      = ls -> GetTokenReference(ruleTokenStart);
+//    auto* endToken        = ls -> GetTokenReference(ruleTokenEnd);
+//    auto* otherStartToken = ls -> GetTokenReference(otherTokenStart);
+//        // Token *otherEndToken   = ls -> GetTokenReference(otherTokenEnd);
+//
+//	Tuple<const char *> msg;
+//	IntToString state_no_str(state_no);
+//	IntToString n_str(n);
+//	IntToString rule_no_str(rule_no);
+//	IntToString other_start_line_str(otherStartToken -> getLine());
+//	IntToString other_start_col_str(otherStartToken -> getColumn());
+//
+//	msg.Next() = "Reduce/reduce conflict in state ";
+//	msg.Next() = state_no_str.String();
+//	msg.Next() = " on \"";
+//	msg.Next() = temp;
+//	msg.Next() = "\" between rule ";
+//	msg.Next() = n_str.String();
+//	msg.Next() = " and rule ";
+//	msg.Next() = rule_no_str.String();
+//	msg.Next() = " starting at line ";
+//	msg.Next() = other_start_line_str.String();
+//	msg.Next() = ", column ";
+//	msg.Next() = other_start_col_str.String();
+//
+//	option -> EmitWarning(startToken, endToken, msg);
+//
+//        option -> FlushReport();
+//
+//        if (option -> trace != JiksPgOption::NONE)
+//        {
+//            if (! option -> slr)
+//                 print_relevant_lalr_items(state_no, p -> item1, symbol);
+//            else print_relevant_slr_items(p -> item1, symbol);
+//            pda -> PrintItem(p -> item1);
+//            char msg_line[PRINT_LINE_SIZE];
+//            FillIn(msg_line, PRINT_LINE_SIZE - 3, '-');
+//            fprintf(option -> syslis, "\n%s", msg_line);
+//            if (! option -> slr)
+//                 print_relevant_lalr_items(state_no, p -> item2, symbol);
+//            else print_relevant_slr_items(p -> item2, symbol);
+//            pda -> PrintItem(p -> item2);
+//            fprintf(option -> syslis, "\n\n"); // Leave some space after printing items
+//        }
+//    }
+//
+//    //
+//    // Process Keyword/Identifier conflicts.
+//    //
+//    if (option -> verbose)
+//    {
+//        {
+//            for (int i = 0; i < soft_ss_conflicts.Length(); i++)
+//            {
+//                SsConflictElement *p = &soft_ss_conflicts[i];
+//                int symbol = p -> symbol;
+//                char temp[SYMBOL_SIZE + 1];
+//                grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
+//
+//                option -> report.Put("*** Keyword/Identifier Shift conflict on \"");
+//                option -> report.Put(temp);
+//                option -> report.Put("\"\n");
+//            }
+//        }
+//
+//        {
+//            for (int i = 0; i < soft_sr_conflicts.Length(); i++)
+//            {
+//                SrConflictElement *p = &soft_sr_conflicts[i];
+//                int symbol = p -> symbol,
+//                    rule_no = base -> item_table[p -> item].rule_number;
+//                char temp[SYMBOL_SIZE + 1];
+//                grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
+//
+//                option -> report.Put("*** Keyword/Identifier Shift/reduce conflict on \"");
+//                option -> report.Put(temp);
+//                option -> report.Put("\" with rule ");
+//                option -> report.Put(rule_no);
+//                option -> report.PutChar('\n');
+//            }
+//        }
+//
+//        for (int i = 0; i < soft_rr_conflicts.Length(); i++)
+//        {
+//            RrConflictElement *p = &soft_rr_conflicts[i];
+//            int symbol = p -> symbol,
+//                n = base -> item_table[p -> item1].rule_number,
+//                rule_no = base -> item_table[p -> item2].rule_number;
+//            char temp[SYMBOL_SIZE + 1];
+//            grammar -> RestoreSymbol(temp, grammar -> RetrieveString(symbol));
+//
+//            option -> report.Put("*** Keyword/Identifier Reduce/reduce conflict on \"");
+//            option -> report.Put(temp);
+//            option -> report.Put("\" between rule ");
+//            option -> report.Put(n);
+//            option -> report.Put(" and ");
+//            option -> report.Put(rule_no);
+//            option -> report.PutChar('\n');
+//        }
+//    }
+//    else
+//    {
+//        if (soft_ss_conflicts.Length() > 0)
+//        {
+//            option -> report.Put("*** ");
+//            option -> report.Put(soft_ss_conflicts.Length());
+//            option -> report.Put(" Keyword/Identifier Shift/shift conflicts detected\n");
+//        }
+//
+//        if (soft_sr_conflicts.Length() > 0)
+//        {
+//            option -> report.Put("*** ");
+//            option -> report.Put(soft_sr_conflicts.Length());
+//            option -> report.Put(" Keyword/Identifier Shift/reduce conflicts detected\n");
+//        }
+//
+//        if (soft_rr_conflicts.Length() > 0)
+//        {
+//            option -> report.Put("*** ");
+//            option -> report.Put(soft_rr_conflicts.Length());
+//            option -> report.Put(" Keyword/Identifier Reduce/reduce conflicts detected\n");
+//        }
+//    }
+//
+//    option -> FlushReport();
 
     return;
 }

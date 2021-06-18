@@ -2,6 +2,7 @@
 
 
 #include "dfa.h"
+#include "set.h"
 
 class Produce : public Dfa
 {

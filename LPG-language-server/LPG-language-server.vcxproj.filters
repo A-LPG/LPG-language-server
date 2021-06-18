@@ -72,6 +72,33 @@
     <ClCompile Include="src\message\SemanticTokensHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser\JiksPgOption.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\grammar.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\base.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\dfa.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\produce.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\pda.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\resolve.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\sp.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\JikesPGUtil.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">
@@ -121,6 +148,48 @@
     </ClInclude>
     <ClInclude Include="src\code.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\LpgData.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\set.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\grammar.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\JiksPgOption.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\base.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\node.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\dfa.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\produce.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\partition.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\pda.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\resolve.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\sp.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\JiksPGControl.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\JikesPGUtil.h">
+      <Filter>parser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

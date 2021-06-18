@@ -1,12 +1,12 @@
-#ifndef RESOLVE_INCLUDED
-#define RESOLVE_INCLUDED
+#pragma once
+
 
 #include "grammar.h"
 #include "node.h"
 #include "pda.h"
 #include "set.h"
 #include "tuple.h"
-#include "../ASTUtils.h"
+
 
 class Resolve : public Util
 {
@@ -258,4 +258,4 @@ public:
     void ResolveKeywordIdentifierReduceReduceConflicts(int, int, int, Array< Tuple<int> > &);
     void CreateLastats(void);
 };
-#endif
+

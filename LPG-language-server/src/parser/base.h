@@ -2,9 +2,10 @@
 
 
 #include "grammar.h"
+#include "JikesPGUtil.h"
 #include "node.h"
 #include "set.h"
-#include "../ASTUtils.h"
+
 #include "tuple.h"
 
 

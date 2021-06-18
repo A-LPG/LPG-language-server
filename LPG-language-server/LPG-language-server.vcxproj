@@ -32,8 +32,17 @@
     <ClCompile Include="src\message\NavigateToDefinitionHandler.cpp" />
     <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp" />
     <ClCompile Include="src\message\SemanticTokensHandler.cpp" />
+    <ClCompile Include="src\parser\base.cpp" />
+    <ClCompile Include="src\parser\dfa.cpp" />
+    <ClCompile Include="src\parser\grammar.cpp" />
+    <ClCompile Include="src\parser\JikesPGUtil.cpp" />
+    <ClCompile Include="src\parser\JiksPgOption.cpp" />
     <ClCompile Include="src\parser\LPGParser.cpp" />
     <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp" />
+    <ClCompile Include="src\parser\pda.cpp" />
+    <ClCompile Include="src\parser\produce.cpp" />
+    <ClCompile Include="src\parser\resolve.cpp" />
+    <ClCompile Include="src\parser\sp.cpp" />
     <ClCompile Include="src\WorkSpaceManager.cpp" />
     <ClCompile Include="src\timer.cpp" />
   </ItemGroup>
@@ -42,6 +51,13 @@
     <ClInclude Include="src\code.h" />
     <ClInclude Include="src\CompilationUnit.h" />
     <ClInclude Include="src\message\MessageHandler.h" />
+    <ClInclude Include="src\parser\base.h" />
+    <ClInclude Include="src\parser\dfa.h" />
+    <ClInclude Include="src\parser\grammar.h" />
+    <ClInclude Include="src\parser\JikesPGUtil.h" />
+    <ClInclude Include="src\parser\JiksPGControl.h" />
+    <ClInclude Include="src\parser\JiksPgOption.h" />
+    <ClInclude Include="src\parser\LpgData.h" />
     <ClInclude Include="src\parser\LPGKWLexer.h" />
     <ClInclude Include="src\parser\LPGKWLexerprs.h" />
     <ClInclude Include="src\parser\LPGKWLexersym.h" />
@@ -52,6 +68,13 @@
     <ClInclude Include="src\parser\LPGParserprs.h" />
     <ClInclude Include="src\parser\LPGParsersym.h" />
     <ClInclude Include="src\parser\LPGParser_top_level_ast.h" />
+    <ClInclude Include="src\parser\node.h" />
+    <ClInclude Include="src\parser\partition.h" />
+    <ClInclude Include="src\parser\pda.h" />
+    <ClInclude Include="src\parser\produce.h" />
+    <ClInclude Include="src\parser\resolve.h" />
+    <ClInclude Include="src\parser\set.h" />
+    <ClInclude Include="src\parser\sp.h" />
     <ClInclude Include="src\WorkSpaceManager.h" />
     <ClInclude Include="src\timer.h" />
   </ItemGroup>

@@ -1,18 +1,22 @@
 #pragma once
 
 
+#include "JikesPGUtil.h"
+#include "JiksPGControl.h"
 #include "JiksPgOption.h"
 #include "LpgData.h"
-#include "../ASTUtils.h"
+#include "LPGParsersym.h"
+
 #include "tuple.h"
 
-#include "parser.h"
+
 #include "set.h"
 
 
-#undef INFINITY // disable macro definition of INFINITY
+//#undef INFINITY // disable macro definition of INFINITY
 
 
+class JikesPGLexStream;
 //
 // 
 //
@@ -226,6 +230,10 @@ public:
     {
         return  start_symbol;
     }
+     JikesPGLexStream* GetLexStream()
+     {
+         return lex_stream;
+     }
      LpgData parser;
 private:
 
@@ -272,7 +280,7 @@ private:
     void ProcessTerminals(Tuple<int> &);
     void ProcessInitialAliases(Tuple<int> &);
     void ProcessRemainingAliases(Tuple<int> &);
-    void ProcessTitleOrGlobalBlock(int, ActionBlockElement &);
+   
     char *InsertInterface(SymbolLookupTable &, char *);
     void ProcessRules(Tuple<int> &);
     void SetName(VariableSymbol *, VariableSymbol *, bool negate = false);
@@ -284,14 +292,13 @@ private:
 
     JiksPgOption*option;
 
-  
+    Control* control;
     VariableLookupTable *variable_table;
-
+    JikesPGLexStream* lex_stream;
 
     char *ast_token_classname;
     int ast_token_interface;
-    ILexStream* token_stream = nullptr;
-    PrsStream* lex_stream = nullptr;
+  
     std::unordered_map<int, VariableSymbol*>  lex_stream_variable_table;
 public:
 
@@ -369,7 +376,7 @@ public:
     inline int FirstRule() { return 0; }
     inline int LastRule()  { return num_rules; }
 
-    void RestoreSymbol(const char *, char *);
+    void RestoreSymbol(char *, char *);
     void PrintLargeToken(char *, const char *, const char *, int);
 };
 

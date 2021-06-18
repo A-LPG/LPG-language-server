@@ -746,7 +746,7 @@ void Pda::MakeReductions(void)
         }
     } // end for ALL_STATES
 
-    fprintf(option -> syslis, "\n\n");
+  //  fprintf(option -> syslis, "\n\n");
 
     //
     // If the automaton required multiple lookahead, construct the
@@ -808,7 +808,7 @@ void Pda::MakeReductions(void)
     }
     else
     {
-        LexStream *ls = grammar -> GetLexStream();
+        auto ls = grammar -> GetLexStream();
 
         if (num_reduce_reduce_conflicts > 0 || num_shift_reduce_conflicts > 0)
         {

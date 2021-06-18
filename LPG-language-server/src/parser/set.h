@@ -1,5 +1,5 @@
-#ifndef SET_INCLUDED
-#define SET_INCLUDED
+#pragma once
+
 
 #include <limits.h>
 #include <assert.h>
@@ -463,4 +463,4 @@ if (! (i >= 0 && i < set_size))
                                               : (CELL) 1);
     }
 };
-#endif
+

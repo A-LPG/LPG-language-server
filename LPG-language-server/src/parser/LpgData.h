@@ -1,6 +1,9 @@
 #pragma once
 #include <tuple.h>
+
+#include "JikesPGUtil.h"
 #include "../code.h"
+
 class HashPrimes
 {
 public:
@@ -205,6 +208,12 @@ SubSymbol* LookupTable<SubSymbol>::InsertName(const char* str, size_t len)
 }
 class VariableSymbol;
 class RuleSymbol;
+class MacroSymbol;
+class SimpleMacroSymbol;
+class BlockSymbol;
+class InputFileSymbol;
+class ActionFileSymbol;
+
 class Symbol
 {
 public:
@@ -215,14 +224,22 @@ public:
         NONE,
         VARIABLE,
         RULE,
-       
+        MACRO,
+        SIMPLE_MACRO,
+        BLOCK,
+        INPUT_FILE,
+        ACTION_FILE
     };
 
     SymbolKind Kind() { return kind; }
 
     VariableSymbol* VariableCast() { return (VariableSymbol*)(kind == VARIABLE ? this : NULL); }
     RuleSymbol* RuleCast() { return (RuleSymbol*)(kind == RULE ? this : NULL); }
-  
+    MacroSymbol* MacroCast() { return (MacroSymbol*)(kind == MACRO ? this : NULL); }
+    SimpleMacroSymbol* SimpleMacroCast() { return (SimpleMacroSymbol*)(kind == SIMPLE_MACRO ? this : NULL); }
+    BlockSymbol* BlockCast() { return (BlockSymbol*)(kind == BLOCK ? this : NULL); }
+    InputFileSymbol* InputFileCast() { return (InputFileSymbol*)(kind == INPUT_FILE ? this : NULL); }
+    ActionFileSymbol* ActionFileCast() { return (ActionFileSymbol*)(kind == ACTION_FILE ? this : NULL); }
 
     unsigned HashAddress() { return hash_address; }
 
@@ -234,7 +251,7 @@ public:
     int Index() { return pool_index; }
 
     IToken* Location() { return location; }
-    void SetLocation(Token* location_) { location = location_; }
+    void SetLocation(IToken* location_) { location = location_; }
 
     Symbol(SymbolKind kind_, const char* name_, int length_, int pool_index_, unsigned hash_address_) : kind(kind_),
         length(length_),
@@ -317,6 +334,107 @@ public:
 
 private:
     Tuple<int> rules;
+};
+
+class MacroSymbol : public Symbol
+{
+public:
+    int Block() { return block; }
+    void SetBlock(int block_) { block = block_; }
+
+    bool IsInUse() { return in_use; }
+    void MarkInUse() { in_use = true; }
+    void MarkNotInUse() { in_use = false; }
+
+    MacroSymbol(const char* name_, int length_, int pool_index_, unsigned hash_address_) : Symbol(MACRO, name_, length_, pool_index_, hash_address_),
+        block(0),
+        in_use(false)
+    {}
+
+    virtual ~MacroSymbol()
+    {}
+
+private:
+    int block;
+    bool in_use;
+};
+
+
+class SimpleMacroSymbol : public Symbol
+{
+public:
+    char* Value() { return value; }
+    void SetValue(const char* value_) { value = new char[strlen(value_) + 1]; strcpy(value, value_); }
+
+    bool IsUsed() { return used; }
+    void MarkUsed() { used = true; }
+
+    SimpleMacroSymbol(const char* name_,
+        int length_,
+        int pool_index_,
+        unsigned hash_address_) : Symbol(SIMPLE_MACRO, name_, length_, pool_index_, hash_address_),
+        value(NULL),
+        used(false)
+    {}
+
+    virtual ~SimpleMacroSymbol()
+    {
+        delete[] value;
+    }
+
+private:
+    char* value;
+    bool used;
+};
+
+class BlockSymbol : public Symbol
+{
+public:
+    enum
+    {
+        MAIN_BLOCK,
+        HEADER_BLOCK,
+        TRAILER_BLOCK
+    };
+
+    BlockSymbol(const char* block_begin_,
+        int block_begin_length_,
+        int pool_index_,
+        unsigned hash_address_) : Symbol(BLOCK, block_begin_, block_begin_length_, pool_index_, hash_address_),
+        block_end(NULL),
+        block_end_length(0)
+    {}
+
+    virtual ~BlockSymbol();
+
+    char* BlockBegin() { return name; }
+    int BlockBeginLength() { return length; }
+
+    // TODO Rename these methods and the field - they shadow the base class field/method
+    void SetKind(int kind_) { kind = kind_; }
+    int Kind() { return kind; }
+
+    void SetBlockEnd(const char* block_end_, int block_end_length_)
+    {
+        block_end_length = block_end_length_;
+
+        block_end = new char[block_end_length + 1];
+        memmove(block_end, block_end_, block_end_length * sizeof(char));
+        block_end[block_end_length] = Code::NULL_CHAR;
+
+        return;
+    }
+    char* BlockEnd() { return block_end; }
+    int BlockEndLength() { return block_end_length; }
+
+  
+   
+
+private:
+   
+    int kind;
+    char* block_end;
+    int block_end_length;
 };
 
 struct LpgData
