@@ -1,105 +1,10 @@
 #include <sys/stat.h>
 #include "control.h"
 #include "grammar.h"
-
-
 #include <iostream>
+
+
 int HashPrimes::primes[] = { DEFAULT_HASH_SIZE, 8191, 16411, MAX_HASH_SIZE };
-
-void JiksPgOption::EmitHeader(IToken* startToken, IToken* endToken, const char* header)
-{
-    /*startToken = (startToken != NULL ? startToken : lex_stream->GetTokenReference(0));
-    endToken = (endToken != NULL ? endToken : lex_stream->GetTokenReference(0));
-
-    report.Put(startToken->FileName());
-    report.Put(":");
-    report.Put(startToken->Line());
-    report.Put(":");
-    report.Put(startToken->Column());
-    report.Put(":");
-    report.Put(endToken->EndLine());
-    report.Put(":");
-    report.Put(endToken->EndColumn());
-    report.Put(":");
-    report.Put(startToken->StartLocation());
-    report.PutChar(':');
-    report.Put(endToken->EndLocation());
-    report.Put(": ");
-
-    if (*header != '\0')
-        report.Put(header);*/
-
-    return;
-}
-
-void JiksPgOption::EmitHeader(IToken* token, const char* header)
-{
-    EmitHeader(token, token, header);
-}
-
-void JiksPgOption::EmitError(int index, const char* msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Error: ", msg);
-}
-void JiksPgOption::EmitError(int index, Tuple<const char*>& msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Error: ", msg);
-}
-void JiksPgOption::EmitWarning(int index, const char* msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Warning: ", msg);
-}
-void JiksPgOption::EmitWarning(int index, Tuple<const char*>& msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Warning: ", msg);
-}
-void JiksPgOption::EmitInformative(int index, const char* msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Informative: ", msg);
-}
-void JiksPgOption::EmitInformative(int index, Tuple<const char*>& msg)
-{
-	//Emit(lex_stream->GetTokenReference(index), "Informative: ", msg);
-}
-
-void JiksPgOption::Emit(IToken* token, const char* header, const char* msg)
-{
-    Emit(token, token, header, msg);
-
-    return;
-}
-
-
-void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const char* header, const char* msg)
-{
-    //EmitHeader(startToken, endToken, header);
-    //report.Put(msg);
-    //report.PutChar('\n');
-
-    //FlushReport();
-
-    return;
-}
-
-
-void JiksPgOption::Emit(IToken* token, const char* header, Tuple<const char*>& msg)
-{
-    Emit(token, token, header, msg);
-
-    return;
-}
-
-void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const char* header, Tuple<const char*>& msg)
-{
-   /* EmitHeader(startToken, endToken, header);
-    for (int i = 0; i < msg.Length(); i++)
-        report.Put(msg[i]);
-    report.PutChar('\n');
-
-    FlushReport();*/
-
-    return;
-}
 
 
 
@@ -107,13 +12,13 @@ using namespace std;
  const char* GetDefaultTerminalType() { return "IToken"; }
  const char* GetDefaultNonterminalType() { return "Object"; }
 Grammar::Grammar(
-				JiksPgOption* opt,
+				Control* con,
                  VariableLookupTable *variable_table_ )
-                                  : 
-                                    option(opt),
+                                  : parser(*con->jikspg_data),
+                                    option(con->option),
                                 
-                                    lex_stream(nullptr),
                                     variable_table(variable_table_),
+                                    lex_stream(con->lex_stream),
                                  
              
                                     symbol_index(4, variable_table_ -> Size()),

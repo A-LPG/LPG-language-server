@@ -12,14 +12,7 @@
 
 #include "set.h"
 
-
-//#undef INFINITY // disable macro definition of INFINITY
-
-
 class JikesPGLexStream;
-//
-// 
-//
 class ProcessedRuleElement
 {
 public:
@@ -234,7 +227,7 @@ public:
      {
          return lex_stream;
      }
-     LpgData parser;
+     LpgData& parser;
 private:
 
 
@@ -290,19 +283,19 @@ private:
     void DisplayInput();
 
 
-    JiksPgOption*option;
+    JiksPgOption*option = nullptr;
 
-    Control* control;
-    VariableLookupTable *variable_table;
-    JikesPGLexStream* lex_stream;
+    Control* control = nullptr;
+    VariableLookupTable *variable_table = nullptr;
+    JikesPGLexStream* lex_stream = nullptr;
 
-    char *ast_token_classname;
-    int ast_token_interface;
+    char *ast_token_classname = nullptr;
+    int ast_token_interface=0;
   
     std::unordered_map<int, VariableSymbol*>  lex_stream_variable_table;
 public:
 
-    Grammar(JiksPgOption* opt,
+    Grammar(Control* con,
             VariableLookupTable *variable_table_);
 
     ~Grammar()

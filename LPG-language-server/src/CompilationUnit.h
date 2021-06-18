@@ -4,6 +4,7 @@
 #include <LibLsp/lsp/symbol.h>
 #include <LibLsp/lsp/working_files.h>
 
+#include "parser/JiksPGControl.h"
 #include "parser/LPGLexer.h"
 #include "parser/LPGParser.h"
 
@@ -112,7 +113,11 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	//https://www.jianshu.com/p/210fda081c76
 	void collectFirstSet(LPGParser_top_level_ast::nonTerm* ,std::unordered_set<LPGParser_top_level_ast::ASTNodeToken*>&);
 	void collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<LPGParser_top_level_ast::ASTNodeToken*>&);
-
+	std::shared_ptr<Control>  control;
+	VariableLookupTable     variable_table;
+	MacroLookupTable        macro_table;
+	LpgData lpg_data;
+	JikesPGLexStream lex_stream;
 private:
 	void  collectEpsilonSet();
 };

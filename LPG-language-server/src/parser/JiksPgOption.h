@@ -7,11 +7,32 @@
 class JiksPgOption : public Code, public Util
 {
 
-
+    Tuple<char*> temp_string;
+    char* NewString(int n) { return temp_string.Next() = new char[n]; }
+    char* NewString(const char* in)
+    {
+        char* out = new char[strlen(in) + 1];
+        temp_string.Next() = out;
+        strcpy(out, in);
+        return out;
+    }
+    char* NewString(const char* in, int length)
+    {
+        char* out = new char[length + 1];
+        temp_string.Next() = out;
+        strncpy(out, in, length);
+        out[length] = NULL_CHAR;
+        return out;
+    }
     public:
-	JiksPgOption();
+    const char* GetPrefix(const char* filename);
+    void ProcessPath(Tuple<const char*>&, const char*, const char* = NULL);
+    JiksPgOption(const std::string& file_path);
+    const char* GetFile(const char* directory, const char* file_suffix, const char* file_type);
+    const char* GetFilename(const char* filespec);
+    const char* GetType(const char* filespec);
 
-        enum
+    enum
         {
             //
             // Possible values for option "names"
@@ -179,7 +200,9 @@ class JiksPgOption : public Code, public Util
         bool quiet;
 
         void EmitHeader(IToken*, const char*);
-        void EmitHeader(IToken*, IToken*, const char*);
+	void CompleteOptionProcessing();
+    const char* ExpandFilename(const char* filename);
+    void EmitHeader(IToken*, IToken*, const char*);
         void Emit(IToken*, const char*, const char*);
         void Emit(IToken*, const char*, Tuple<const char*>&);
         void Emit(IToken*, IToken*, const char*, const char*);
@@ -204,4 +227,17 @@ class JiksPgOption : public Code, public Util
         void EmitWarning(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, "Warning: ", msg); }
         void EmitInformative(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, "Informative: ", msg); }
         void EmitInformative(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, "Informative: ", msg); }
+
+        //
+    // Turn all backslashes into forward slashes in filename.
+    //
+        void NormalizeSlashes(char* filename)
+        {
+            for (char* s = filename; *s != '\0'; s++)
+            {
+                if (*s == '\\')
+                    *s = '/';
+            }
+        }
+
 };

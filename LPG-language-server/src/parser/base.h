@@ -71,7 +71,7 @@ class Base : public Util
                        is_cyclic,
                        generates_null;
 
-
+    Control* control;
     JiksPgOption*option;
  
     Grammar *grammar;
@@ -103,7 +103,7 @@ class Base : public Util
 
 public:
 
-    Base(JiksPgOption* opt, Grammar* g, NodePool* n);
+    Base(Control* control_);
 
     //
     // CLOSURE is a mapping from non-terminal to a set (linked-list) of

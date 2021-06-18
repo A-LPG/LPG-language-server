@@ -356,7 +356,9 @@ void Resolve::print_relevant_slr_items(int item_no, int conflict_symbol)
     slr_visited.MemReset();
     if (slr_trace(grammar -> rules[base -> item_table[item_no].rule_number].lhs,
                    conflict_symbol))
-        ;
+    {
+	    
+    }
 
     return;
 }

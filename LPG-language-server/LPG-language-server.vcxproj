@@ -36,6 +36,7 @@
     <ClCompile Include="src\parser\dfa.cpp" />
     <ClCompile Include="src\parser\grammar.cpp" />
     <ClCompile Include="src\parser\JikesPGUtil.cpp" />
+    <ClCompile Include="src\parser\JiksPGControl.cpp" />
     <ClCompile Include="src\parser\JiksPgOption.cpp" />
     <ClCompile Include="src\parser\LPGParser.cpp" />
     <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp" />

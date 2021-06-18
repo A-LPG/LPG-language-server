@@ -99,6 +99,9 @@
     <ClCompile Include="src\parser\JikesPGUtil.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser\JiksPGControl.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">

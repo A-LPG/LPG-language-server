@@ -500,6 +500,10 @@ struct LpgData
     class TypeDefinition
     {
     public:
+        TypeDefinition(): type_index(0), separator_index(0), symbol_index(0), block_index(0)
+        {
+        }
+
         int type_index,
             separator_index,
             symbol_index,
@@ -510,6 +514,11 @@ struct LpgData
     class ImportedStartIndexes
     {
     public:
+        ImportedStartIndexes(): import_file_index(0)
+        {
+        }
+    	
+
         int import_file_index;
         Tuple<int> start_indexes;
     };
@@ -600,10 +609,17 @@ struct LpgData
         return;
     }
 
-
+    LpgData();
 };
+
+inline LpgData::LpgData(): identifier_index(0), eol_index(0), eof_index(0), error_index(0)
+{
+}
 
 
 typedef LookupTable<Symbol> SymbolLookupTable;
 typedef LookupTable<VariableSymbol> VariableLookupTable;
 typedef LookupTable<RuleSymbol> RuleLookupTable;
+typedef LookupTable<MacroSymbol> MacroLookupTable;
+typedef LookupTable<SimpleMacroSymbol> SimpleMacroLookupTable;
+typedef LookupTable<BlockSymbol> BlockLookupTable;

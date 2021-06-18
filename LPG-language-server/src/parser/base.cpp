@@ -10,11 +10,11 @@ int Base::MAX_LENGTH = PRINT_LINE_SIZE - 4;
 //
 // Constructor
 //
-Base::Base(JiksPgOption* opt , Grammar* g,   NodePool* n) :
-                                option(opt),
-                                
-                                grammar(g),
-                                node_pool(n)
+Base::Base(Control* control_) : control(control_),
+option(control_ -> option),
+
+grammar(control_ -> grammar),
+node_pool(control_ -> node_pool)
 {}
 
 

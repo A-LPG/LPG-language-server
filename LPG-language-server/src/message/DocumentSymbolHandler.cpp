@@ -63,23 +63,44 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 
 struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
-    LpgData jikspg_data;
+    LpgData& jikspg_data;
     ILexStream* lex= nullptr;
     std::shared_ptr<CompilationUnit>& unit;
     std::stack< lsDocumentSymbol*> fItemStack;
     void unimplementedVisitor(const std::string& s) { }
-    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u,lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l), unit(u)
+    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u, lsDocumentSymbol* rootSymbol, ILexStream* _l) :jikspg_data(u->lpg_data), lex(_l), unit(u)
     {
         fItemStack.push(rootSymbol);
        
         Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
+        VariableLookupTable& variable_table = u->variable_table;
+        MacroLookupTable& macro_table = u->macro_table;
+        Tuple<VariableSymbol*>& variable_index = u->lex_stream.variable_index;
+        u->lex_stream.token_stream  = tokens;
+     
+        variable_index.Resize(tokens.size());
         for (int i = 0; i < tokens.size(); ++i)
         {
             IToken* token = tokens[i];
-            if(LPGParsersym::TK_BLOCK == token->getKind())
+          
+            auto kind =  token->getKind();
+            if(LPGParsersym::TK_BLOCK == kind)
             {
                 jikspg_data.initial_blocks.Next() = token->getTokenIndex();
+              
             }
+            else if(LPGParsersym::TK_SYMBOL == kind)
+            {
+                auto name = token->to_utf8_string();
+                variable_index[i] = variable_table.FindOrInsertName(name.c_str(), name.size());
+                
+            }
+            else if (LPGParsersym::TK_MACRO_NAME == kind)
+            {
+                auto name = token->to_utf8_string();
+                macro_table.FindOrInsertName(name.c_str(), name.size());
+            }
+            
         }
     }
     lsDocumentSymbol*  createSubItem(IAst* n)
@@ -811,6 +832,16 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit)
             children.back().swap(it);
     	}
     }
-
+	 try
+	 {
+         
+         unit->control = std::make_shared<Control>(unit->working_file->filename.path,&unit->lex_stream,&unit->lpg_data, &unit->variable_table);
+         unit->control->option->CompleteOptionProcessing();
+         unit->control->ProcessGrammar();
+         unit->control->ConstructParser();
+	 }
+	 catch (...)
+	 {
+	 }
 	
 }

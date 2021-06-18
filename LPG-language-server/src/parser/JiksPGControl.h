@@ -3,10 +3,13 @@
 #include <IToken.h>
 #include <unordered_map>
 
+#include "JiksPgOption.h"
 #include "LpgData.h"
 #include "node.h"
 
 
+class Pda;
+class Base;
 class JiksPgOption;
 class Grammar;
 
@@ -14,11 +17,13 @@ class JikesPGLexStream
 {
 public:
 	
-    Tuple<IToken*> token_stream;
-    Tuple<VariableSymbol*> variable_table;
+    Tuple<IToken*>          token_stream;
+   
+    Tuple<VariableSymbol*>  variable_index;
+
     typedef int TokenIndex;
     inline unsigned Kind(TokenIndex i) { return token_stream[i]->getKind(); }
-    IToken* GetTokenReference(int index) { return (token_stream[index]); }
+    IToken* GetTokenReference(int i) { return (token_stream[i]); }
     //
    //
 
@@ -63,7 +68,7 @@ public:
     inline int NumTokens() { return token_stream.Length(); }
     VariableSymbol* GetVariableSymbol(TokenIndex i)
     {
-        return (variable_table[i]);
+        return (variable_index[i]);
     }
     //
 //
@@ -103,15 +108,27 @@ private:
 class Control
 {
 public:
-	
-    JiksPgOption* option;
-    Grammar* grammar;
+   
+    Control(const std::string& file_path, JikesPGLexStream* stream,LpgData*data, VariableLookupTable* variable_table);
+    //
+// Close listing file and destroy the objects allocated in the constructor.
+//
+    ~Control() { CleanUp(); }
+    void ProcessGrammar(void);
+
+    void ConstructParser(void);
+    void CleanUp();
+    LpgData* jikspg_data;
+    JiksPgOption* option ;
+    
     NodePool* node_pool;
+    Base* base;
+    Pda* pda;
+    Grammar* grammar;
+	
     void Exit(int code)
     {
-
         throw code;
-
     }
-    JikesPGLexStream* lex_stream= nullptr;
+    JikesPGLexStream* lex_stream;
 };
