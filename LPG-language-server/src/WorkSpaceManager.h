@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -33,7 +34,7 @@ struct WorkSpaceManagerData;
 
 struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path, Monitor* monitor);
-	void   collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit , Monitor* monitor);
+	void   collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit , Monitor* monitor);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName, Monitor* monitor);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor);
 	std::vector<Object*> findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);

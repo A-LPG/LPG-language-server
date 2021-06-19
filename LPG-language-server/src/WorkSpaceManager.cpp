@@ -126,8 +126,10 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
 {
 
 	 auto     id = stripName(_word);
-	 std::vector<std::string> includedFiles;
+	 std::set<std::string> includedFiles;
+	 includedFiles.insert(refUnit->working_file->filename);
 	collectIncludedFiles(includedFiles,refUnit, monitor);
+	includedFiles.erase(refUnit->working_file->filename);
 	 for (auto& fileName : includedFiles) 
 	 {
 		 auto include_unit= lookupImportedFile(refUnit->working_file->directory,fileName,monitor);
@@ -170,7 +172,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	return OnChange(_open,std::move(content), monitor);
 }
 
-void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
+void WorkSpaceManager::collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
 	if(!refUnit){
 		return;
@@ -199,7 +201,9 @@ void WorkSpaceManager::collectIncludedFiles(std::vector<std::string>& result, co
 				if ( dynamic_cast<option_value0*>(optValue)) {
 					string fileName;
 					fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
-					result.emplace_back(fileName);
+					if(result.find(fileName) != result.end()) 
+						continue;
+					result.insert(fileName);
 					if (optName == (L"import_terminals")) {
 						// pick up defs from the filter
 						if (monitor && monitor->isCancelled())
