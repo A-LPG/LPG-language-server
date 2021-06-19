@@ -72,9 +72,6 @@
     <ClCompile Include="src\message\SemanticTokensHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="src\parser\JiksPgOption.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\parser\grammar.cpp">
       <Filter>parser</Filter>
     </ClCompile>
@@ -100,6 +97,12 @@
       <Filter>parser</Filter>
     </ClCompile>
     <ClCompile Include="src\parser\JiksPGControl.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\buffer.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\JiksPgOption.cpp">
       <Filter>parser</Filter>
     </ClCompile>
   </ItemGroup>
@@ -152,7 +155,7 @@
     <ClInclude Include="src\code.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\parser\LpgData.h">
+    <ClInclude Include="src\parser\ParseData.h">
       <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="src\parser\set.h">
@@ -192,6 +195,12 @@
       <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="src\parser\JikesPGUtil.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\buffer.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\lpgErrorCode.h">
       <Filter>parser</Filter>
     </ClInclude>
   </ItemGroup>

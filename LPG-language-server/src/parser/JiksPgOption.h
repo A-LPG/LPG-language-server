@@ -1,12 +1,19 @@
 #pragma once
 #include <IToken.h>
 #include <tuple.h>
+#include <LibLsp/lsp/lsp_diagnostic.h>
 
+#include "buffer.h"
 #include "JikesPGUtil.h"
+#include "lpgErrorCode.h"
 #include "../code.h"
+struct IMessageHandler;
+class JikesPGLexStream;
+
 class JiksPgOption : public Code, public Util
 {
-
+    ProblemHandler* message_handler_ =nullptr;
+    JikesPGLexStream* lex_stream ;
     Tuple<char*> temp_string;
     char* NewString(int n) { return temp_string.Next() = new char[n]; }
     char* NewString(const char* in)
@@ -27,10 +34,11 @@ class JiksPgOption : public Code, public Util
     public:
     const char* GetPrefix(const char* filename);
     void ProcessPath(Tuple<const char*>&, const char*, const char* = NULL);
-    JiksPgOption(const std::string& file_path);
+    JiksPgOption(JikesPGLexStream* ,const std::string& file_path);
     const char* GetFile(const char* directory, const char* file_suffix, const char* file_type);
     const char* GetFilename(const char* filespec);
     const char* GetType(const char* filespec);
+    void CheckGlobalOptionsConsistency();
 
     enum
         {
@@ -134,7 +142,7 @@ class JiksPgOption : public Code, public Util
             serialize,
             soft_keywords,
             table;
-
+        bool for_lsp;
         bool for_parser;
         int lalr_level,
             margin,
@@ -198,35 +206,37 @@ class JiksPgOption : public Code, public Util
             * suffix;
 
         bool quiet;
-
+        TextBuffer report;
         void EmitHeader(IToken*, const char*);
-	void CompleteOptionProcessing();
-    const char* ExpandFilename(const char* filename);
+	    void CompleteOptionProcessing();
+      const char* ExpandFilename(const char* filename);
     void EmitHeader(IToken*, IToken*, const char*);
-        void Emit(IToken*, const char*, const char*);
-        void Emit(IToken*, const char*, Tuple<const char*>&);
-        void Emit(IToken*, IToken*, const char*, const char*);
-        void Emit(IToken*, IToken*, const char*, Tuple<const char*>&);
-        void EmitError(int, const char*);
+        void Emit(IToken*, const lsDiagnosticSeverity, const char*);
+    void FlushReport();
+         void Emit(IToken*,const  lsDiagnosticSeverity severity, Tuple<const char*>&);
+        void Emit(IToken*, IToken*,const  lsDiagnosticSeverity severity, const char*);
+        void Emit(IToken*, IToken*, const lsDiagnosticSeverity severity, Tuple<const char*>&);
+    
+    void EmitError(int, const char*);
         void EmitError(int, Tuple<const char*>&);
         void EmitWarning(int, const char*);
         void EmitWarning(int, Tuple<const char*>&);
         void EmitInformative(int, const char*);
         void EmitInformative(int, Tuple<const char*>&);
 
-        void EmitError(IToken* token, const char* msg) { Emit(token, "Error: ", msg); return_code = 12; }
-        void EmitError(IToken* token, Tuple<const char*>& msg) { Emit(token, "Error: ", msg); return_code = 12; }
-        void EmitWarning(IToken* token, const char* msg) { Emit(token, "Warning: ", msg); }
-        void EmitWarning(IToken* token, Tuple<const char*>& msg) { Emit(token, "Warning: ", msg); }
-        void EmitInformative(IToken* token, const char* msg) { Emit(token, "Informative: ", msg); }
-        void EmitInformative(IToken* token, Tuple<const char*>& msg) { Emit(token, "Informative: ", msg); }
+        void EmitError(IToken* token, const char* msg) { Emit(token, lsDiagnosticSeverity::Error, msg); return_code = 12; }
+        void EmitError(IToken* token, Tuple<const char*>& msg) { Emit(token, lsDiagnosticSeverity::Error, msg); return_code = 12; }
+        void EmitWarning(IToken* token, const char* msg) { Emit(token, lsDiagnosticSeverity::Warning, msg); }
+        void EmitWarning(IToken* token, Tuple<const char*>& msg) { Emit(token, lsDiagnosticSeverity::Warning, msg); }
+        void EmitInformative(IToken* token, const char* msg) { Emit(token, lsDiagnosticSeverity::Information, msg); }
+        void EmitInformative(IToken* token, Tuple<const char*>& msg) { Emit(token, lsDiagnosticSeverity::Information, msg); }
 
-        void EmitError(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, "Error: ", msg); return_code = 12; }
-        void EmitError(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, "Error: ", msg); return_code = 12; }
-        void EmitWarning(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, "Warning: ", msg); }
-        void EmitWarning(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, "Warning: ", msg); }
-        void EmitInformative(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, "Informative: ", msg); }
-        void EmitInformative(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, "Informative: ", msg); }
+        void EmitError(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Error, msg); return_code = 12; }
+        void EmitError(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Error, msg); return_code = 12; }
+        void EmitWarning(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Warning, msg); }
+        void EmitWarning(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Warning, msg); }
+        void EmitInformative(IToken* startToken, IToken* endToken, const char* msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Information, msg); }
+        void EmitInformative(IToken* startToken, IToken* endToken, Tuple<const char*>& msg) { Emit(startToken, endToken, lsDiagnosticSeverity::Information, msg); }
 
         //
     // Turn all backslashes into forward slashes in filename.
@@ -239,5 +249,8 @@ class JiksPgOption : public Code, public Util
                     *s = '/';
             }
         }
-
+        void SetMessageHandler(ProblemHandler* handler)
+        {
+            message_handler_ = handler;
+        }
 };

@@ -1,4 +1,8 @@
 #include "JiksPgOption.h"
+#include "IcuUtil.h"
+#include <IPrsStream.h>
+
+#include "JiksPGControl.h"
 //
 // Change the following static to "true" to enable the new options-processing code
 //
@@ -59,10 +63,11 @@ void JiksPgOption::ProcessPath(Tuple<const char*>& list, const char* path, const
     return;
 }
 
-JiksPgOption::JiksPgOption(const std::string& file_path): home_directory(nullptr), template_directory(nullptr), ast_directory_prefix(nullptr)
+JiksPgOption::JiksPgOption(JikesPGLexStream* lex,const std::string& file_path)
+: home_directory(nullptr), template_directory(nullptr), ast_directory_prefix(nullptr),lex_stream(lex)
 {
 	for_parser = true;
-
+    for_lsp = true;
 
 	return_code = 0;
 
@@ -278,10 +283,12 @@ const char* JiksPgOption::GetType(const char* filespec)
     return NewString(start, length);
 }
 
+//
+//
+//
+
 void JiksPgOption::CompleteOptionProcessing()
 {
-
-    home_directory = NewString("home_directory");
     //
     //
     //
@@ -609,26 +616,26 @@ const char* JiksPgOption::ExpandFilename(const char* filename)
 
 void JiksPgOption::EmitHeader(IToken* startToken, IToken* endToken, const char* header)
 {
-    /*startToken = (startToken != NULL ? startToken : lex_stream->GetTokenReference(0));
+    startToken = (startToken != NULL ? startToken : lex_stream->GetTokenReference(0));
     endToken = (endToken != NULL ? endToken : lex_stream->GetTokenReference(0));
-
-    report.Put(startToken->FileName());
+    
+    report.Put(IcuUtil::ws2s( startToken->getIPrsStream()->getFileName()).c_str());
     report.Put(":");
-    report.Put(startToken->Line());
+    report.Put(startToken->getLine());
     report.Put(":");
-    report.Put(startToken->Column());
+    report.Put(startToken->getColumn());
     report.Put(":");
-    report.Put(endToken->EndLine());
+    report.Put(endToken->getEndLine());
     report.Put(":");
-    report.Put(endToken->EndColumn());
+    report.Put(endToken->getEndColumn());
     report.Put(":");
-    report.Put(startToken->StartLocation());
+    report.Put(startToken->getStartOffset());
     report.PutChar(':');
-    report.Put(endToken->EndLocation());
+    report.Put(endToken->getEndOffset());
     report.Put(": ");
 
     if (*header != '\0')
-        report.Put(header);*/
+        report.Put(header);
 
     return;
 }
@@ -640,42 +647,59 @@ void JiksPgOption::EmitHeader(IToken* token, const char* header)
 
 void JiksPgOption::EmitError(int index, const char* msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Error: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Error, msg);
 }
 void JiksPgOption::EmitError(int index, Tuple<const char*>& msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Error: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Error, msg);
 }
 void JiksPgOption::EmitWarning(int index, const char* msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Warning: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Warning, msg);
 }
 void JiksPgOption::EmitWarning(int index, Tuple<const char*>& msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Warning: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Warning, msg);
 }
 void JiksPgOption::EmitInformative(int index, const char* msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Informative: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Information, msg);
 }
 void JiksPgOption::EmitInformative(int index, Tuple<const char*>& msg)
 {
-    //Emit(lex_stream->GetTokenReference(index), "Informative: ", msg);
+    Emit(lex_stream->GetTokenReference(index), lsDiagnosticSeverity::Information, msg);
 }
 
-void JiksPgOption::Emit(IToken* token, const char* header, const char* msg)
+void JiksPgOption::Emit(IToken* token, lsDiagnosticSeverity severity, const char* msg)
 {
-    Emit(token, token, header, msg);
+  
+    Emit(token, token, severity, msg);
 
     return;
 }
 
-
-void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const char* header, const char* msg)
+void JiksPgOption::FlushReport()
 {
-    //EmitHeader(startToken, endToken, header);
-    //report.Put(msg);
-    //report.PutChar('\n');
+    report.Flush(stdout);
+}
+void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnosticSeverity severity, const char* msg)
+{
+    const char* header;
+    if (severity == lsDiagnosticSeverity::Error)
+    {
+        header = "Error: ";
+    }
+	else if(severity == lsDiagnosticSeverity::Warning)
+	{
+        header = "Warning: ";
+	}
+    else 
+    {
+        header = "Informative: ";
+    }
+    EmitHeader(startToken, endToken, header);
+    report.Put(msg);
+    report.PutChar('\n');
 
     //FlushReport();
 
@@ -683,21 +707,39 @@ void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const char* header
 }
 
 
-void JiksPgOption::Emit(IToken* token, const char* header, Tuple<const char*>& msg)
+void JiksPgOption::Emit(IToken* token,const lsDiagnosticSeverity severity,  Tuple<const char*>& msg)
 {
-    Emit(token, token, header, msg);
+    Emit(token, token, severity, msg);
 
     return;
 }
 
-void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const char* header, Tuple<const char*>& msg)
+void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const lsDiagnosticSeverity severity, Tuple<const char*>& msg)
 {
-    /* EmitHeader(startToken, endToken, header);
+	/*if(message_handler_)
+	{
+        message_handler_->handleMessage(severity, startToken, endToken, msg);
+		return;
+	}*/
+    const char* header;
+    if (severity == lsDiagnosticSeverity::Error)
+    {
+        header = "Error: ";
+    }
+    else if (severity == lsDiagnosticSeverity::Warning)
+    {
+        header = "Warning: ";
+    }
+    else
+    {
+        header = "Informative: ";
+    }
+     EmitHeader(startToken, endToken, header);
      for (int i = 0; i < msg.Length(); i++)
          report.Put(msg[i]);
      report.PutChar('\n');
 
-     FlushReport();*/
+     FlushReport();
 
     return;
 }

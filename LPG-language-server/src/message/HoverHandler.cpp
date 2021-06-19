@@ -79,21 +79,19 @@ struct DocumentationProvider
         auto& header = markdown_output.addHeading(3);
         if (dynamic_cast<nonTerm*>(target)) {
             auto nt = static_cast<nonTerm*>(target);
-            header.appendText("non-terminal " + nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
+            auto nt_symbol =  nt->getruleNameWithAttributes()->getSYMBOL();
+            auto file_name = IcuUtil::ws2s( nt_symbol->getLeftIToken()->getILexStream()->getFileName() );
+            header.appendText("non-terminal " + nt_symbol->to_utf8_string() + " in " + file_name);
             markdown_output.addRuler();
           
             auto lex = nt->getLeftIToken()->getILexStream();
             auto  original_unit =  ast_unit->parent.FindFile(lex);
             {
-                std::unordered_set<ASTNodeToken*> fFirstSet;
+          
                 std::unordered_set<std::string> token_strings;
-                original_unit->collectFirstSet(nt, fFirstSet);
-            	if(!fFirstSet.empty())
+                original_unit->data->collectFirstSet(nt, token_strings);
+            	if(!token_strings.empty())
             	{
-                    for (auto& it : fFirstSet)
-                    {
-                        token_strings.insert(it->to_utf8_string());           
-                    }
                     std::string firstset_str("First set: ");
                     for (auto& it : token_strings)
                     {
@@ -102,26 +100,28 @@ struct DocumentationProvider
                     markdown_output.addHeading(5).appendText(firstset_str);
             	}
             }
-          /*  {
-                std::unordered_set<ASTNodeToken*> fFirstSet;
-                original_unit->collectFollowSet(nt, fFirstSet);
-                if (fFirstSet.size())
+            {
+                std::unordered_set<std::string> token_strings;
+                original_unit->data->collectFollowSet(nt, token_strings);
+                if (!token_strings.empty())
                 {
-                    std::string firstset_str("Follow Set:");
-                    for (auto& it : fFirstSet)
+                    std::string firstset_str("Follow set: ");
+                    for (auto& it : token_strings)
                     {
-                        firstset_str += it->to_utf8_string() + " ";
+                        firstset_str += it + " ";
                     }
                     markdown_output.addHeading(5).appendText(firstset_str);
                 }
             }
-        	*/
+        	
             markdown_output.addCodeBlock(nt->to_utf8_string() + " ");
         	
         }
         else if (dynamic_cast<terminal*>(target)) {
             auto  term = static_cast<terminal*>(target);
-            header.appendText("terminal: " + term->getterminal_symbol()->to_utf8_string());
+            auto terminal_symbol =  term->getterminal_symbol();
+            auto file_name = IcuUtil::ws2s(terminal_symbol->getLeftIToken()->getILexStream()->getFileName());
+            header.appendText("terminal: " + terminal_symbol->to_utf8_string() + " in " + file_name);
             markdown_output.addRuler();
             markdown_output.addCodeBlock(term->to_utf8_string());
         }
@@ -144,93 +144,6 @@ enum class MarkupKind {
     PlainText,
     Markdown,
 };
-//void process_hover(std::shared_ptr<CompilationUnit>& unit,
-//    const lsPosition& temp_position, TextDocumentHover::Result& out, Monitor* monitor)
-//{
-//
-//    TextDocumentHover::Left content = std::vector< std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>> >();
-//   
-//    if (!unit || !unit->root)
-//    {
-//        return;
-//    }
-//    auto lex = unit->_lexer.getILexStream();
-//
-//    auto offset = ASTUtils::toOffset(lex, temp_position);
-//    if (offset < 0)
-//    {
-//        return;
-//    }
-//    LPGSourcePositionLocator locator;
-//    auto selNode = locator.findNode(unit->root, offset);
-//    if (selNode == nullptr) return;
-//   
-//    
-//	auto set = unit->getLinkTarget(selNode,monitor);
-//
-//    // if target is null, we're hovering over a declaration whose javadoc is right before us, but
-//	// showing it can still be useful for previewing the javadoc formatting
-//	// OR if target is null we're hovering over something not a decl or ref (e.g. integer literal)
-//	// ==>  show information if something other than the source is available:
-//	// 1. if target != src, show something
-//	// 2. if target == src, and docProvider gives something, then show it
-//	// 3. if target == src, and docProvider doesn't give anything, don't show anything
-//	//
-//
-//	// if this is not a reference, provide info for it anyway 
-//    if(set.empty())
-//    {
-//        set.push_back(selNode);
-//    }
-//    
-//	for(auto& hover_obj : set)
-//	{
-//        std::vector<Object*> candidates;
-//        do
-//        {
-//            auto result = unit->FindMacroInBlock(hover_obj, temp_position, monitor);
-//
-//            if (!result)break;
-//            if (!result->def_set.empty())
-//            {
-//                hover_obj = result->def_set[0];
-//            }
-//            else
-//            {
-//                std::wstringex name = result->macro_name;
-//                name.trim_left(unit->_lexer.escape_token);
-//                auto key = IcuUtil::ws2s(name);
-//                if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end())
-//                {
-//                    std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;
-//                    item.first = "Build in macro :" + key;
-//                    content->push_back(item);
-//
-//                    out.contents.first = content;
-//                    return;
-//                }
-//            }
-//        } while (false);
-//        
-//        DocumentationProvider docProvider;
-//        lsMarkedString marked_string;
-//          
-//        std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>> temp;
-//        auto doc = docProvider.getDocumentation(unit, hover_obj, monitor);
-//        marked_string.language = "markdown";
-//        marked_string.value = doc;
-//        temp.second = std::move(marked_string);
-//        content->emplace_back(temp);
-//	}
-//    out.contents.first = std::move(content);
-// /*   DocumentationProvider docProvider;
-//    MarkupContent markup_content;
-//   auto doc= docProvider.getDocumentation( unit, target,monitor);
-//  
-//   markup_content.value= doc;
-//   markup_content.kind = "markdown";
-//   out.contents.second = markup_content;*/
-//}
 
 void process_hover(std::shared_ptr<CompilationUnit>& unit,
     const lsPosition& position, TextDocumentHover::Result& out, Monitor* monitor)

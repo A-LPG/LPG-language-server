@@ -348,7 +348,7 @@ void Base::Process(void)
     //   3) Error-maps are requested
     //   4) There are more than one starting symbol.
     //
-    if (option -> slr || option -> follow || option -> error_maps || lhs_rule[grammar -> accept_image].Length() > 1)
+    if (option->for_lsp ||  option -> slr || option -> follow || option -> error_maps || lhs_rule[grammar -> accept_image].Length() > 1)
     {
         follow.Resize(grammar -> num_terminals + 1, grammar -> num_symbols);
         for (int i = grammar -> FirstNonTerminal(); i <= grammar -> LastNonTerminal(); i++)

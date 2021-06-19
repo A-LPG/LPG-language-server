@@ -1,7 +1,9 @@
 #pragma once
+#include <ParseErrorCodes.h>
 #include <tuple.h>
 
 #include "JikesPGUtil.h"
+#include "lpgErrorCode.h"
 #include "../code.h"
 
 class HashPrimes
@@ -437,7 +439,7 @@ private:
     int block_end_length;
 };
 
-struct LpgData
+struct ParseData
 {
 
     //
@@ -525,20 +527,7 @@ struct LpgData
     Tuple<ImportedStartIndexes> imported_start_indexes;
 
 
-    //
-    //
-    //
-    enum
-    {
-        MACRO_EXPECTED_INSTEAD_OF_SYMBOL,
-        SYMBOL_EXPECTED_INSTEAD_OF_MACRO,
-        RESPECIFICATION_OF_ERROR_SYMBOL,
-        RESPECIFICATION_OF_IDENTIFIER_SYMBOL,
-        RESPECIFICATION_OF_EOL_SYMBOL,
-        RESPECIFICATION_OF_EOF_SYMBOL,
-        RESPECIFICATION_OF_START_SYMBOL,
-        RECURSIVE_IMPORT
-    };
+
     void SetIdentifierIndex(int index)
     {
         if (identifier_index == 0)
@@ -567,52 +556,52 @@ struct LpgData
         else ReportError(RESPECIFICATION_OF_ERROR_SYMBOL, index);
     }
 
-    //
-    //
-    //
-    void ReportError(int msg_code, int token_index)
-    {
-        const char* msg = NULL;
+    void ReportError(int msg_code, int token_index);
 
-        switch (msg_code)
-        {
-        case MACRO_EXPECTED_INSTEAD_OF_SYMBOL:
-            msg = "A macro name was expected here instead of a grammar symbol name";
-            break;
-        case SYMBOL_EXPECTED_INSTEAD_OF_MACRO:
-            msg = "A grammar symbol name was expected instead of a macro name";
-            break;
-        case RESPECIFICATION_OF_ERROR_SYMBOL:
-            msg = "Respecification of the error symbol";
-            break;
-        case RESPECIFICATION_OF_IDENTIFIER_SYMBOL:
-            msg = "Respecification of the identifier symbol";
-            break;
-        case RESPECIFICATION_OF_EOL_SYMBOL:
-            msg = "Respecification of the eol symbol";
-            break;
-        case RESPECIFICATION_OF_EOF_SYMBOL:
-            msg = "Respecification of the eof symbol";
-            break;
-        case RESPECIFICATION_OF_START_SYMBOL:
-            msg = "Respecification of the start symbol";
-            break;
-        case RECURSIVE_IMPORT:
-            msg = "Attempt to recursively include this file";
-            break;
-        default:
-            assert(false);
-        }
-
-       // option->EmitWarning(token_index, msg);
-
-        return;
-    }
-
-    LpgData();
+    ParseData(JiksPgOption* _option);
+    JiksPgOption* option = nullptr;
 };
 
-inline LpgData::LpgData(): identifier_index(0), eol_index(0), eof_index(0), error_index(0)
+inline void ParseData::ReportError(int msg_code, int token_index)
+{
+	const char* msg = NULL;
+
+	switch (msg_code)
+	{
+	case MACRO_EXPECTED_INSTEAD_OF_SYMBOL:
+		msg = "A macro name was expected here instead of a grammar symbol name";
+		break;
+	case SYMBOL_EXPECTED_INSTEAD_OF_MACRO:
+		msg = "A grammar symbol name was expected instead of a macro name";
+		break;
+	case RESPECIFICATION_OF_ERROR_SYMBOL:
+		msg = "Respecification of the error symbol";
+		break;
+	case RESPECIFICATION_OF_IDENTIFIER_SYMBOL:
+		msg = "Respecification of the identifier symbol";
+		break;
+	case RESPECIFICATION_OF_EOL_SYMBOL:
+		msg = "Respecification of the eol symbol";
+		break;
+	case RESPECIFICATION_OF_EOF_SYMBOL:
+		msg = "Respecification of the eof symbol";
+		break;
+	case RESPECIFICATION_OF_START_SYMBOL:
+		msg = "Respecification of the start symbol";
+		break;
+	case RECURSIVE_IMPORT:
+		msg = "Attempt to recursively include this file";
+		break;
+	default:
+		assert(false);
+	}
+
+	option->EmitWarning(token_index, msg);
+
+	return;
+}
+
+inline ParseData::ParseData(JiksPgOption* _option): identifier_index(0), eol_index(0), eof_index(0), error_index(0), option(_option)
 {
 }
 

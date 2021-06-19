@@ -140,7 +140,7 @@ public:
 
     BitSet &NonterminalFirst(int i) { return nt_first[i]; }
     BitSet &First(int i) { return first[i].set; }
-
+    BitSet& NonterminalFollow(int i) { return follow[i]; }
     //
     // FOLLOW is a mapping from non-terminals to a set of terminals that
     // may appear immediately after the non-terminal.

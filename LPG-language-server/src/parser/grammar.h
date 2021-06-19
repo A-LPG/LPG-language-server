@@ -4,7 +4,7 @@
 #include "JikesPGUtil.h"
 #include "JiksPGControl.h"
 #include "JiksPgOption.h"
-#include "LpgData.h"
+#include "ParseData.h"
 #include "LPGParsersym.h"
 
 #include "tuple.h"
@@ -140,8 +140,7 @@ public:
 class Grammar : public Util,public   LPGParsersym{
 public:
 
-    friend class Action;
-
+   
     enum { DEFAULT_SYMBOL = 0 };
 
     //
@@ -227,7 +226,7 @@ public:
      {
          return lex_stream;
      }
-     LpgData& parser;
+     ParseData& parser;
 private:
 
 
@@ -334,6 +333,7 @@ public:
     //
     Tuple<SymbolElement> symbol_index;
     Tuple<RuleElement> rules;
+  
     Tuple<int> rhs_sym;
     Tuple<int> keywords;
     Tuple<int> recovers;

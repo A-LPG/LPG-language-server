@@ -63,7 +63,7 @@ void Grammar::Process()
    
       option-> EmitError(lex_stream->NumTokens() - 2, msg); // point to the last token
 
-      
+      control->Exit(4);
     }
    
 
@@ -92,6 +92,7 @@ void Grammar::Process()
         if (this -> check_predecessor_sets_for[i].right_symbol == 0)
             option -> EmitError(rhs_index, "This symbol was not defined in the grammar");
     }
+ 	
 
 }
 
@@ -676,6 +677,8 @@ void Grammar::ProcessRemainingAliases(Tuple<int> &remaining_aliases)
     //
     // If bad errors were detected, quit!
     //
+    if (return_code > 0)
+        control->Exit(return_code);
 
 }
 
@@ -765,7 +768,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
         VariableSymbol*& entry = start_symbol.Next();
         entry = lex_stream->GetVariableSymbol(entry_index);
         AssignSymbolIndex(entry);
-
+    
         rule_index = rules.nextIndex();
         rules[rule_index].first_token_index = entry_index;
         rules[rule_index].last_token_index = entry_index;
@@ -944,6 +947,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
         // Add info for this rule to rules (of RuleElement) array.
         //
         int rule_index = rules.nextIndex();
+     
         rules[rule_index].first_token_index = parser.rules[k].separator_index;
         rules[rule_index].last_token_index = last_symbol_index;
         rules[rule_index].lhs = lhs_image;
@@ -1131,6 +1135,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
     for (int l = 0; l < attribute_actions.Length(); l++)
     {
         int rule_index = rules.nextIndex();
+     
         (void)processed_rule_map.Next(); // allocate an empty macro table for rule_index;
         rules[rule_index].lhs = attribute_actions[l].lhs_image;
         rules[rule_index].separator_token_kind = TK_EQUIVALENCE;

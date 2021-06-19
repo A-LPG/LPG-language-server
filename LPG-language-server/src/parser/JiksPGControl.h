@@ -4,7 +4,8 @@
 #include <unordered_map>
 
 #include "JiksPgOption.h"
-#include "LpgData.h"
+#include "LPGParsersym.h"
+#include "ParseData.h"
 #include "node.h"
 
 
@@ -16,9 +17,9 @@ class Grammar;
 class JikesPGLexStream
 {
 public:
-	
-    Tuple<IToken*>          token_stream;
-   
+    JikesPGLexStream(Tuple<IToken*>& t):token_stream(t){}
+    std::unordered_map<int, BlockSymbol*> block_table;
+    std::unordered_map<int, MacroSymbol*> macro_table;
     Tuple<VariableSymbol*>  variable_index;
 
     typedef int TokenIndex;
@@ -61,7 +62,8 @@ public:
 //
     MacroSymbol* GetMacroSymbol(TokenIndex i)
     {
-        
+        auto findIt = macro_table.find(i);
+        if (findIt != macro_table.end()) return  findIt->second;
         return nullptr;
     }
     inline TokenIndex Badtoken() { return 0; }
@@ -79,7 +81,9 @@ public:
         if (findIt != block_table.end()) return  findIt->second;
     	return nullptr;
     }
+    Array<const char*> keyword_name;
 
+    const char* KeywordName(int i) { return keyword_name[i]; }
     const char* NameString(TokenIndex i)
     {
         VariableSymbol* variable = GetVariableSymbol(i);
@@ -87,20 +91,50 @@ public:
         {
             return  variable->Name();
         }
-        return  nullptr;
+        MacroSymbol* macro = GetMacroSymbol(i);
+        if (macro)
+        {
+            return  macro->Name();
+        }
+        BlockSymbol* block = GetBlockSymbol(i);
+        if (Kind(i) == LPGParsersym::TK_BLOCK)
+        {
+            return  block->BlockBegin();
+        }
+       
+        return   UnknowKindTokenNameString(i).c_str();
+      
     }
+
+    std::unordered_map<int, std::string> name_holder;
     int NameStringLength(TokenIndex i)
     {
         VariableSymbol* variable = GetVariableSymbol(i);
-        if (variable)
-        {
-            return  variable->NameLength();
-        }
+        MacroSymbol* macro = GetMacroSymbol(i);
+
+        return (variable ? variable->NameLength()
+            : macro ? macro->NameLength()
+            : Kind(i) == LPGParsersym::TK_BLOCK ? EndLocation(i) - StartLocation(i)
+            : UnknowKindTokenNameString(i).size());
+    	
         return  0;
     }
+    void SetSymbol(TokenIndex i, MacroSymbol* symbol)
+    {
+        macro_table[i] = symbol;
+    }
 private:
-    std::unordered_map<int, BlockSymbol*> block_table;
+    std::string& UnknowKindTokenNameString(TokenIndex i)
+    {
+        std::string& temp = name_holder[i];
+    	if(temp.empty())
+            temp = token_stream[i]->to_utf8_string();
+        return   temp;
+    }
+
+
     TokenIndex index=0;
+    Tuple<IToken*>& token_stream;
 };
 
 
@@ -109,7 +143,7 @@ class Control
 {
 public:
    
-    Control(const std::string& file_path, JikesPGLexStream* stream,LpgData*data, VariableLookupTable* variable_table);
+    Control(JiksPgOption* _option, JikesPGLexStream* stream,ParseData*data, VariableLookupTable* variable_table);
     //
 // Close listing file and destroy the objects allocated in the constructor.
 //
@@ -118,7 +152,7 @@ public:
 
     void ConstructParser(void);
     void CleanUp();
-    LpgData* jikspg_data;
+    ParseData* jikspg_data;
     JiksPgOption* option ;
     
     NodePool* node_pool;
@@ -131,4 +165,5 @@ public:
         throw code;
     }
     JikesPGLexStream* lex_stream;
+    
 };

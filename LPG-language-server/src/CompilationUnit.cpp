@@ -5,6 +5,8 @@
 #include "ASTUtils.h"
 #include "code.h"
 #include "WorkSpaceManager.h"
+#include "parser/base.h"
+#include "parser/grammar.h"
 #include "parser/LPGParser_top_level_ast.h"
 
 bool CompilationUnit::NeedToCompile() const
@@ -312,97 +314,52 @@ bool CompilationUnit::IsNullable(LPGParser_top_level_ast::nonTerm* node)
 //如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
 
 
-void CompilationUnit::collectFirstSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFirstSet)
+
+
+bool CompilationUnit::JikesPG2::collectFirstSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<std::string>& out)
 {
-	Stack<nonTerm*> workList;
-	std::unordered_set<nonTerm*> processed;
-	workList.Push(fNonTerm);
-	while (!workList.IsEmpty()) {
-		auto nt = workList.Pop();
-		auto nt_name = nt->getruleNameWithAttributes()->getSYMBOL()->toString();
-		processed.insert(nt);
-		auto rules = nt->getruleList();
-		for (int i = 0; i < rules->size(); i++) {
-			auto r = rules->getruleAt(i);
-			auto syms = r->getsymWithAttrsList();
-			ASTNode* firstSym = nullptr;
-			
-			int symIdx = 0;
+	if (!control)return false;
+	if(!control->grammar) return false;
+	auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+	auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
+	if(!symbole) return false;
+	auto symbol_index = symbole->SymbolIndex();
 
-			// The following really needs to be replaced by something that
-			// computes the
-			// set of non-terminals that *transitively* produce epsilon,
-			// *before* doing
-			// any of this processing.
-			std::vector<Object*> candidates;
-			do {
-				firstSym = syms->getsymWithAttrsAt(symIdx++);
-				auto firstSym_name = firstSym->toString();
-				if (nt_name == firstSym_name)
-					continue;
-				bool have_nullable = false;
-				for (auto& it : FindDefineIn_Term_and_noTerms(firstSym_name))
-				{
-					if (dynamic_cast<terminal*>(it))
-					{
-						candidates.push_back(it);
-					    break;	
-					}
-					if (!dynamic_cast<nonTerm*>(it) )continue;
-					auto temp = (nonTerm*)(it);
-					if(!IsNullable(temp))
-					{
-						candidates.push_back(it);
-					}
-					else
-					{
-						have_nullable = true;
-						//如果a在FIRST(Yi)中，且 ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yi - 1)中，那么a也在FIRST(X)中；
-						//如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
-					}
-				}
-
-				if(!have_nullable)
-				{
-					if (!candidates.empty())
-						break;
-				}
-				
-				if(!IsEmptyRule(firstSym_name) )
-				{
-					break;
-				}
-				
-			} while (symIdx < syms->size());
-
-			if(candidates.empty())
-			{
-				if (!IsEmptyRule(firstSym->toString()))
-				{
-					fFirstSet.insert(static_cast<ASTNodeToken*>(firstSym));
-				}
-			   continue;
-			}
-			
-			for(auto& node : candidates)
-			{
-				if (dynamic_cast<terminal*>(node)) {
-					auto thisTerm = static_cast<ASTNodeToken*>(static_cast<terminal*>(node)->getterminal_symbol());
-					if (!(fFirstSet.find(thisTerm) != fFirstSet.end())) {
-
-						fFirstSet.insert(thisTerm);
-					}
-				}
-				else if (dynamic_cast<nonTerm*>(node)) {
-					if (!(processed.find(static_cast<nonTerm*>(node)) != processed.end())) {
-						workList.Push(static_cast<nonTerm*>(node));
-					}
-				}
-		    }
+	auto grammar = control->grammar;
+	if (!grammar->IsNonTerminal(symbol_index))
+		return false;
+	char tok[SYMBOL_SIZE + 1];
+	auto&  first_set = control->base->NonterminalFirst(symbol_index);
+	for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+	{
+		if (first_set[t]) {
+			grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+			out.insert(tok);
 		}
 	}
+	return true;
 }
 
-void CompilationUnit::collectFollowSet(nonTerm* fNonTerm, std::unordered_set<ASTNodeToken*>& fFollowSet)
+bool CompilationUnit::JikesPG2::collectFollowSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<string>& out)
 {
+	if (!control)return false;
+	if (!control->grammar) return false;
+	auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+	auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
+	if (!symbole) return false;
+	auto symbol_index = symbole->SymbolIndex();
+
+	auto grammar = control->grammar;
+	if (!grammar->IsNonTerminal(symbol_index))
+		return false;
+	char tok[SYMBOL_SIZE + 1];
+	auto& first_set = control->base->NonterminalFollow(symbol_index);
+	for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+	{
+		if (first_set[t]) {
+			grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+			out.insert(tok);
+		}
+	}
+	return true;
 }

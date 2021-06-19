@@ -281,7 +281,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::sha
 std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
 	auto     id = stripName(s->toString());
-	std::vector<Object*> candidates = unit->FindDefine(id);;
+	std::vector<Object*> candidates = unit->FindDefine(id);
 	if (candidates.empty()) {
 		// try a little harder
 		auto def_set =  findDefOf_internal(s->toString(), unit, monitor);
@@ -290,15 +290,19 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 	}
 	else
 	{
+		std::vector<Object*> temp = candidates;
 		for(auto& it : candidates)
 		{
 			if (s->parent != it)
 				continue;
 			// just found the same spot;
 			auto def_set = findDefOf_internal(s->toString(), unit, monitor);
-			if (!def_set.empty())
-				return def_set;	
+			for(auto& it : def_set)
+			{
+				temp.push_back(it);
+			}
 		}
+		candidates.swap(temp);
 	}
 
 
@@ -380,40 +384,13 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<Workin
 {
 	return OnChange(_open, monitor);
 }
-struct MessageHandle : public IMessageHandler
-{
-	Notify_TextDocumentPublishDiagnostics::notify notify;
-	lsRange toRange(const Location& location)
-	{
-		lsRange range;
-		range.start.line = location.start_line-1;
-		range.start.character = location.start_column;
-		range.end.line = location.end_line-1;
-		range.end.character = location.end_column;
-		return  range;
-	}
-	void handleMessage(int errorCode, const Location& msgLocation, const Location& errorLocation,
-		const std::wstring& filename, const std::vector<std::wstring>& errorInfo) override
-	{
-		lsDiagnostic diagnostic;
-		diagnostic.severity = lsDiagnosticSeverity::Error;
-		diagnostic.range = toRange(msgLocation);
-		std::string info;
-		for (auto& it : errorInfo)
-		{
-			info += IcuUtil::ws2s(it);
-			info += "\n";
-		}
-		diagnostic.message.swap(info);
-		notify.params.diagnostics.emplace_back(std::move(diagnostic));
-	}
-};
+
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
 
 {
 	return OnChange(_change,{}, monitor);
 }
-extern  void process_symbol(std::shared_ptr<CompilationUnit>&);
+extern  void process_symbol(std::shared_ptr<CompilationUnit>&, ProblemHandler* handler);
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
 
@@ -443,7 +420,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
 	unit->counter.store(_change->counter.load(std::memory_order_relaxed));
 	
-	MessageHandle handle;
+	ProblemHandler handle;
 	handle.notify.params.uri = _change->filename;
 	
 	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
@@ -460,7 +437,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	d_ptr->update_unit(_change->filename, unit);
 
-	process_symbol(unit);
+	process_symbol(unit, &handle);
 	
 	d_ptr->end_point.sendNotification(handle.notify);
 	return unit;

@@ -111,13 +111,25 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	//
 	// where Bi is nullable for 1 <= i <= k
 	//https://www.jianshu.com/p/210fda081c76
-	void collectFirstSet(LPGParser_top_level_ast::nonTerm* ,std::unordered_set<LPGParser_top_level_ast::ASTNodeToken*>&);
-	void collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<LPGParser_top_level_ast::ASTNodeToken*>&);
-	std::shared_ptr<Control>  control;
-	VariableLookupTable     variable_table;
-	MacroLookupTable        macro_table;
-	LpgData lpg_data;
-	JikesPGLexStream lex_stream;
+	
+	struct JikesPG2
+	{
+
+		JikesPG2(Tuple<IToken*>& t) :lex_stream(t)
+		{
+
+		}
+		std::shared_ptr<Control>  control;
+		VariableLookupTable     variable_table;
+		MacroLookupTable        macro_table;
+		std::shared_ptr<ParseData> lpg_data;
+		JikesPGLexStream lex_stream;
+		bool collectFirstSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
+		bool collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
+
+	};
+	
+	std::shared_ptr<JikesPG2> data;
 private:
 	void  collectEpsilonSet();
 };

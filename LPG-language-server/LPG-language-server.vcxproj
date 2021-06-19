@@ -33,6 +33,7 @@
     <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp" />
     <ClCompile Include="src\message\SemanticTokensHandler.cpp" />
     <ClCompile Include="src\parser\base.cpp" />
+    <ClCompile Include="src\parser\buffer.cpp" />
     <ClCompile Include="src\parser\dfa.cpp" />
     <ClCompile Include="src\parser\grammar.cpp" />
     <ClCompile Include="src\parser\JikesPGUtil.cpp" />
@@ -53,12 +54,14 @@
     <ClInclude Include="src\CompilationUnit.h" />
     <ClInclude Include="src\message\MessageHandler.h" />
     <ClInclude Include="src\parser\base.h" />
+    <ClInclude Include="src\parser\buffer.h" />
     <ClInclude Include="src\parser\dfa.h" />
     <ClInclude Include="src\parser\grammar.h" />
     <ClInclude Include="src\parser\JikesPGUtil.h" />
     <ClInclude Include="src\parser\JiksPGControl.h" />
     <ClInclude Include="src\parser\JiksPgOption.h" />
-    <ClInclude Include="src\parser\LpgData.h" />
+    <ClInclude Include="src\parser\ParseData.h" />
+    <ClInclude Include="src\parser\lpgErrorCode.h" />
     <ClInclude Include="src\parser\LPGKWLexer.h" />
     <ClInclude Include="src\parser\LPGKWLexerprs.h" />
     <ClInclude Include="src\parser\LPGKWLexersym.h" />
