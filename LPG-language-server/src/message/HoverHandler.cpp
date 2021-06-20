@@ -55,7 +55,18 @@ struct DocumentationProvider
             }
         	else if(dynamic_cast<terminal_symbol0*>(node))
         	{
-                markdown_output.addCodeBlock(node->to_utf8_string());
+        		if(ASTUtils::IsExportType(static_cast<terminal_symbol0*>(node)))
+        		{
+                    auto& header = markdown_output.addHeading(3);
+                 
+                    header.appendText( node->to_utf8_string()  + " which  is in the export segment.");
+   
+        		}
+                else
+                {
+                    markdown_output.addCodeBlock(node->to_utf8_string());
+                }
+              
         		return;
         	}
             ASTNode* def = nullptr;

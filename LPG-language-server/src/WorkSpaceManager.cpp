@@ -128,6 +128,10 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal( const SearchPolicy& 
                                               const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
 	 auto     id = stripName(_word);
+	if(id.empty())
+	{
+		id = _word;
+	}
 	 std::vector<Object*> result;
 	 std::set<std::string> includedFiles;
 	 collect_def(includedFiles, result, policy, id, refUnit, monitor);

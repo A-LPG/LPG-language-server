@@ -31,8 +31,8 @@ struct SearchPolicy
 		};
 		bool terminal = false;
 		bool no_terminal = false;
-		bool export_type = false;
-		bool import_type = false;
+		bool export_term = false;
+		bool import_term = false;
 		FileScope _scope;
 	
 	};

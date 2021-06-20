@@ -21,6 +21,17 @@ namespace
          }
 	};
 }
+
+bool ASTUtils::IsExportType(terminal_symbol0* node)
+{
+    if (!node) return  false;
+	if(!node->getParent())return  false;
+    auto  ancesstor = node->getParent()->getParent();
+    if (!ancesstor)return  false;
+    return (dynamic_cast<ExportSeg*>(ancesstor));
+	
+}
+
 void ASTUtils::findRefsOf(std::vector<ASTNode*>& result, nonTerm* _nonTerm)
 {
     auto root = getRoot(_nonTerm);

@@ -39,6 +39,7 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 		
 		
 	}
+	static bool IsExportType(terminal_symbol0* node);
 	static void getTerminals(LPG* root, std::vector<terminal*>& vec) {
 		if (!root || !root->environment) return;
 		// TODO: pick up non-terminals from imported files

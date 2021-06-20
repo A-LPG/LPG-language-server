@@ -45,20 +45,31 @@ boost::optional<SearchPolicy::Variable> SearchPolicy::getVariableInstance(bool v
 	Variable variable;
 	variable.terminal = value;
 	variable.no_terminal = value;
-	variable.export_type = value;
-	variable.import_type = value;
+	variable.export_term = value;
+	variable.import_term = value;
 	
 	return std::move(variable);
 }
 
 SearchPolicy SearchPolicy::suggest(ASTNode* node)
 {
+	
 	SearchPolicy policy;
+	if (!node)
+		return  policy;
+	
 	if(InMacroInBlock(node))
 	{
 		policy.macro = getMacroInstance(true);
 	
 		return  policy;
+	}
+	policy.variable = SearchPolicy::getVariableInstance(true);
+	if(dynamic_cast<RuleName*>( node->parent))
+	{
+		policy.variable.value().terminal = false;
+		policy.variable.value().export_term = false;
+		policy.variable.value().import_term = false;
 	}
 	return policy;
 }
@@ -114,7 +125,7 @@ void CompilationUnit::parser(Monitor* monitor)
 {
 	_lexer.lexer(monitor, _parser.getIPrsStream());
 	root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(_parser.parser(monitor,1000));
-	collectEpsilonSet();
+
 }
 
 std::vector<Object*> CompilationUnit::getLinkTarget(SearchPolicy& policy, Object* node, Monitor* monitor)
@@ -129,7 +140,7 @@ std::vector<Object*> CompilationUnit::getLinkTarget(SearchPolicy& policy, Object
 
 
 
-int  CompilationUnit::FindExportMacro(const std::string& name ,std::vector<Object*> & candidates)
+int  CompilationUnit::FindExportMacro(const std::wstring& name, std::vector<Object*> & candidates)
 {
 	auto  range = export_macro_table.equal_range(name);
 	int i = 0;
@@ -202,6 +213,14 @@ void CompilationUnit::FindIn_Term(const std::wstring& name, std::vector<Object*>
 		candidates.push_back(it->second);
 	}
 }
+
+void CompilationUnit::FindIn_Export(const std::wstring& name, std::vector<Object*>& candidates)
+{
+	auto  range =export_term.equal_range(name);
+	for (auto it = range.first; it != range.second; ++it) {
+		candidates.push_back(it->second);
+	}
+}
 void CompilationUnit::FindIn_define(const std::wstring& name, std::vector<Object*>& candidates)
 {
 	auto  range = _parser._define_specs.equal_range(name);
@@ -222,13 +241,17 @@ std::vector<Object*>  CompilationUnit::FindDefine(const SearchPolicy& policy, co
 		{
 			FindIn_Term(name, candidates);
 		}
+		if(policy.variable->export_term)
+		{
+			FindIn_Export(name, candidates);
+		}
 	}
 	if(policy.macro)
 	{
 		if (policy.macro->local_macro)
 			FindIn_define(name, candidates);
 		if(policy.macro->export_macro)
-			FindExportMacro(IcuUtil::ws2s(name), candidates);
+			FindExportMacro(name, candidates);
 	}
 
 
@@ -250,118 +273,8 @@ bool IsEmptyRule(const std::wstring& name)
 {
 	return  name == L"$empty" || name == L"%empty";
 }
-void CompilationUnit::collectEpsilonSet()
-{
-	fEpsilonSet.clear();
-	Stack<nonTerm*> workList;
-	std::unordered_set<nonTerm*> processed;
-
-	std::unordered_set<nonTerm*> epsilonSet;
-	
-	std::vector<nonTerm*> allNonTerms;
-	ASTUtils::getNonTerminals(root, allNonTerms);
-
-	// Seed the epsilon set with all non-terminals that directly derive
-	// epsilon
-	for (auto nt : allNonTerms) {
-		auto rules = nt->getruleList();
-		for (int i = 0; i < rules->size(); i++) {
-			auto r = rules->getruleAt(i);
-			symWithAttrsList* syms = r->getsymWithAttrsList();
-			if (syms->size() == 1) {
-				auto  onlySym = syms->getsymWithAttrsAt(0);
-				if ( IsEmptyRule(onlySym->toString()) ) {
-					fEpsilonSet_back.insert(nt);
-					processed.insert(nt);
-					break;
-				}
-			}
-		}
-	}
-	
-	for (auto nt : allNonTerms)
-	{
-		if (processed.find(nt) == processed.end())
-			processed.insert(nt);
-		else
-		{
-			continue;
-		}
 
 
-		
-	}
-	for (auto &nt : fEpsilonSet) {
-		workList.Push(nt.second);
-	}
-	
-	while (!workList.IsEmpty()) {
-		auto nt = workList.Pop();
-		if(processed.find(nt) == processed.end())
-			processed.insert(nt);
-		else
-		{
-			continue;
-		}
-		auto nt_name = nt->getruleNameWithAttributes()->getSYMBOL()->toString();
-		// Find references to 'nt'
-		// The following is BOGUS!!!
-		auto rules = nt->getruleList();
-
-		for (int i = 0; i < rules->size(); i++) {
-			auto r = rules->getruleAt(i);
-			auto syms = r->getsymWithAttrsList();
-			bool nextRule_continue = false;
-			for (int symIdx = 0; symIdx < syms->size(); symIdx++) {
-				auto sym = syms->getsymWithAttrsAt(symIdx);
-				auto sym_name = sym->toString();
-				if(sym_name == nt_name)
-					continue;
-				
-				auto candidates = FindDefineIn_Term_and_noTerms(sym_name);
-				for(auto& node : candidates)
-				{
-					if (!dynamic_cast<terminal*>(node))break;
-					
-					if(!dynamic_cast<nonTerm*>(node))continue;
-					
-					auto _temp_name = ((nonTerm*)node)->getruleNameWithAttributes()->getSYMBOL()->toString();
-					if (!( IsEmptyRule(sym_name) ) && !(fEpsilonSet.find(_temp_name) != fEpsilonSet.end())) {
-						// This rule doesn't appear to derive epsilon
-						nextRule_continue = true;
-						break;
-					}
-				}
-				if (nextRule_continue)
-					break;
-			}
-			if(nextRule_continue)
-				continue;
-			// This rule derives epsilon
-			fEpsilonSet.insert({ nt->getruleNameWithAttributes()->getSYMBOL()->toString() ,nt });
-			workList.Push(nt);
-		}
-	}
-	for(auto& it : fEpsilonSet)
-	{
-		fEpsilonSet_back.insert(it.second);
-	}
-}
-
-bool CompilationUnit::IsNullable(const std::wstring& name)
-{
-	auto findIt = fEpsilonSet.find(name);
-	if(findIt  == fEpsilonSet.end())
-	{
-		return  false;
-	}
-	return true;
-}
-
-bool CompilationUnit::IsNullable(LPGParser_top_level_ast::nonTerm* node)
-{
-	return  fEpsilonSet_back.find(node) != fEpsilonSet_back.end();
-}
 //计算FIRST(X)的方法
 //
 //如果 X 是终结符号，那么FIRST(X) = { X }

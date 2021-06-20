@@ -123,18 +123,20 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(ExportSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Export ";
-        std::string prefix;
-        prefix.push_back(static_cast<char>(unit->_lexer.escape_token));
+        std::wstring prefix;
+        prefix.push_back(unit->_lexer.escape_token);
         prefix.push_back('_');
         for (auto& it : n->lpg_export_segment->list)
         {
             auto item = pushSubItem(it);
             item->kind = lsSymbolKind::Interface;
-            unit->export_macro_table.insert({ prefix + item->name, it });
+            auto name = it->getLeftIToken()->toString();
+            unit->export_macro_table.insert({ prefix + name , it });
+            unit->export_term.insert({ name , it });
             popSubItem();
         }
 
-
+      
 
         return true;
     }

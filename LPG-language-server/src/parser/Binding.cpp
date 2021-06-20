@@ -173,10 +173,6 @@ struct LPGBindingVisitor :public AbstractVisitor {
 
     bool visit(ExportSeg* n) {
         
-      
-        std::string prefix;
-        prefix.push_back(static_cast<char>(unit->_lexer.escape_token));
-        prefix.push_back('_');
         for(auto& it : n->lpg_export_segment->list)
         {
           jikspg_data.exports.Next() = it->getLeftIToken()->getTokenIndex();         
