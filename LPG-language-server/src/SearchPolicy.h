@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 
+#include <boost/optional.hpp>
 // no terminal
 // terminal
 
@@ -36,7 +36,7 @@ struct SearchPolicy
 		FileScope _scope;
 	
 	};
-	std::shared_ptr<Variable>  variable;
+	boost::optional< Variable >  variable;
 	
 	struct Macro
 	{
@@ -54,9 +54,9 @@ struct SearchPolicy
 
 		FileScope _scope;
 	};
-	std::shared_ptr<Macro> macro;
+	boost::optional<Macro> macro;
 
-	static  std::shared_ptr<Macro> getMacroInstance(bool value = false);
-	static  std::shared_ptr<Variable> getVariableInstance(bool value = false);
+	static  boost::optional<Macro> getMacroInstance(bool value = false);
+	static  boost::optional<Variable> getVariableInstance(bool value = false);
 	static SearchPolicy suggest(LPGParser_top_level_ast::ASTNode* node);
 };

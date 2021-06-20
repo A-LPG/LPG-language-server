@@ -141,7 +141,7 @@ void WorkSpaceManager::collect_def(
 {
 	includedFiles.insert(refUnit->working_file->filename);
 
-	auto collect_method = [&](const std::string& fileName)
+	auto collect_method = [&](const SearchPolicy& collect_policy,const std::string& fileName)
 	{
 		if (includedFiles.find(fileName) != includedFiles.end())
 			return;
@@ -155,7 +155,7 @@ void WorkSpaceManager::collect_def(
 		{
 			result.insert(result.end(), candidates.begin(), candidates.end());
 		}
-		collect_def(includedFiles, result, policy, id, include_unit, monitor);
+		collect_def(includedFiles, result, collect_policy, id, include_unit, monitor);
 	};
 	
 	if (policy.macro)
@@ -164,14 +164,14 @@ void WorkSpaceManager::collect_def(
 		{
 			for (auto& fileName : refUnit->dependence_info.include_files)
 			{
-				collect_method(fileName);
+				collect_method(policy,fileName);
 			}
 		}
 		if (policy.macro->_scope._template)
 		{
 			for (auto& fileName : refUnit->dependence_info.template_files)
 			{
-				collect_method(fileName);
+				collect_method(policy, fileName);
 			}
 		}
 	}
@@ -181,28 +181,34 @@ void WorkSpaceManager::collect_def(
 		{
 			for (auto& fileName : refUnit->dependence_info.include_files)
 			{
-				collect_method(fileName);
+				collect_method(policy, fileName);
 			}
 		}
 		if (policy.variable->_scope._template)
 		{
 			for (auto& fileName : refUnit->dependence_info.template_files)
 			{
-				collect_method(fileName);
+				collect_method(policy, fileName);
 			}
 		}
 		if (policy.variable->_scope._filter)
 		{
+			SearchPolicy collect_policy = policy;
+			collect_policy.variable.value().no_terminal = false;
+			collect_policy.variable.value().terminal = false;
 			for (auto& fileName : refUnit->dependence_info.filter_files)
 			{
-				collect_method(fileName);
+				collect_method(collect_policy,fileName);
 			}
 		}
 		if (policy.variable->_scope._import_terminals)
 		{
+			SearchPolicy collect_policy = policy;
+			collect_policy.variable.value().no_terminal = false;
+			collect_policy.variable.value().terminal = false;
 			for (auto& fileName : refUnit->dependence_info.import_terminals_files)
 			{
-				collect_method(fileName);
+				collect_method(collect_policy,fileName);
 			}
 		}
 	}

@@ -28,27 +28,27 @@ namespace
 }
 
 
-std::shared_ptr<SearchPolicy::Macro> SearchPolicy::getMacroInstance(bool value)
+boost::optional<SearchPolicy::Macro> SearchPolicy::getMacroInstance(bool value)
 {
-	auto macro = std::make_shared<SearchPolicy::Macro>();
-	macro->build_in_macro = true;
-	macro->rule_macro = true;
-	macro->filter_macro = true;
-	macro->export_macro = true;
-	macro->undeclared_macro = true;
-	macro->local_macro = true;
-	return  macro;
+	SearchPolicy::Macro macro;
+	macro.build_in_macro = true;
+	macro.rule_macro = true;
+	macro.filter_macro = true;
+	macro.export_macro = true;
+	macro.undeclared_macro = true;
+	macro.local_macro = true;
+	return std::move(macro);
 }
 
-std::shared_ptr<SearchPolicy::Variable> SearchPolicy::getVariableInstance(bool value)
+boost::optional<SearchPolicy::Variable> SearchPolicy::getVariableInstance(bool value)
 {
-	auto variable = std::make_shared<SearchPolicy::Variable>();
-	variable->terminal = value;
-	variable->no_terminal = value;
-	variable->export_type = value;
-	variable->import_type = value;
+	Variable variable;
+	variable.terminal = value;
+	variable.no_terminal = value;
+	variable.export_type = value;
+	variable.import_type = value;
 	
-	return  variable;
+	return std::move(variable);
 }
 
 SearchPolicy SearchPolicy::suggest(ASTNode* node)
