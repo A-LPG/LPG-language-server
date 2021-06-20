@@ -133,13 +133,13 @@ std::vector<Object*>  WorkSpaceManager::findDefOf_internal( const SearchPolicy& 
 		id = _word;
 	}
 	 std::vector<Object*> result;
-	 std::set<std::string> includedFiles;
+	 std::set<AbsolutePath> includedFiles;
 	 collect_def(includedFiles, result, policy, id, refUnit, monitor);
 	 return  result;
 }
 
 void WorkSpaceManager::collect_def(
-	std::set<std::string>& includedFiles, std::vector<Object*>& result,
+	std::set<AbsolutePath>& includedFiles, std::vector<Object*>& result,
 	const SearchPolicy& policy, std::wstring id,
 	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
 {
@@ -147,10 +147,13 @@ void WorkSpaceManager::collect_def(
 
 	auto collect_method = [&](const SearchPolicy& collect_policy,const std::string& fileName)
 	{
-		if (includedFiles.find(fileName) != includedFiles.end())
-			return;
+
 		auto include_unit = lookupImportedFile(refUnit->working_file->directory, fileName, monitor);
+		
 		if (!include_unit)return;
+		
+		if (includedFiles.find(include_unit->working_file->filename) != includedFiles.end())
+			return;// recursive 
 		if (monitor && monitor->isCancelled())
 			return;
 

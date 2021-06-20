@@ -53,7 +53,7 @@ struct WorkSpaceManager {
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
     std::vector< Object*>	 findDefOf_internal(const SearchPolicy&, std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
-	void collect_def(std::set<std::string>& includedFiles, std::vector<Object*>& result, const SearchPolicy& policy,
+	void collect_def(std::set<AbsolutePath>& includedFiles, std::vector<Object*>& result, const SearchPolicy& policy,
 	                 std::wstring id, const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&&, Monitor* monitor);
 	
