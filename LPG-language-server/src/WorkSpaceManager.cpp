@@ -22,8 +22,11 @@
 #include "IMessageHandler.h"
 #include "message/MessageHandler.h"
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
+
+#include "SearchPolicy.h"
 using namespace LPGParser_top_level_ast;
 using namespace lsp;
+
 struct WorkSpaceManagerData
 {
 	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log): working_files(_w),
@@ -121,31 +124,90 @@ std::string stripName(const std::string& rawId) {
 
 	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
 }
-std::vector<Object*>  WorkSpaceManager::findDefOf_internal(std::wstring _word,
+std::vector<Object*>  WorkSpaceManager::findDefOf_internal( const SearchPolicy& policy, std::wstring _word,
                                               const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
-
 	 auto     id = stripName(_word);
+	 std::vector<Object*> result;
 	 std::set<std::string> includedFiles;
-	 includedFiles.insert(refUnit->working_file->filename);
-	collectIncludedFiles(includedFiles,refUnit, monitor);
-	includedFiles.erase(refUnit->working_file->filename);
-	 for (auto& fileName : includedFiles) 
-	 {
-		 auto include_unit= lookupImportedFile(refUnit->working_file->directory,fileName,monitor);
-		 if(!include_unit)continue;
-		 if (monitor && monitor->isCancelled())
-			 return {};
-		 if (LPG * includedRoot = include_unit->root; includedRoot != nullptr) {
-			 std::vector<Object*> candidates = include_unit->FindDefine(id);
-			 if (!candidates.empty())
-				 return candidates;
-		 }
-	 }
-	 return {};
-	
+	 collect_def(includedFiles, result, policy, id, refUnit, monitor);
+	 return  result;
 }
 
+void WorkSpaceManager::collect_def(
+	std::set<std::string>& includedFiles, std::vector<Object*>& result,
+	const SearchPolicy& policy, std::wstring id,
+	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
+{
+	includedFiles.insert(refUnit->working_file->filename);
+
+	auto collect_method = [&](const std::string& fileName)
+	{
+		if (includedFiles.find(fileName) != includedFiles.end())
+			return;
+		auto include_unit = lookupImportedFile(refUnit->working_file->directory, fileName, monitor);
+		if (!include_unit)return;
+		if (monitor && monitor->isCancelled())
+			return;
+
+		std::vector<Object*> candidates = include_unit->FindDefine(policy, id);
+		if (!candidates.empty())
+		{
+			result.insert(result.end(), candidates.begin(), candidates.end());
+		}
+		collect_def(includedFiles, result, policy, id, include_unit, monitor);
+	};
+	
+	if (policy.macro)
+	{
+		if (policy.macro->_scope._include)
+		{
+			for (auto& fileName : refUnit->dependence_info.include_files)
+			{
+				collect_method(fileName);
+			}
+		}
+		if (policy.macro->_scope._template)
+		{
+			for (auto& fileName : refUnit->dependence_info.template_files)
+			{
+				collect_method(fileName);
+			}
+		}
+	}
+	if (policy.variable)
+	{
+		if (policy.variable->_scope._include)
+		{
+			for (auto& fileName : refUnit->dependence_info.include_files)
+			{
+				collect_method(fileName);
+			}
+		}
+		if (policy.variable->_scope._template)
+		{
+			for (auto& fileName : refUnit->dependence_info.template_files)
+			{
+				collect_method(fileName);
+			}
+		}
+		if (policy.variable->_scope._filter)
+		{
+			for (auto& fileName : refUnit->dependence_info.filter_files)
+			{
+				collect_method(fileName);
+			}
+		}
+		if (policy.variable->_scope._import_terminals)
+		{
+			for (auto& fileName : refUnit->dependence_info.import_terminals_files)
+			{
+				collect_method(fileName);
+			}
+		}
+	}
+
+}
 
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath& fileName, Monitor* monitor)
@@ -174,49 +236,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 
 void WorkSpaceManager::collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
-	if(!refUnit){
-		return;
-	}
-	auto root = refUnit->root;
-	if (!root){
-		return;
-	}
-	if(monitor && monitor->isCancelled())
-		return;
 	
-	auto optSeg = static_cast<option_specList*>(root->getoptions_segment());
-	for (int i = 0; i < optSeg->size(); i++) {
-		auto optSpec = optSeg->getoption_specAt(i);
-		auto optList = optSpec->getoption_list();
-		for (int o = 0; o < optList->size(); o++) {
-			auto opt =optList->getoptionAt(o);
-			auto sym = opt->getSYMBOL();
-			auto  optName = sym->toString();
-
-			if (optName==(L"import_terminals")
-				|| optName==(L"template")
-				|| optName==(L"filter")) 
-			{
-				auto  optValue = opt->getoption_value();
-				if ( dynamic_cast<option_value0*>(optValue)) {
-					string fileName;
-					fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
-					if(result.find(fileName) != result.end()) 
-						continue;
-					result.insert(fileName);
-					if (optName == (L"import_terminals")) {
-						// pick up defs from the filter
-						if (monitor && monitor->isCancelled())
-							return;
-						auto filterUnit = lookupImportedFile(refUnit->working_file->directory, fileName,monitor);
-						if (monitor && monitor->isCancelled())
-							return;
-						 collectIncludedFiles(result, filterUnit,monitor);
-					}
-				}
-			}
-		}
-	}
 }
 
 
@@ -270,25 +290,29 @@ Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std
 	return nullptr;
 }
 
-std::vector<Object*> WorkSpaceManager::findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
+std::vector<Object*> WorkSpaceManager::findDefOf(const SearchPolicy& policy, std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
-	std::vector<Object*> candidates = unit->FindDefine(id);;
+	std::vector<Object*> candidates = unit->FindDefine(policy,id);
 	if (candidates.empty()) {
 		// try a little harder
-		auto def_set = findDefOf_internal(id, unit,monitor);
+		auto def_set = findDefOf_internal(policy,id, unit,monitor);
 		if (!def_set.empty())
 			return def_set;
 	}
 	return  candidates;
 }
 
-std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
+std::vector<Object*> WorkSpaceManager::findDefOf(const SearchPolicy& policy, ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor)
 {
 	auto     id = stripName(s->toString());
-	std::vector<Object*> candidates = unit->FindDefine(id);
+	if(id.empty())
+	{
+		id = s->toString();
+	}
+	std::vector<Object*> candidates = unit->FindDefine(policy,id);
 	if (candidates.empty()) {
 		// try a little harder
-		auto def_set =  findDefOf_internal(s->toString(), unit, monitor);
+		auto def_set =  findDefOf_internal(policy,s->toString(), unit, monitor);
 		if (!def_set.empty())
 			return def_set;
 	}
@@ -300,7 +324,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(ASTNodeToken* s, const std::sha
 			if (s->parent != it)
 				continue;
 			// just found the same spot;
-			auto def_set = findDefOf_internal(s->toString(), unit, monitor);
+			auto def_set = findDefOf_internal(policy,s->toString(), unit, monitor);
 			for(auto& it : def_set)
 			{
 				temp.push_back(it);
@@ -395,6 +419,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	return OnChange(_change,{}, monitor);
 }
 extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
+void process_symbol(std::shared_ptr<CompilationUnit>& unit);
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
@@ -443,6 +468,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		if (monitor && monitor->isCancelled())
 			return {};
 		d_ptr->update_unit(_change->filename, unit);
+		process_symbol(unit);
 	}
 	
 	process_type_binding(unit, &handle);

@@ -4,10 +4,64 @@
 
 #include "ASTUtils.h"
 #include "code.h"
+#include "SearchPolicy.h"
 #include "WorkSpaceManager.h"
 #include "parser/base.h"
 #include "parser/grammar.h"
 #include "parser/LPGParser_top_level_ast.h"
+
+namespace
+{
+	bool InMacroInBlock(Object* target)
+	{
+
+		if (dynamic_cast<action_segment*>(target) || dynamic_cast<macro_segment*>(target))
+		{
+			return true;
+		}
+		else
+		{
+			return  false;
+		}
+	}
+
+}
+
+
+std::shared_ptr<SearchPolicy::Macro> SearchPolicy::getMacroInstance(bool value)
+{
+	auto macro = std::make_shared<SearchPolicy::Macro>();
+	macro->build_in_macro = true;
+	macro->rule_macro = true;
+	macro->filter_macro = true;
+	macro->export_macro = true;
+	macro->undeclared_macro = true;
+	macro->local_macro = true;
+	return  macro;
+}
+
+std::shared_ptr<SearchPolicy::Variable> SearchPolicy::getVariableInstance(bool value)
+{
+	auto variable = std::make_shared<SearchPolicy::Variable>();
+	variable->terminal = value;
+	variable->no_terminal = value;
+	variable->export_type = value;
+	variable->import_type = value;
+	
+	return  variable;
+}
+
+SearchPolicy SearchPolicy::suggest(ASTNode* node)
+{
+	SearchPolicy policy;
+	if(InMacroInBlock(node))
+	{
+		policy.macro = getMacroInstance(true);
+	
+		return  policy;
+	}
+	return policy;
+}
 
 bool CompilationUnit::NeedToCompile() const
 {
@@ -63,42 +117,27 @@ void CompilationUnit::parser(Monitor* monitor)
 	collectEpsilonSet();
 }
 
-std::vector<Object*> CompilationUnit::getLinkTarget(Object* node, Monitor* monitor)
+std::vector<Object*> CompilationUnit::getLinkTarget(SearchPolicy& policy, Object* node, Monitor* monitor)
 {
 	if (!dynamic_cast<LPGParser_top_level_ast::ASTNodeToken*>(node))
 	{
 		return {};
 	}
-	auto def = parent.findDefOf(static_cast<LPGParser_top_level_ast::ASTNodeToken*>(node), shared_from_this(),monitor);
+	auto def = parent.findDefOf(policy,static_cast<LPGParser_top_level_ast::ASTNodeToken*>(node), shared_from_this(),monitor);
 	return def;
 }
 
-namespace 
-{
-	bool InMacroInBlock(Object* target)
-	{
-
-		if (dynamic_cast<action_segment*>(target) || dynamic_cast<macro_segment*>(target))
-		{
-			return true;
-		}
-		else
-		{
-			return  false;
-		}
-	}
-
-}
 
 
-std::vector<Object*> CompilationUnit::FindExportMacro(const std::string& name)
+int  CompilationUnit::FindExportMacro(const std::string& name ,std::vector<Object*> & candidates)
 {
 	auto  range = export_macro_table.equal_range(name);
-	std::vector<Object*> candidates;
+	int i = 0;
 	for (auto it = range.first; it != range.second; ++it) {
 		candidates.emplace_back(it->second);
+		i += 1;
 	}
-	return  candidates;
+	return  i;
 }
 
 std::unique_ptr< CompilationUnit::FindMacroInBlockResult>
@@ -126,10 +165,11 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
         std::wstring macro_name(cursor, end_cursor);
         if (macro_name.empty()) break;
 		std::unique_ptr< FindMacroInBlockResult> result = std::make_unique<FindMacroInBlockResult>();
-		auto def_set = FindExportMacro(IcuUtil::ws2s(macro_name));
-    	
-		result->def_set= parent.findDefOf(macro_name, shared_from_this(), monitor);
-		result->def_set.insert(result->def_set.end(), def_set.begin(), def_set.end());
+	
+		SearchPolicy policy;
+		policy.macro = SearchPolicy::getMacroInstance(true);
+		result->def_set= parent.findDefOf(policy,macro_name, shared_from_this(), monitor);
+	
     	
 		result->macro_name .swap(macro_name) ;
 		return  result;
@@ -143,6 +183,7 @@ bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken
 	{
 		if (it == node)return true;
 	}
+	
 	return false;
 }
 
@@ -168,12 +209,28 @@ void CompilationUnit::FindIn_define(const std::wstring& name, std::vector<Object
 		candidates.push_back(it->second);
 	}
 }
-std::vector<Object*>  CompilationUnit::FindDefine(const std::wstring& name)
+std::vector<Object*>  CompilationUnit::FindDefine(const SearchPolicy& policy, const std::wstring& name)
 {
 	std::vector<Object*> candidates;
-	FindIn_noTerm(name, candidates);
-	FindIn_Term(name, candidates);
-	FindIn_define(name, candidates);
+	if(policy.variable)
+	{
+		if (policy.variable->no_terminal)
+		{
+			FindIn_noTerm(name, candidates);
+		}
+		if (policy.variable->terminal)
+		{
+			FindIn_Term(name, candidates);
+		}
+	}
+	if(policy.macro)
+	{
+		if (policy.macro->local_macro)
+			FindIn_define(name, candidates);
+		if(policy.macro->export_macro)
+			FindExportMacro(IcuUtil::ws2s(name), candidates);
+	}
+
 
 	return  candidates;
 }

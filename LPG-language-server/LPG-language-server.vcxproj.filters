@@ -108,6 +108,9 @@
     <ClCompile Include="src\parser\Binding.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="src\SearchPolicy.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">

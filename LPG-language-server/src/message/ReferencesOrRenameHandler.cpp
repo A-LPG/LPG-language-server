@@ -6,6 +6,7 @@
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
 #include "LPGSourcePositionLocator.h"
+#include "../SearchPolicy.h"
 #include "../WorkSpaceManager.h"
 #include "LibLsp/lsp/textDocument/hover.h"
 struct ReferencesOrRenameHandler::Data
@@ -99,7 +100,8 @@ struct ReferenceData : ReferencesOrRenameHandler::Data
    		if(!dynamic_cast<ASTNodeToken*>(node))return;
 		auto nTok = static_cast<ASTNodeToken*>(node);
 		bool  had_add_node = false;
-		auto def_set = unit->parent.findDefOf(nTok, unit, monitor);
+		SearchPolicy policy = SearchPolicy::suggest(node);
+		auto def_set = unit->parent.findDefOf(policy,nTok, unit, monitor);
    		for(auto& def : def_set)
    		{
    			if(!def) continue;
@@ -228,7 +230,8 @@ struct RenameData : ReferencesOrRenameHandler::Data
 		if (!dynamic_cast<ASTNodeToken*>(node))return;
 		auto nTok = static_cast<ASTNodeToken*>(node);
 		bool  had_add_node = false;
-		auto def_set = unit->parent.findDefOf(nTok, unit, monitor);
+		SearchPolicy policy = SearchPolicy::suggest(node);
+		auto def_set = unit->parent.findDefOf(policy,nTok, unit, monitor);
 		for (auto& def : def_set)
 		{
 			if (!def) continue;

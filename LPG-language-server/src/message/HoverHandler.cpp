@@ -8,6 +8,7 @@
 #include "../WorkSpaceManager.h"
 #include "LibLsp/lsp/textDocument/hover.h"
 #include "../code.h"
+#include "../SearchPolicy.h"
 #include "LibLsp/lsp/Markup/Markup.h"
 using namespace LPGParser_top_level_ast;
 
@@ -52,9 +53,15 @@ struct DocumentationProvider
                   return;
             	}
             }
-        	
+        	else if(dynamic_cast<terminal_symbol0*>(node))
+        	{
+                markdown_output.addCodeBlock(node->to_utf8_string());
+        		return;
+        	}
             ASTNode* def = nullptr;
-        	auto set = ast_unit->parent.findDefOf(node, ast_unit, monitor);
+            SearchPolicy policy;
+            policy.variable = SearchPolicy::getVariableInstance(true);
+        	auto set = ast_unit->parent.findDefOf(policy,node, ast_unit, monitor);
             if(!set.empty())
             {
                 def = dynamic_cast<ASTNode*>(set[0]);
@@ -162,20 +169,13 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
     LPGSourcePositionLocator locator;
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return;
-
-    auto targets = unit->getLinkTarget(selNode, monitor);
-
-    if (targets.empty()) {
-        targets.push_back(selNode);
-    }
-    const auto set = targets;
-    MarkupContent content;
-    lsp::Document markdown_doc;
-    for (auto& target : set) {
+    auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(selNode));
+    if(policy.macro)
+    {
         std::vector<Object*> collector;
         do
         {
-            auto result = unit->FindMacroInBlock(target, position, monitor);
+            auto result = unit->FindMacroInBlock(selNode, position, monitor);
 
             if (!result)break;
             if (result->def_set.empty())
@@ -198,17 +198,36 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
                 collector.emplace_back(it);
             }
         } while (false);
-
-        if (collector.empty()) {
-            collector.push_back(target);
-        }
-
-        for (auto hover_obj : collector)
+        if (collector.empty())
         {
+            collector.push_back(selNode);
+        }
+        MarkupContent content;
+        lsp::Document markdown_doc;
+    	for(auto& it : collector)
+    	{
             DocumentationProvider docProvider;
             lsMarkedString marked_string;
-            docProvider.getDocumentation(markdown_doc ,unit, hover_obj, monitor);
-        }
+            docProvider.getDocumentation(markdown_doc, unit, it, monitor);
+    	}
+        content.kind = "markdown";
+        content.value = markdown_doc.asMarkdown();
+        out.contents.second = std::move(content);
+    	return;
+    	
+    }
+  
+    auto targets = unit->getLinkTarget(policy,selNode, monitor);
+    if (targets.empty()) {
+        targets.push_back(selNode);
+    }
+    const auto set = targets;
+    MarkupContent content;
+    lsp::Document markdown_doc;
+    for (auto& target : set) {
+        DocumentationProvider docProvider;
+        lsMarkedString marked_string;
+        docProvider.getDocumentation(markdown_doc ,unit, target, monitor);
     }
     content.kind = "markdown";
     content.value = markdown_doc.asMarkdown();

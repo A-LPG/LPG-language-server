@@ -46,6 +46,7 @@
     <ClCompile Include="src\parser\produce.cpp" />
     <ClCompile Include="src\parser\resolve.cpp" />
     <ClCompile Include="src\parser\sp.cpp" />
+    <ClCompile Include="src\SearchPolicy.h" />
     <ClCompile Include="src\WorkSpaceManager.cpp" />
     <ClCompile Include="src\timer.cpp" />
   </ItemGroup>

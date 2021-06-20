@@ -180,8 +180,6 @@ struct LPGBindingVisitor :public AbstractVisitor {
         for(auto& it : n->lpg_export_segment->list)
         {
           jikspg_data.exports.Next() = it->getLeftIToken()->getTokenIndex();         
-           unit->export_macro_table.insert({ prefix + it->getLeftIToken()->to_utf8_string(), it});
-      
         }
         return true;
     }

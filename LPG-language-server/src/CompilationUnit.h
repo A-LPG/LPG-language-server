@@ -47,6 +47,7 @@ namespace BuildInMacroName
 };
 struct WorkingFile;
 struct WorkSpaceManager;
+struct SearchPolicy;
 struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 {
 	std::shared_ptr<CompilationUnit> getptr()
@@ -68,7 +69,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
  * Get the target for a given source node in the AST represented by a given
  * Parse Controller.
  */
-	std::vector<Object*> getLinkTarget(Object* node, Monitor* monitor);
+	std::vector<Object*> getLinkTarget(SearchPolicy& policy, Object* node, Monitor* monitor);
 
 
 	std::set<std::string> local_macro_name_table;
@@ -81,7 +82,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	};
 	std::unordered_multimap<std::wstring,LPGParser_top_level_ast::nonTerm* > fEpsilonSet;
 	std::unordered_set<LPGParser_top_level_ast::nonTerm*> fEpsilonSet_back;
-	std::vector<Object*> FindExportMacro(const std::string& name);
+	int FindExportMacro(const std::string& name, std::vector<Object*>&);
 	std::unique_ptr<FindMacroInBlockResult> FindMacroInBlock(
 		Object* , const lsPosition&, Monitor* monitor);
 
@@ -93,7 +94,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 
 	void FindIn_define(const std::wstring& name, std::vector<Object*>& candidates);
 	
-	std::vector<Object*> FindDefine(const std::wstring& name);
+	std::vector<Object*> FindDefine(const SearchPolicy& policy, const std::wstring& name);
 	std::vector<Object*>   FindDefineIn_Term_and_noTerms(const std::wstring& name);
 	
 	bool  IsNullable(const std::wstring&);
@@ -128,7 +129,16 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 		bool collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
 
 	};
-	
+	std::vector< lsDocumentSymbol > document_symbols;
+
+	struct DependenceInfo
+	{
+		std::vector<std::string>  template_files;
+		std::vector<std::string>  import_terminals_files;
+		std::vector<std::string>  filter_files;
+		std::vector<std::string>  include_files;
+	};
+	DependenceInfo dependence_info;
 	std::shared_ptr<JikesPG2> data;
 private:
 	void  collectEpsilonSet();

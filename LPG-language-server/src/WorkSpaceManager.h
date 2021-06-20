@@ -5,6 +5,7 @@
 #include <vector>
 
 
+struct SearchPolicy;
 struct ILexStream;
 struct Monitor;
 class RemoteEndPoint;
@@ -30,15 +31,13 @@ namespace lsp {
 struct WorkSpaceManagerData;
 
 
-
-
 struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path, Monitor* monitor);
 	void   collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit , Monitor* monitor);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName, Monitor* monitor);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor);
-	std::vector<Object*> findDefOf(std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
-	std::vector<Object*> findDefOf(LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
+	std::vector<Object*> findDefOf(const SearchPolicy& , std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
+	std::vector<Object*> findDefOf(const SearchPolicy&, LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
 	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path, Monitor* monitor);
 	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&);
@@ -53,7 +52,9 @@ struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
-    std::vector< Object*>	 findDefOf_internal(std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
+    std::vector< Object*>	 findDefOf_internal(const SearchPolicy&, std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
+	void collect_def(std::set<std::string>& includedFiles, std::vector<Object*>& result, const SearchPolicy& policy,
+	                 std::wstring id, const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&&, Monitor* monitor);
 	
 };

@@ -8,92 +8,35 @@
 #include "../WorkSpaceManager.h"
 using namespace LPGParser_top_level_ast;
 
-namespace 
-{
-
-void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILexStream* lex)
-{
-
-	int size = list->size();
-	for(int i = 0; i < size; ++i)
-	{
-		auto _option_spec = list->getoption_specAt(i);
-		if(!_option_spec)
-		{
-            continue;
-		}
-		optionList* lpg_optionList = _option_spec->getoption_list();
-		if(!lpg_optionList)
-		{
-            continue;
-		}
-		for(int k =0; k < lpg_optionList->list.size(); ++k)
-		{
-			option* _opt = lpg_optionList->getoptionAt(k);
-			if(!_opt)
-                continue;
-			
-			lsDocumentSymbol children;
-			children.name = _opt->to_utf8_string();
-			if(children.name.find("template") == 0 ||
-                children.name.find("import_terminals") == 0 ||
-                children.name.find("filter") == 0)
-			{
-                children.kind = lsSymbolKind::File;
-			}else
-			{
-                children.kind = lsSymbolKind::Property;
-			}
-			
-			auto pos = ASTUtils::toPosition(lex,
-				_opt->getSYMBOL()->getLeftIToken()->getStartOffset());
-			if (pos)
-			{
-				children.range.start = pos.value();
-			}
-			pos = ASTUtils::toPosition(lex,
-                _opt->getSYMBOL()->getRightIToken()->getEndOffset());
-			if (pos)
-			{
-				children.range.end = pos.value();
-			}
-            children.selectionRange = children.range;
-			out.emplace_back(children);
-		}
-		
-	}
-}
-
-}
 struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
 
-    ILexStream* lex= nullptr;
+    ILexStream* lex = nullptr;
     std::shared_ptr<CompilationUnit>& unit;
     std::stack< lsDocumentSymbol*> fItemStack;
     void unimplementedVisitor(const std::string& s) { }
-    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u,lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l), unit(u)
+    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u, lsDocumentSymbol* rootSymbol, ILexStream* _l) :lex(_l), unit(u)
     {
         fItemStack.push(rootSymbol);
     }
-    lsDocumentSymbol*  createSubItem(IAst* n)
+    lsDocumentSymbol* createSubItem(IAst* n)
     {
-        auto parent =  fItemStack.top();
-    	if(!parent->children.has_value())
-    	{
+        auto parent = fItemStack.top();
+        if (!parent->children.has_value())
+        {
             parent->children = std::vector<lsDocumentSymbol>();
-    	}
+        }
         auto& children = parent->children.value();
         children.emplace_back(lsDocumentSymbol());
         lsDocumentSymbol* treeNode = &children[children.size() - 1];
         treeNode->kind = lsSymbolKind::Class;
         auto token = n->getLeftIToken();
-        treeNode->name =  token->to_utf8_string();
-        auto pos =  ASTUtils::toPosition(lex, token->getStartOffset());
-    	if(pos)
-    	{
+        treeNode->name = token->to_utf8_string();
+        auto pos = ASTUtils::toPosition(lex, token->getStartOffset());
+        if (pos)
+        {
             treeNode->range.start = pos.value();
-    	}
+        }
         pos = ASTUtils::toPosition(lex, token->getEndOffset());
         if (pos)
         {
@@ -108,14 +51,14 @@ struct LPGModelVisitor :public AbstractVisitor {
         fItemStack.push(node);
         return  node;
     }
-	void popSubItem()
+    void popSubItem()
     {
         fItemStack.pop();
     }
     bool visit(AliasSeg* n) {
 
-        auto symbol =  pushSubItem(n);
-    	
+        auto symbol = pushSubItem(n);
+
         return true;
     }
 
@@ -124,7 +67,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(AstSeg* n) {
-       auto symbol = pushSubItem(n);
+        auto symbol = pushSubItem(n);
 
         return true;
     }
@@ -136,7 +79,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(DefineSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Define ";
-    	
+
         return true;
     }
 
@@ -152,7 +95,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     void endVisit(EofSeg* n) {
-    	
+
         popSubItem();
     }
 
@@ -167,7 +110,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(ErrorSeg* n) {
-    	
+
         auto symbol = pushSubItem(n);
         symbol->name = "Error ";
         return true;
@@ -183,16 +126,16 @@ struct LPGModelVisitor :public AbstractVisitor {
         std::string prefix;
         prefix.push_back(static_cast<char>(unit->_lexer.escape_token));
         prefix.push_back('_');
-        for(auto& it : n->lpg_export_segment->list)
+        for (auto& it : n->lpg_export_segment->list)
         {
-           auto item =  pushSubItem(it);
-           item->kind = lsSymbolKind::Interface;
-           unit->export_macro_table.insert({ prefix + item->name, it});
-           popSubItem();
+            auto item = pushSubItem(it);
+            item->kind = lsSymbolKind::Interface;
+            unit->export_macro_table.insert({ prefix + item->name, it });
+            popSubItem();
         }
 
 
-    	
+
         return true;
     }
 
@@ -259,7 +202,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     void endVisit(KeywordsSeg* n) {
-    	
+
         popSubItem();
     }
 
@@ -368,17 +311,17 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto symbol = createSubItem(node);
         symbol->kind = lsSymbolKind::Variable;
         symbol->name = node->to_utf8_string();
-        auto pos =  ASTUtils::toPosition(lex, node->getRightIToken()->getEndOffset());
-    	if(pos)
-    	{
+        auto pos = ASTUtils::toPosition(lex, node->getRightIToken()->getEndOffset());
+        if (pos)
+        {
             symbol->range.end = pos.value();
-    	}
+        }
         return true;
     }
 
     bool visit(terminal_symbol1* n) {
-       auto  sym=  createSubItem((ASTNode*)n->getMACRO_NAME());
-       sym->kind = lsSymbolKind::Macro;
+        auto  sym = createSubItem((ASTNode*)n->getMACRO_NAME());
+        sym->kind = lsSymbolKind::Macro;
         return false;
     }
 
@@ -394,7 +337,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(terminal* n) {
         auto symbol = n->getterminal_symbol();
-      
+
         auto alias = n->getoptTerminalAlias();
         std::string label;
         if (alias != nullptr) {
@@ -404,15 +347,15 @@ struct LPGModelVisitor :public AbstractVisitor {
         }
         else
             label = symbolImage(symbol);
-       auto item = createSubItem(symbol);
-       item->name.swap(label);
-       item->kind = lsSymbolKind::String;
+        auto item = createSubItem(symbol);
+        item->name.swap(label);
+        item->kind = lsSymbolKind::String;
     }
 
     bool visit(nonTerm* n) {
         if (n->getruleList()->size() > 1)
         {
-	        auto item = pushSubItem(n);
+            auto item = pushSubItem(n);
             item->kind = lsSymbolKind::Field;
         }
         return true;
@@ -425,7 +368,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(rule* n) {
         fRHSLabel.clear();
-         nonTerm* parentNonTerm = static_cast<nonTerm*>(n->getParent()->getParent());
+        nonTerm* parentNonTerm = static_cast<nonTerm*>(n->getParent()->getParent());
         if (parentNonTerm->getruleList()->size() == 1) {
             fRHSLabel.append(parentNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
             fRHSLabel.append(" ::= ");
@@ -434,10 +377,10 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     void endVisit(rule* n) {
-       auto item =  createSubItem(n);
-       item->name.swap(fRHSLabel);
-       item->kind = lsSymbolKind::Field;
-       fRHSLabel.clear();
+        auto item = createSubItem(n);
+        item->name.swap(fRHSLabel);
+        item->kind = lsSymbolKind::Field;
+        fRHSLabel.clear();
     }
 
     void endVisit(symWithAttrs0* n) {
@@ -463,15 +406,15 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     std::string producesImage(ASTNode* produces) {
-        if ( dynamic_cast<produces0*>(produces) 
+        if (dynamic_cast<produces0*>(produces)
             || dynamic_cast<produces1*>(produces)
             || dynamic_cast<produces2*>(produces)
             || dynamic_cast<produces3*>(produces)
             )
             return produces->getLeftIToken()->to_utf8_string();
-   
-        
-         return "<???>";
+
+
+        return "<???>";
     }
 
     std::string nameImage(ASTNode* name) {
@@ -513,50 +456,135 @@ struct LPGModelVisitor :public AbstractVisitor {
         return block.getLeftIToken()->to_utf8_string();
     }
 };
-void process_symbol(std::shared_ptr<CompilationUnit>& unit , std::vector< lsDocumentSymbol >& document_symbols)
+
+namespace
 {
-	 if(!unit->root)
-	 {
-		 return;
-	 }
-     std::vector< lsDocumentSymbol >& children = document_symbols;
-     auto lex = unit->_lexer.getILexStream();
-	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
-	if(lpg_options_ && lpg_options_->list.size())
-	{
+
+    void build_option(CompilationUnit::DependenceInfo& infos_info,
+        std::vector<lsDocumentSymbol>& out,
+        option_specList* list, ILexStream* lex)
+    {
+        int size = list->size();
+        for (int i = 0; i < size; ++i)
+        {
+            auto _option_spec = list->getoption_specAt(i);
+            if (!_option_spec)
+            {
+                continue;
+            }
+            optionList* lpg_optionList = _option_spec->getoption_list();
+            if (!lpg_optionList)
+            {
+                continue;
+            }
+            for (size_t k = 0; k < lpg_optionList->list.size(); ++k)
+            {
+                option* _opt = lpg_optionList->getoptionAt(k);
+                if (!_opt)
+                    continue;
+                lsDocumentSymbol children;
+                children.name = _opt->to_utf8_string();
+                auto sym = _opt->getSYMBOL();
+                auto  optName = sym->toString();
+                if (optName == (L"import_terminals")
+                    || optName == (L"template")
+                    || optName == (L"filter"))
+                {
+                    children.kind = lsSymbolKind::File;
+                    string fileName;
+                    auto  optValue = _opt->getoption_value();
+                    if (dynamic_cast<option_value0*>(optValue)) {
+
+                        fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
+
+                    }
+                    else
+                    {
+                        fileName = optValue->to_utf8_string();
+                    }
+                    if (optName == (L"import_terminals"))
+                    {
+                        infos_info.import_terminals_files.push_back(fileName);
+                    }
+                    else if (optName == (L"template"))
+                    {
+                        infos_info.template_files.push_back(fileName);
+                    }
+                    else
+                    {
+                        infos_info.filter_files.push_back(fileName);
+                    }
+                }
+                else
+                {
+                    children.kind = lsSymbolKind::Property;
+                }
+
+
+                auto pos = ASTUtils::toPosition(lex,
+                    _opt->getSYMBOL()->getLeftIToken()->getStartOffset());
+                if (pos)
+                {
+                    children.range.start = pos.value();
+                }
+                pos = ASTUtils::toPosition(lex,
+                    _opt->getSYMBOL()->getRightIToken()->getEndOffset());
+                if (pos)
+                {
+                    children.range.end = pos.value();
+                }
+                children.selectionRange = children.range;
+                out.emplace_back(children);
+            }
+
+        }
+    }
+
+}
+void process_symbol(std::shared_ptr<CompilationUnit>& unit)
+{
+    if (!unit->root)
+    {
+        return;
+    }
+    std::vector< lsDocumentSymbol >& children = unit->document_symbols;
+    auto lex = unit->_lexer.getILexStream();
+    auto  lpg_options_ = (option_specList*)unit->root->getoptions_segment();
+    if (lpg_options_ && lpg_options_->list.size())
+    {
         children.push_back({});
-		lsDocumentSymbol& lpg_options_segment = children[children.size()-1];
-		lpg_options_segment.kind = lsSymbolKind::Package;
-		lpg_options_segment.name = "options";
-		auto pos = ASTUtils::toPosition(lex,
-			lpg_options_->getLeftIToken()->getStartOffset());
-		if (pos)
-		{
-			lpg_options_segment.range.start = pos.value();
-		}
-		pos = ASTUtils::toPosition(lex,
-			lpg_options_->getRightIToken()->getEndOffset());
-		if (pos)
-		{
-			lpg_options_segment.range.end = pos.value();
-		}
+        lsDocumentSymbol& lpg_options_segment = children[children.size() - 1];
+        lpg_options_segment.kind = lsSymbolKind::Package;
+        lpg_options_segment.name = "options";
+        auto pos = ASTUtils::toPosition(lex,
+            lpg_options_->getLeftIToken()->getStartOffset());
+        if (pos)
+        {
+            lpg_options_segment.range.start = pos.value();
+        }
+        pos = ASTUtils::toPosition(lex,
+            lpg_options_->getRightIToken()->getEndOffset());
+        if (pos)
+        {
+            lpg_options_segment.range.end = pos.value();
+        }
         lpg_options_segment.selectionRange = lpg_options_segment.range;
-		lpg_options_segment.children = std::vector<lsDocumentSymbol>();
-		build_option(lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
-	}
-	 if(auto _input =  unit->root->getLPG_INPUT(); _input)
+        lpg_options_segment.children = std::vector<lsDocumentSymbol>();
+        build_option(unit->dependence_info, lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
+    }
+    if (auto _input = unit->root->getLPG_INPUT(); _input)
     {
         lsDocumentSymbol root;
         root.children = std::vector<lsDocumentSymbol>();
-        LPGModelVisitor visitor(unit,&root, lex);
+        LPGModelVisitor visitor(unit, &root, lex);
         _input->accept(&visitor);
 
-    	for(auto& it :root.children.value())
-    	{
+        for (auto& it : root.children.value())
+        {
             children.push_back({});
             children.back().swap(it);
-    	}
+        }
     }
 
-	
+
 }

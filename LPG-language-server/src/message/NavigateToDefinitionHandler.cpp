@@ -7,6 +7,7 @@
 #include "LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
 #include "LibLsp/lsp/textDocument/hover.h"
+#include "../SearchPolicy.h"
 using namespace LPGParser_top_level_ast;
 
 struct DefinitionProvider
@@ -48,11 +49,18 @@ struct DefinitionProvider
 	            auto def = dynamic_cast<defineSpec*>(node->parent);
                 if (def){
                     return getLocation(ast_unit, def->getLeftIToken(), def->getRightIToken());
+                  
                 }
             }
-        	
+            else if (dynamic_cast<terminal_symbol0*>(node))
+            {
+                return getLocation(ast_unit, node->getLeftIToken(), node->getRightIToken());
+
+            }
             ASTNode* def = nullptr;
-            auto set = ast_unit->parent.findDefOf((ASTNodeToken*)target, ast_unit, monitor);
+            SearchPolicy policy;
+            policy.variable = SearchPolicy::getVariableInstance(true);
+            auto set = ast_unit->parent.findDefOf(policy,(ASTNodeToken*)target, ast_unit, monitor);
             if (!set.empty())
             {
                 def = dynamic_cast<ASTNode*>(set[0]);
@@ -120,8 +128,45 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
     LPGSourcePositionLocator locator;
     auto selNode = locator.findNode(unit->root, offset);
     if (selNode == nullptr) return ;
-  
-  auto targets = unit->getLinkTarget(selNode,monitor);
+    auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(selNode));
+    if (policy.macro)
+    {
+        std::vector<Object*> collector;
+        do
+        {
+            auto result = unit->FindMacroInBlock(selNode, position, monitor);
+
+            if (!result)break;
+            if (result->def_set.empty())
+            {
+                std::wstringex name = result->macro_name;
+                name.trim_left(unit->_lexer.escape_token);
+                auto key = IcuUtil::ws2s(name);
+                if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
+                    return;
+                }
+                break;
+            }
+        	
+            for (auto& it : result->def_set)
+            {
+                collector.emplace_back(it);
+            }
+        } while (false);
+        if (collector.empty())
+        {
+            collector.push_back(selNode);
+        }
+        DefinitionProvider provider(monitor);
+        for (auto it : collector)
+        {
+            auto link = provider.getLocation(unit, it);
+            if (link.has_value())
+                out.emplace_back(link.value());
+        }
+    	return;
+    }
+  auto targets = unit->getLinkTarget(policy,selNode,monitor);
 
   if (targets.empty()){
       targets.push_back(selNode);
@@ -130,38 +175,10 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
 	
   for (auto& target : set) {
 
-      std::vector<Object*> collector;
-      do
-      {
-          auto result = unit->FindMacroInBlock(target, position, monitor);
-
-          if (!result)break;
-          if (result->def_set.empty())
-          {
-              std::wstringex name = result->macro_name;
-              name.trim_left(unit->_lexer.escape_token);
-              auto key = IcuUtil::ws2s(name);
-              if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
-                  return;
-              }
-              break;
-          }
-          for (auto& it : result->def_set)
-          {
-              collector.emplace_back(it);
-          }
-      } while (false);
-
-      if (collector.empty()) {
-          collector.push_back(target);
-      }
-
       DefinitionProvider provider(monitor);
-      for (auto it : collector)
-      {
-          auto link = provider.getLocation(unit, it);
-          if (link.has_value())
-              out.emplace_back(link.value());
-      }
+      auto link = provider.getLocation(unit, target);
+      if (link.has_value())
+          out.emplace_back(link.value());
+      
   }
 }
