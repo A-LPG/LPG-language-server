@@ -248,7 +248,7 @@ public:
 				auto unit =GetUnit(req.params.textDocument,&_requestMonitor);
 				td_symbol::response rsp;
 				if (unit){
-					rsp.result = unit->document_symbols;
+					process_symbol(unit, rsp.result);
 				}
 				return std::move(rsp);
 			});

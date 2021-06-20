@@ -29,6 +29,7 @@ void process_definition(std::shared_ptr<CompilationUnit>&,const  lsPosition& pos
 
 void process_hover(std::shared_ptr<CompilationUnit>&, const lsPosition& , 
 	TextDocumentHover::Result&, Monitor* monitor);
+void process_symbol(std::shared_ptr<CompilationUnit>& unit, std::vector< lsDocumentSymbol >& document_symbols);
 
 struct CompletionHandler
 {

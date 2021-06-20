@@ -105,6 +105,9 @@
     <ClCompile Include="src\parser\JiksPgOption.cpp">
       <Filter>parser</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser\Binding.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">

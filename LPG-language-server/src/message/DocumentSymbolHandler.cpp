@@ -6,11 +6,10 @@
 #include <stack>
 #include "LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
-#include "../parser/ParseData.h"
-#include "../parser/JiksPGControl.h"
 using namespace LPGParser_top_level_ast;
 
-
+namespace 
+{
 
 void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILexStream* lex)
 {
@@ -65,55 +64,17 @@ void build_option(std::vector<lsDocumentSymbol>& out, option_specList* list, ILe
 	}
 }
 
+}
 struct LPGModelVisitor :public AbstractVisitor {
     std::string fRHSLabel;
-    ParseData& jikspg_data;
-    std::set<int> macroToVariableIndex;
+
     ILexStream* lex= nullptr;
     std::shared_ptr<CompilationUnit>& unit;
     std::stack< lsDocumentSymbol*> fItemStack;
-
-    JikesPGLexStream* lex_stream = nullptr;
     void unimplementedVisitor(const std::string& s) { }
-
-    void ChangeMacroToVariable(int index)
-    {
-        macroToVariableIndex.insert(index);
-    }
-    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u, lsDocumentSymbol* rootSymbol, ILexStream* _l) :jikspg_data(*u->data->lpg_data.get()), lex(_l), unit(u)
+    LPGModelVisitor(std::shared_ptr<CompilationUnit>& u,lsDocumentSymbol* rootSymbol, ILexStream* _l):lex(_l), unit(u)
     {
         fItemStack.push(rootSymbol);
-        lex_stream = &u->data->lex_stream;
-        Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
-        VariableLookupTable& variable_table = u->data->variable_table;
-        MacroLookupTable& macro_table = u->data->macro_table;
-        Tuple<VariableSymbol*>& variable_index = lex_stream->variable_index;
-       
-        variable_index.Resize(tokens.size());
-        for (int i = 0; i < tokens.size(); ++i)
-        {
-            IToken* token = tokens[i];
-            variable_index[i] = nullptr;
-            auto kind =  token->getKind();
-            if(LPGParsersym::TK_BLOCK == kind)
-            {
-               jikspg_data.initial_blocks.Next() = token->getTokenIndex();
-              
-            }
-            else if(LPGParsersym::TK_SYMBOL == kind)
-            {
-                auto name = token->to_utf8_string();
-                variable_index[i] = variable_table.FindOrInsertName(name.c_str(), name.size());
-                
-            }
-            else if (LPGParsersym::TK_MACRO_NAME == kind)
-            {
-                auto name = token->to_utf8_string();
-                auto symbol =  macro_table.FindOrInsertName(name.c_str(), name.size());
-                lex_stream->macro_table.insert({ i ,symbol });
-            }
-            
-        }
     }
     lsDocumentSymbol*  createSubItem(IAst* n)
     {
@@ -164,11 +125,7 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     bool visit(AstSeg* n) {
        auto symbol = pushSubItem(n);
-       auto list = n->getast_segment();
-    	for(int i = 0 ; i < list->size(); ++i)
-    	{
-            jikspg_data.ast_blocks.Next() = list->getaction_segmentAt(i)->getLeftIToken()->getTokenIndex();
-    	}
+
         return true;
     }
 
@@ -187,46 +144,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         popSubItem();
     }
 
-	bool visit(aliasSpec0* n) override
-    {
-       jikspg_data.  SetErrorIndex(n->getalias_rhs()->getLeftIToken()->getTokenIndex());
-	    return true;
-    }
-    bool visit(aliasSpec1* n) override
-    {
-        jikspg_data.SetEolIndex(n->getalias_rhs()->getLeftIToken()->getTokenIndex());
-        return true;
-    }
-    bool visit(aliasSpec2* n) override
-    {
-        jikspg_data.SetEofIndex(n->getalias_rhs()->getLeftIToken()->getTokenIndex());
-        return true;
-    }
-    bool visit(aliasSpec3* n) override
-    {
-        jikspg_data.SetIdentifierIndex(n->getalias_rhs()->getLeftIToken()->getTokenIndex());
-        return true;
-    }
-    bool visit(aliasSpec4* n) override
-    {
-        auto& aliases = jikspg_data.aliases;
-        int index = aliases.nextIndex();
-        aliases[index].lhs_index = n->getSYMBOL()->getLeftIToken()->getTokenIndex();
-        aliases[index].rhs_index = n->getalias_rhs()->getLeftIToken()->getTokenIndex();
-        return true;
-    }
-    bool visit(aliasSpec5* n) override
-    {
-        auto& aliases = jikspg_data.aliases;
-        int index = aliases.nextIndex();
-        aliases[index].lhs_index = n->getalias_lhs_macro_name()->getLeftIToken()->getTokenIndex();
-        aliases[index].rhs_index = n->getalias_rhs()->getLeftIToken()->getTokenIndex();
-    	//-- warning: escape prefix used in symbol
-        ChangeMacroToVariable(aliases[index].lhs_index);
-        return true;
-    }
     bool visit(EofSeg* n) {
-        jikspg_data.SetEofIndex(n->geteof_segment()->getLeftIToken()->getTokenIndex());
         auto symbol = pushSubItem(n);
         symbol->name = "Eof ";
 
@@ -241,7 +159,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(EolSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Eol ";
-        jikspg_data.SetEolIndex((n->geteol_segment()->getLeftIToken()->getTokenIndex()));
         return true;
     }
 
@@ -250,7 +167,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(ErrorSeg* n) {
-        jikspg_data.SetErrorIndex(n->geterror_segment()->getLeftIToken()->getTokenIndex());
+    	
         auto symbol = pushSubItem(n);
         symbol->name = "Error ";
         return true;
@@ -258,7 +175,6 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(ErrorSeg* n) {
         popSubItem();
-      
     }
 
     bool visit(ExportSeg* n) {
@@ -269,8 +185,6 @@ struct LPGModelVisitor :public AbstractVisitor {
         prefix.push_back('_');
         for(auto& it : n->lpg_export_segment->list)
         {
-          jikspg_data.exports.Next() = it->getLeftIToken()->getTokenIndex();
-        	
            auto item =  pushSubItem(it);
            item->kind = lsSymbolKind::Interface;
            unit->export_macro_table.insert({ prefix + item->name, it});
@@ -289,11 +203,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(GlobalsSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Globals";
-        auto list = n->getglobals_segment();
-    	for(int i = 0 ; i < list->size() ; ++i)
-    	{
-            jikspg_data.global_blocks.Next() = list->getaction_segmentAt(i)->getLeftIToken()->getTokenIndex();
-    	}
         return true;
     }
 
@@ -304,13 +213,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(HeadersSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Headers";
-
-        auto list = n->getheaders_segment();
-    	for(int i = 0; i < list->size(); ++i)
-    	{
-            auto item = list->getaction_segmentAt(i);
-            jikspg_data.header_blocks.Next() = item->getLeftIToken()->getTokenIndex();
-    	}
         return true;
     }
 
@@ -319,7 +221,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(IdentifierSeg* n) {
-       jikspg_data.SetIdentifierIndex(n->getidentifier_segment()->getLeftIToken()->getTokenIndex());
         auto symbol = pushSubItem(n);
         symbol->name = "Identifier";
         return true;
@@ -358,12 +259,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     void endVisit(KeywordsSeg* n) {
-
-        for(int i = 0 ; i < n->lpg_keywords_segment->size(); ++i)
-        {
-            auto node = n->lpg_keywords_segment->getkeywordSpecAt(i);
-           jikspg_data.keywords.Next() = node->getLeftIToken()->getTokenIndex();
-        }
     	
         popSubItem();
     }
@@ -373,20 +268,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         symbol->name = "Names ";
         return true;
     }
-    bool visit(nameSpec* n) {
-        auto& names = jikspg_data.names;
-        int index = names.nextIndex();
-        names[index].lhs_index = n->getname()->getLeftIToken()->getTokenIndex();
-        names[index].rhs_index = n->getname3()->getLeftIToken()->getTokenIndex();
-    	
-        return true;
-    }
-    bool visit(name1* n)
-    {
-        //-- warning: escape prefix used in symbol
-        ChangeMacroToVariable(n->getMACRO_NAME()->getTokenIndex());
-        return  false;
-    }
+
     void endVisit(NamesSeg* n) {
         popSubItem();
     }
@@ -394,9 +276,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(NoticeSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Notice ";
-    	
-        jikspg_data.notice_blocks.Next() = n->getnotice_segment()->getLeftIToken()->getTokenIndex();
-    	
         return false;
     }
 
@@ -409,15 +288,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         symbol->name = "Predecessor ";
         return true;
     }
-    bool visit(symbol_pair* n)
-    {
-        auto& predecessor_candidates = jikspg_data.predecessor_candidates;
-        int index = predecessor_candidates.nextIndex();
-        predecessor_candidates[index].lhs_index = n->getSYMBOL()->getLeftIToken()->getTokenIndex();
-        predecessor_candidates[index].rhs_index = n->getSYMBOL2()->getLeftIToken()->getTokenIndex();
-	    return false;
-    }
-    
+
     void endVisit(PredecessorSeg* n) {
         popSubItem();
     }
@@ -425,12 +296,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(RecoverSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Recover ";
-
-        auto recover_segment = n->getrecover_segment();
-    	for(int i = 0 ; i < recover_segment->size(); ++i)
-    	{
-            jikspg_data.recovers.Next() = recover_segment->getSYMBOLAt(i)->getLeftIToken()->getTokenIndex();
-    	}
         return true;
     }
 
@@ -456,42 +321,11 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(SoftKeywordsSeg* n) {
         popSubItem();
-    	for(int i = 0 ; i < n->lpg_keywords_segment->size(); ++i)
-    	{
-            auto node = n->lpg_keywords_segment->getkeywordSpecAt(i);
-            auto keyword_spec =  dynamic_cast<keywordSpec*>(n);
-    		if(!keyword_spec)
-    		{
-                jikspg_data.keywords.Next() = node->getLeftIToken()->getTokenIndex();
-    			continue;
-    		}
-            auto   _terminal_index =  keyword_spec->getterminal_symbol()->getLeftIToken()->getTokenIndex();
-            jikspg_data.keywords.Next() = _terminal_index;
-            auto& names = jikspg_data.names;
-            auto& aliases = jikspg_data.aliases;
-            int index = names.nextIndex();
-            ParseData::NameDefinition& name_definition = names[index];
-            name_definition.lhs_index = _terminal_index;
-            name_definition.rhs_index = keyword_spec->getname()->rightIToken->getTokenIndex();
-
-            index = aliases.nextIndex();
-            ParseData::AliasDefinition& alias_definition = aliases[index];
-            alias_definition.lhs_index = name_definition.rhs_index;
-            alias_definition.rhs_index = _terminal_index;
-            
-    	}
     }
 
     bool visit(StartSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Start ";
-
-       auto list =  n->getstart_segment();
-    	for(int i = 0 ; i < list->size(); ++i)
-    	{
-            auto start_symbol = list->getstart_symbolAt(i);
-            jikspg_data.start_indexes.Next() = start_symbol->getLeftIToken()->getTokenIndex();
-    	}
         return true;
     }
 
@@ -512,12 +346,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     bool visit(TrailersSeg* n) {
         auto symbol = pushSubItem(n);
         symbol->name = "Trailers ";
-        auto list = n->gettrailers_segment();
-        for (int i = 0; i < list->size(); ++i)
-        {
-            auto start_symbol = list->getaction_segmentAt(i);
-            jikspg_data.trailer_blocks.Next() = start_symbol->getLeftIToken()->getTokenIndex();
-        }
         return true;
     }
 
@@ -536,7 +364,7 @@ struct LPGModelVisitor :public AbstractVisitor {
     }
 
     bool visit(defineSpec* n) {
-        auto node = n->getmacro_name_symbol();
+        auto node = static_cast<ASTNode*>(n->getmacro_name_symbol());
         auto symbol = createSubItem(node);
         symbol->kind = lsSymbolKind::Variable;
         symbol->name = node->to_utf8_string();
@@ -545,46 +373,15 @@ struct LPGModelVisitor :public AbstractVisitor {
     	{
             symbol->range.end = pos.value();
     	}
-        MacroSymbol* macro_symbol = lex_stream->GetMacroSymbol(node->getLeftIToken()->getTokenIndex());
-        assert(macro_symbol);
-        macro_symbol->SetBlock(n->getmacro_segment()->getLeftIToken()->getTokenIndex());
         return true;
     }
-    bool visit(macro_name_symbol1* n)
-    {
-    	//-- warning: escape prefix missing...
-        auto index = n->getSYMBOL()->getTokenIndex();
-        int length = lex_stream->NameStringLength(index) + 1;
-        char* macro_name = new char[length + 1];
-        macro_name[0] = static_cast<char>(unit->_lexer.escape_token);
-        strcpy(macro_name + 1, lex_stream->NameString(index));
 
-        MacroSymbol* macro_symbol = unit->data->macro_table.FindName(macro_name, length);
-        if (macro_symbol == NULL)
-        {
-            macro_symbol = unit->data->macro_table.InsertName(macro_name, length);
-           unit->data->lpg_data->ReportError(MACRO_EXPECTED_INSTEAD_OF_SYMBOL, index);
-        }
-
-        lex_stream->SetSymbol(index,macro_symbol);
-        delete[] macro_name;
-	    return false;
-    }
-    
     bool visit(terminal_symbol1* n) {
-       
-       auto  sym=  createSubItem(n);
+       auto  sym=  createSubItem((ASTNode*)n->getMACRO_NAME());
        sym->kind = lsSymbolKind::Macro;
-       ChangeMacroToVariable(n->getMACRO_NAME()->getTokenIndex());
-    	// -- warning: escape prefix used in symbol
         return false;
     }
-    bool visit(alias_rhs1* n) {
-        ChangeMacroToVariable(n->getMACRO_NAME()->getTokenIndex());
-        // -- warning: escape prefix used in symbol
-        return false;
-    }
-    
+
     void endVisit(start_symbol0* n) {
         auto  sym = createSubItem(n);
         sym->kind = lsSymbolKind::Macro;
@@ -597,28 +394,13 @@ struct LPGModelVisitor :public AbstractVisitor {
 
     void endVisit(terminal* n) {
         auto symbol = n->getterminal_symbol();
-        auto terminal_symbol_index = symbol->getLeftIToken()->getTokenIndex();
-        jikspg_data.terminals.Next() = terminal_symbol_index;
-    	
+      
         auto alias = n->getoptTerminalAlias();
         std::string label;
         if (alias != nullptr) {
-          
-        	
             auto prod = alias->getproduces();
             auto name = alias->getname();
             label = nameImage(name) + " " + producesImage(prod) + " " + symbolImage(symbol);
-
-        	
-            int index = jikspg_data.names.nextIndex();
-            ParseData::NameDefinition& name_definition = jikspg_data.names[index];
-            name_definition.lhs_index = terminal_symbol_index;
-            name_definition.rhs_index = name->getLeftIToken()->getTokenIndex();
-           
-            index = jikspg_data.aliases.nextIndex();
-            ParseData::AliasDefinition& alias_definition = jikspg_data.aliases[index];
-            alias_definition.lhs_index = name_definition.rhs_index;
-            alias_definition.rhs_index = terminal_symbol_index;
         }
         else
             label = symbolImage(symbol);
@@ -626,108 +408,12 @@ struct LPGModelVisitor :public AbstractVisitor {
        item->name.swap(label);
        item->kind = lsSymbolKind::String;
     }
-    
-    bool visit(drop_command1* n) {
-        auto& dropped_rules = jikspg_data.dropped_rules;
-    	for(int i = 0 ; i < n->lpg_drop_rules->size(); ++i)
-    	{
-           auto rule= n->lpg_drop_rules->getdrop_ruleAt(i);
-           ruleList* rule_list = rule->lpg_ruleList;
-           {
-               int index = dropped_rules.nextIndex();
-               ParseData::RuleDefinition& rule_definition = dropped_rules[index];
-               rule_definition.lhs_index = rule->getSYMBOL()->getLeftIToken()->getTokenIndex();
-               rule_definition.separator_index = rule->lpg_produces->getLeftIToken()->getTokenIndex();
-               rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex();
-           }
 
-
-         
-          
-           auto size = rule_list->size();
-    	   for(int k = 0; k < size; k++)
-    	   {
-    	   	   if(k+1 < size)
-    	   	   {
-                   auto  index = dropped_rules.nextIndex();
-                   ParseData::RuleDefinition& rule_definition = dropped_rules[index];
-    	   	   		// drop_rule ::= drop_rule '|' rhs 针对这种情况
-    	   	   	   auto  rhs_item = rule_list->getruleAt(k+1);
-                   rule_definition.lhs_index = dropped_rules[index - 1].lhs_index;   	   	
-                   rule_definition.separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
-    	   	   	
-                   rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex();
-    	   	   }
-    	   }
-    	}
-        return false;
-    }
-    bool visit(drop_command0* n) {
-        for (size_t i = 0; i < n->lpg_drop_symbols->size(); ++i)
-        {
-            auto symbol = n->lpg_drop_symbols->getSYMBOLAt(i);
-            int index = jikspg_data.dropped_rules.nextIndex();
-            jikspg_data.dropped_rules[index].lhs_index = symbol->getLeftIToken()->getTokenIndex();
-            jikspg_data.dropped_rules[index].separator_index = 0;
-            jikspg_data.dropped_rules[index].end_rhs_index = 0;
-        }
-        return false;
-    }
     bool visit(nonTerm* n) {
-        ruleList* rule_list = n->getruleList();
-        if (rule_list->size() > 1)
+        if (n->getruleList()->size() > 1)
         {
 	        auto item = pushSubItem(n);
             item->kind = lsSymbolKind::Field;
-        }
-        
-     
-        auto& rules = jikspg_data.rules;
-        {
-           
-            int index = rules.nextIndex();
-            ParseData::RuleDefinition& rule_definition = rules[index];
-            auto lpg_ruleNameWithAttributes = n->getruleNameWithAttributes();
-            rule_definition.lhs_index = lpg_ruleNameWithAttributes->getSYMBOL()->getLeftIToken()->getTokenIndex();
-            if (lpg_ruleNameWithAttributes->lpg_className)
-            {
-                rule_definition.classname_index = lpg_ruleNameWithAttributes->lpg_className->getLeftIToken()->getTokenIndex();
-            }
-            else
-            {
-                rule_definition.classname_index = 0;
-            }
-            if (lpg_ruleNameWithAttributes->lpg_arrayElement)
-            {
-                rule_definition.array_element_type_index = lpg_ruleNameWithAttributes->lpg_arrayElement->getLeftIToken()->getTokenIndex();
-            }
-            else
-            {
-                rule_definition.array_element_type_index = 0;
-            }
-            rule_definition.separator_index = n->getproduces()->getLeftIToken()->getTokenIndex();
-            rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex();
-
-        }
-     
-      
-
-     
-        auto size = rule_list->size();
-        for (int k = 0; k < size; k++)
-        {
-            if (k + 1 < size)
-            {
-                // drop_rule ::= drop_rule '|' rhs 针对这种情况
-                auto  rhs_item = rule_list->getruleAt(k + 1);
-                int index = rules.nextIndex();
-                ParseData::RuleDefinition& rule_definition = rules[index];
-                rule_definition.lhs_index = rules[index - 1].lhs_index;
-                rule_definition.classname_index = rules[index - 1].classname_index;
-                rule_definition.separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
-                rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex();
-            	
-            }
         }
         return true;
     }
@@ -736,13 +422,10 @@ struct LPGModelVisitor :public AbstractVisitor {
         if (n->getruleList()->size() > 1)
             popSubItem();
     }
-    
+
     bool visit(rule* n) {
-       
-         nonTerm* parentNonTerm = dynamic_cast<nonTerm*>(n->getParent()->getParent());
-         if (!parentNonTerm)return true;
-    	
-         fRHSLabel.clear();
+        fRHSLabel.clear();
+         nonTerm* parentNonTerm = static_cast<nonTerm*>(n->getParent()->getParent());
         if (parentNonTerm->getruleList()->size() == 1) {
             fRHSLabel.append(parentNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string());
             fRHSLabel.append(" ::= ");
@@ -756,11 +439,7 @@ struct LPGModelVisitor :public AbstractVisitor {
        item->kind = lsSymbolKind::Field;
        fRHSLabel.clear();
     }
-    bool visit(name2* n)
-    {
-        jikspg_data.option->EmitError(n->getEMPTY_KEY(), "Illegal use of empty name or empty keyword");
-	    return true;
-    }
+
     void endVisit(symWithAttrs0* n) {
         fRHSLabel.push_back(' ');
         fRHSLabel.append(n->getIToken()->to_utf8_string());
@@ -775,33 +454,6 @@ struct LPGModelVisitor :public AbstractVisitor {
     // return true;
     // }
     bool visit(type_declarations* n) {
-        auto& types = jikspg_data.types;
-        int index = types.nextIndex();
-        types[index].type_index =n->getSYMBOL()->getLeftIToken()->getTokenIndex();
-        types[index].separator_index = n->getproduces()->getLeftIToken()->getTokenIndex();
-        types[index].symbol_index = n->getbarSymbolList()->getLeftIToken()->getTokenIndex();
-        int block_index = 0;
-    	if(n->lpg_opt_action_segment)
-    	{
-            block_index = n->lpg_opt_action_segment->getLeftIToken()->getTokenIndex();
-    	}
-        types[index].block_index = block_index;
-        auto rule_list = n->getbarSymbolList();
-        auto size = rule_list->size();
-        for (int k = 0; k < size; k++)
-        {
-            if (k + 1 < size)
-            {
-                index = types.nextIndex();
-                // drop_rule ::= drop_rule '|' rhs 针对这种情况
-                auto  rhs_item = rule_list->getSYMBOLAt(k + 1);
-                types[index].type_index = types[index - 1].type_index;
-                types[index].separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
-                types[index].symbol_index = rhs_item->getLeftIToken()->getTokenIndex();
-                types[index].block_index = block_index;
-            }
-        }
-    	
         pushSubItem(n);
         return true;
     }
@@ -861,25 +513,15 @@ struct LPGModelVisitor :public AbstractVisitor {
         return block.getLeftIToken()->to_utf8_string();
     }
 };
-
-void process_symbol(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler)
+void process_symbol(std::shared_ptr<CompilationUnit>& unit , std::vector< lsDocumentSymbol >& document_symbols)
 {
 	 if(!unit->root)
 	 {
 		 return;
 	 }
-     unit->data = std::make_shared<CompilationUnit::JikesPG2>(unit->_parser.prsStream->tokens);
-	
-     CompilationUnit::JikesPG2* data = unit->data.get();
-
-     JiksPgOption pg_option(&data->lex_stream, unit->working_file->filename.path);
-     pg_option.SetMessageHandler(handler);
-     pg_option.CompleteOptionProcessing();
-     data->lpg_data = std::make_shared<ParseData>(&pg_option);
-	
-     std::vector< lsDocumentSymbol >& children = unit->document_symbols;
+     std::vector< lsDocumentSymbol >& children = document_symbols;
      auto lex = unit->_lexer.getILexStream();
-	 auto  lpg_options_= static_cast<option_specList*>(unit->root->getoptions_segment());
+	 auto  lpg_options_= (option_specList*)unit->root->getoptions_segment();
 	if(lpg_options_ && lpg_options_->list.size())
 	{
         children.push_back({});
@@ -902,8 +544,6 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* hand
 		lpg_options_segment.children = std::vector<lsDocumentSymbol>();
 		build_option(lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
 	}
-
-	
 	 if(auto _input =  unit->root->getLPG_INPUT(); _input)
     {
         lsDocumentSymbol root;
@@ -916,38 +556,7 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* hand
             children.push_back({});
             children.back().swap(it);
     	}
-        if (!visitor.macroToVariableIndex.empty())
-        {
-            auto ChangeMacroToVariable = [&](int index)
-            {
-                const char* variable_name = data->lex_stream.NameString(index);
-                int length = data->lex_stream.NameStringLength(index);
-
-                VariableSymbol* variable_symbol = data->variable_table.FindName(variable_name, length);
-                if (variable_symbol == NULL)
-                {
-                    variable_symbol = data->variable_table.InsertName(variable_name, length);
-                    data->lpg_data->ReportError(SYMBOL_EXPECTED_INSTEAD_OF_MACRO, index);
-                }
-                data->lex_stream.variable_index[index]=(variable_symbol);
-            };
-        	
-            for(auto i : visitor.macroToVariableIndex)
-            {
-                ChangeMacroToVariable(i);
-            }
-        }
     }
 
-	 try
-	 {
-         data-> control = std::make_shared<Control>(&pg_option,&data->lex_stream,data->lpg_data.get(), &data->variable_table);
-        
-         data->control->ProcessGrammar();
-         data->control->ConstructParser();
-	 }
-	 catch (...)
-	 {
-	 }
 	
 }

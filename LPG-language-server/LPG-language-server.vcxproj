@@ -33,6 +33,7 @@
     <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp" />
     <ClCompile Include="src\message\SemanticTokensHandler.cpp" />
     <ClCompile Include="src\parser\base.cpp" />
+    <ClCompile Include="src\parser\Binding.cpp" />
     <ClCompile Include="src\parser\buffer.cpp" />
     <ClCompile Include="src\parser\dfa.cpp" />
     <ClCompile Include="src\parser\grammar.cpp" />

@@ -73,7 +73,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 
 	std::set<std::string> local_macro_name_table;
 	std::unordered_multimap<std::string, Object*> export_macro_table;
-	std::vector< lsDocumentSymbol > document_symbols;
+	
 	struct FindMacroInBlockResult
 	{
 		std::vector<Object*> def_set;

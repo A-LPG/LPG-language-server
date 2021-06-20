@@ -394,7 +394,8 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 {
 	return OnChange(_change,{}, monitor);
 }
-extern  void process_symbol(std::shared_ptr<CompilationUnit>&, ProblemHandler* handler);
+extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
+
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
 
@@ -402,47 +403,49 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	if (monitor && monitor->isCancelled())
 		return {};
-	WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
-
-	auto findIt = d_ptr->units.find(_change->filename);
-	if (findIt != d_ptr->units.end())
-	{
-		if( findIt->second->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
-		{
-			return  findIt->second;
-		}
-	}
-	if(content.empty())
-	{
-		if (!_change->parent.GetFileBufferContent(_change, content))
-		{
-			return {};
-		}
-	}
-
-	
-	std::shared_ptr<CompilationUnit> unit = std::make_shared<CompilationUnit>(_change,*this);
-	unit->counter.store(_change->counter.load(std::memory_order_relaxed));
-	
 	ProblemHandler handle;
-	handle.notify.params.uri = _change->filename;
-	
-	unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+	std::shared_ptr<CompilationUnit> unit;
+	{
+		WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
 
-	unit->_parser.reset(unit->_lexer.getLexStream());
-	
-	unit->_lexer.getLexStream()->setMessageHandler(&handle);
-	unit->_parser.getIPrsStream()->setMessageHandler(&handle);
-	if (monitor  &&monitor->isCancelled())
-		return {};
+		auto findIt = d_ptr->units.find(_change->filename);
+		if (findIt != d_ptr->units.end())
+		{
+			if (findIt->second->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
+			{
+				return  findIt->second;
+			}
+		}
+		if (content.empty())
+		{
+			if (!_change->parent.GetFileBufferContent(_change, content))
+			{
+				return {};
+			}
+		}
 
-	unit->parser(monitor);
-	if (monitor && monitor->isCancelled())
-		return {};
-	d_ptr->update_unit(_change->filename, unit);
 
-	process_symbol(unit, &handle);
+		unit = std::make_shared<CompilationUnit>(_change, *this);
+		unit->counter.store(_change->counter.load(std::memory_order_relaxed));
+
+		handle.notify.params.uri = _change->filename;
+
+		unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+
+		unit->_parser.reset(unit->_lexer.getLexStream());
+
+		unit->_lexer.getLexStream()->setMessageHandler(&handle);
+		unit->_parser.getIPrsStream()->setMessageHandler(&handle);
+		if (monitor && monitor->isCancelled())
+			return {};
+
+		unit->parser(monitor);
+		if (monitor && monitor->isCancelled())
+			return {};
+		d_ptr->update_unit(_change->filename, unit);
+	}
 	
+	process_type_binding(unit, &handle);
 	d_ptr->end_point.sendNotification(handle.notify);
 	return unit;
 }
