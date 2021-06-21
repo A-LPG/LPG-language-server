@@ -63,7 +63,7 @@
     <ClCompile Include="src\message\NavigateToDefinitionHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
-    <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp">
+    <ClCompile Include="src\message\ReferencesHandler.cpp">
       <Filter>message</Filter>
     </ClCompile>
     <ClCompile Include="src\code.cpp">
@@ -110,6 +110,9 @@
     </ClCompile>
     <ClCompile Include="src\SearchPolicy.h">
       <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message\Refactoring.cpp">
+      <Filter>message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

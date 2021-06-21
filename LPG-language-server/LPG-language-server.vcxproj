@@ -29,8 +29,9 @@
     <ClCompile Include="src\message\FoldingRangeHandler.cpp" />
     <ClCompile Include="src\message\HoverHandler.cpp" />
     <ClCompile Include="src\message\DocumentSymbolHandler.cpp" />
+    <ClCompile Include="src\message\Refactoring.cpp" />
     <ClCompile Include="src\message\NavigateToDefinitionHandler.cpp" />
-    <ClCompile Include="src\message\ReferencesOrRenameHandler.cpp" />
+    <ClCompile Include="src\message\ReferencesHandler.cpp" />
     <ClCompile Include="src\message\SemanticTokensHandler.cpp" />
     <ClCompile Include="src\parser\base.cpp" />
     <ClCompile Include="src\parser\Binding.cpp" />

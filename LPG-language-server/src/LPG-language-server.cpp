@@ -392,7 +392,7 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit){
-					ReferencesOrRenameHandler(unit, req.params.position, rsp.result,&_requestMonitor);
+					ReferencesHandler(unit, req.params.position, rsp.result,&_requestMonitor);
 				}
 				return std::move(rsp);
 			});
@@ -408,9 +408,81 @@ public:
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
 					std::vector< lsWorkspaceEdit::Either >  edits;
-					ReferencesOrRenameHandler(unit, req.params, edits, &_requestMonitor);
+					RenameHandler(unit, req.params, edits, &_requestMonitor);
 					rsp.result.documentChanges = std::move(edits);
 				
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_inlineNonTerminal::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_inlineNonTerminal::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_inlineNonTerminal::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					std::vector< lsWorkspaceEdit::Either >  edits;
+					InlineNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
+					rsp.result.documentChanges = std::move(edits);
+
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_makeEmpty::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_makeEmpty::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_makeEmpty::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					std::vector< lsWorkspaceEdit::Either >  edits;
+					MakeEmptyNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
+					rsp.result.documentChanges = std::move(edits);
+
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_makeNonEmpty::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_makeNonEmpty::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_makeNonEmpty::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					std::vector< lsWorkspaceEdit::Either >  edits;
+					MakeNonEmptyNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
+					rsp.result.documentChanges = std::move(edits);
+
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_MakeLeftRecursive::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_MakeLeftRecursive::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_MakeLeftRecursive::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					std::vector< lsWorkspaceEdit::Either >  edits;
+					MakeLeftRecursiveHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
+					rsp.result.documentChanges = std::move(edits);
+
 				}
 				return std::move(rsp);
 			});
