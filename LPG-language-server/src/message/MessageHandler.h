@@ -264,7 +264,7 @@ MAKE_REFLECT_STRUCT(MakeNonEmptyNonTerminal::Params,
  *
  * Registration Options: TextDocumentRegistrationOptions
  */
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeNonEmpty, MakeNonEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/NonEmpty");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeNonEmpty, MakeNonEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/MakeNonEmpty");
 
 
 struct MakeNonEmptyNonTerminalHandler
