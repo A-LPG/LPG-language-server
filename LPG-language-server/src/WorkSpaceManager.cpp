@@ -22,7 +22,7 @@
 #include "IMessageHandler.h"
 #include "message/MessageHandler.h"
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
-
+#include <LibLsp/JsonRpc/ScopeExit.h>
 #include "SearchPolicy.h"
 using namespace LPGParser_top_level_ast;
 using namespace lsp;
@@ -44,13 +44,14 @@ struct WorkSpaceManagerData
 	boost::shared_mutex _rw_mutex;
 
 	std::map<std::string, std::shared_ptr<CompilationUnit>> units;
+	std::map<std::string, std::shared_ptr<JikesPG2>> bindings;
 	std::vector<Directory>includeDirs;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream* lex)
 	{
 		readLock a(_rw_mutex);
 		for(auto& it : units)
 		{
-			if (lex == it.second->_lexer.getILexStream())
+			if (lex == it.second->parse_unit->_lexer.getILexStream())
 				return  it.second;
 		}
 
@@ -302,9 +303,9 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor)
 {
 	auto unit = lookupImportedFile(directory, fileName,monitor);
-	if(unit && unit->root)
+	if(unit && unit->parse_unit->root)
 	{
-		return  unit->root;
+		return  unit->parse_unit->root;
 	}
 	return nullptr;
 }
@@ -449,48 +450,52 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	ProblemHandler handle;
 	std::shared_ptr<CompilationUnit> unit;
+	unit = d_ptr->find(_change->filename);
+	if (unit)
+	{
+		if (unit->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
+		{
+			return  unit;
+		}
+	}
+	if (content.empty())
+	{
+		if (!_change->parent.GetFileBufferContent(_change, content))
+		{
+			return nullptr;
+		}
+	}
 	{
 		WorkSpaceManagerData::writeLock b(d_ptr->_rw_mutex);
-
-		auto findIt = d_ptr->units.find(_change->filename);
-		if (findIt != d_ptr->units.end())
-		{
-			if (findIt->second->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
-			{
-				return  findIt->second;
-			}
-		}
-		if (content.empty())
-		{
-			if (!_change->parent.GetFileBufferContent(_change, content))
-			{
-				return {};
-			}
-		}
-
-
 		unit = std::make_shared<CompilationUnit>(_change, *this);
 		unit->counter.store(_change->counter.load(std::memory_order_relaxed));
 
 		handle.notify.params.uri = _change->filename;
 
-		unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+		unit->parse_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
 
-		unit->_parser.reset(unit->_lexer.getLexStream());
+		unit->parse_unit->_parser.reset(unit->parse_unit->_lexer.getLexStream());
 
-		unit->_lexer.getLexStream()->setMessageHandler(&handle);
-		unit->_parser.getIPrsStream()->setMessageHandler(&handle);
+		unit->parse_unit->_lexer.getLexStream()->setMessageHandler(&handle);
+		unit->parse_unit->_parser.getIPrsStream()->setMessageHandler(&handle);
 		if (monitor && monitor->isCancelled())
-			return {};
+			return nullptr;
 
 		unit->parser(monitor);
 		if (monitor && monitor->isCancelled())
-			return {};
+			return nullptr;
 		d_ptr->update_unit(_change->filename, unit);
 		process_symbol(unit);
+		unit->parse_unit->mutex.lock();
 	}
-	
+	lsp::make_scope_exit([&]
+	{
+		unit->parse_unit->mutex.unlock();
+	});
+		
 	process_type_binding(unit, &handle);
+	
+	
 	d_ptr->end_point.sendNotification(handle.notify);
 	return unit;
 }
@@ -529,6 +534,14 @@ RemoteEndPoint& WorkSpaceManager::GetEndPoint() const
 std::shared_ptr<CompilationUnit> WorkSpaceManager::FindFile(ILexStream* lex)
 {
 	return  d_ptr->FindFile(lex);
+}
+
+std::shared_ptr<JikesPG2> WorkSpaceManager::GetLpgBinding(const AbsolutePath& path, Monitor* monitor)
+{
+	auto findIt = d_ptr->bindings.find(path);
+	if (findIt != d_ptr->bindings.end())
+		return  findIt->second;
+	return nullptr;
 }
 
 

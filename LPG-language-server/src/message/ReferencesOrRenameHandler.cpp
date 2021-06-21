@@ -63,17 +63,17 @@ struct ReferenceData : ReferencesOrRenameHandler::Data
 		std::vector<lsLocation>& o  ,Monitor* _monitor):
 	    out(o), unit(u),monitor(_monitor)
     {
-	    if (!unit || !unit->root)
+	    if (!unit || !unit->parse_unit->root)
 	    {
 		    return;
 	    }
-	    auto offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), position);
+	    auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
 	    if (offset < 0)
 	    {
 		    return;
 	    }
 	    LPGSourcePositionLocator locator;
-	    auto node = static_cast<ASTNode*>(locator.findNode(unit->root, offset));
+	    auto node = static_cast<ASTNode*>(locator.findNode(unit->parse_unit->root, offset));
 	    if (node == nullptr) return;
 
 		// Handles (I think) symbols in the terminals section
@@ -81,8 +81,8 @@ struct ReferenceData : ReferencesOrRenameHandler::Data
 		if(dynamic_cast<terminal_symbol0*>(node))
 		{
            getLocation(unit, node->getLeftIToken(), node->getRightIToken());
-		   auto lex = unit->_lexer.getILexStream();
-		   Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
+		   auto lex = unit->parse_unit->_lexer.getILexStream();
+		   Tuple<IToken*>& tokens = u->parse_unit->_parser.prsStream->tokens;
 		   auto nodeString = node->toString();
 		   for (int i = 1; i < tokens.size(); ++i)
 		   {
@@ -197,13 +197,13 @@ struct RenameData : ReferencesOrRenameHandler::Data
 	}
 	void GetData(const lsPosition& position)
 	{
-		auto offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), position);
+		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto node = static_cast<ASTNode*>(locator.findNode(unit->root, offset));
+		auto node = static_cast<ASTNode*>(locator.findNode(unit->parse_unit->root, offset));
 		if (node == nullptr) return;
 
 		// Handles (I think) symbols in the terminals section
@@ -211,8 +211,8 @@ struct RenameData : ReferencesOrRenameHandler::Data
 		if (dynamic_cast<terminal_symbol0*>(node))
 		{
 			getTextEdit(unit, node->getLeftIToken(), node->getRightIToken());
-			auto lex = unit->_lexer.getILexStream();
-			Tuple<IToken*>& tokens = unit->_parser.prsStream->tokens;
+			auto lex = unit->parse_unit->_lexer.getILexStream();
+			Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
 			auto nodeString = node->toString();
 			for (int i = 1; i < tokens.size(); ++i)
 			{
@@ -270,7 +270,7 @@ struct RenameData : ReferencesOrRenameHandler::Data
 	RenameData(std::shared_ptr<CompilationUnit>& u, const TextDocumentRename::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->root)
+		if (!unit || !unit->parse_unit->root)
 		{
 			return;
 		}

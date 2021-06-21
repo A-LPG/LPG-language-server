@@ -5,6 +5,7 @@
 #include <vector>
 
 
+struct JikesPG2;
 struct SearchPolicy;
 struct ILexStream;
 struct Monitor;
@@ -32,6 +33,7 @@ struct WorkSpaceManagerData;
 
 
 struct WorkSpaceManager {
+	
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path, Monitor* monitor);
 	void   collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit , Monitor* monitor);
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName, Monitor* monitor);
@@ -42,6 +44,7 @@ struct WorkSpaceManager {
 	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path, Monitor* monitor);
 	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&);
 	~WorkSpaceManager();
+	
 	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>&, Monitor* monitor);
 	void OnClose(const lsDocumentUri& close);
@@ -50,6 +53,8 @@ struct WorkSpaceManager {
 	void UpdateIncludePaths(const std::vector<Directory>&);
 	RemoteEndPoint& GetEndPoint()const;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
+
+	std::shared_ptr<JikesPG2> GetLpgBinding(const AbsolutePath& path, Monitor* monitor);
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
     std::vector< Object*>	 findDefOf_internal(const SearchPolicy&, std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);

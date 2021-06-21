@@ -124,7 +124,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto symbol = pushSubItem(n);
         symbol->name = "Export ";
         std::wstring prefix;
-        prefix.push_back(unit->_lexer.escape_token);
+        prefix.push_back(unit->parse_unit->_lexer.escape_token);
         prefix.push_back('_');
         for (auto& it : n->lpg_export_segment->list)
         {
@@ -189,7 +189,9 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto symbol = pushSubItem(n);
         symbol->name = "include ";
         symbol->kind = lsSymbolKind::File;
-        symbol->name += n->getSYMBOL()->to_utf8_string();
+    	auto file_name = n->getSYMBOL()->to_utf8_string();
+        symbol->name += file_name;
+        unit->dependence_info.include_files.push_back(file_name);
         return true;
     }
 
@@ -545,13 +547,13 @@ namespace
 }
 void process_symbol(std::shared_ptr<CompilationUnit>& unit)
 {
-    if (!unit->root)
+    if (!unit->parse_unit->root)
     {
         return;
     }
     std::vector< lsDocumentSymbol >& children = unit->document_symbols;
-    auto lex = unit->_lexer.getILexStream();
-    auto  lpg_options_ = (option_specList*)unit->root->getoptions_segment();
+    auto lex = unit->parse_unit->_lexer.getILexStream();
+    auto  lpg_options_ = (option_specList*)unit->parse_unit->root->getoptions_segment();
     if (lpg_options_ && lpg_options_->list.size())
     {
         children.push_back({});
@@ -572,9 +574,10 @@ void process_symbol(std::shared_ptr<CompilationUnit>& unit)
         }
         lpg_options_segment.selectionRange = lpg_options_segment.range;
         lpg_options_segment.children = std::vector<lsDocumentSymbol>();
-        build_option(unit->dependence_info, lpg_options_segment.children.value(), lpg_options_, unit->_lexer.getILexStream());
+        build_option(unit->dependence_info, lpg_options_segment.children.value(), lpg_options_, 
+            unit->parse_unit->_lexer.getILexStream());
     }
-    if (auto _input = unit->root->getLPG_INPUT(); _input)
+    if (auto _input = unit->parse_unit->root->getLPG_INPUT(); _input)
     {
         lsDocumentSymbol root;
         root.children = std::vector<lsDocumentSymbol>();

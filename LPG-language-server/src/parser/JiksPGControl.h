@@ -20,7 +20,7 @@ public:
     JikesPGLexStream(Tuple<IToken*>& t):token_stream(t){}
     std::unordered_map<int, BlockSymbol*> block_table;
     std::unordered_map<int, MacroSymbol*> macro_table;
-    Tuple<VariableSymbol*>  variable_index;
+    std::vector<VariableSymbol*>  variable_index;
 
     typedef int TokenIndex;
     inline unsigned Kind(TokenIndex i) { return token_stream[i]->getKind(); }
@@ -123,6 +123,7 @@ public:
     {
         macro_table[i] = symbol;
     }
+    Tuple<IToken*> token_stream;
 private:
     std::string& UnknowKindTokenNameString(TokenIndex i)
     {
@@ -134,7 +135,7 @@ private:
 
 
     TokenIndex index=0;
-    Tuple<IToken*>& token_stream;
+
 };
 
 

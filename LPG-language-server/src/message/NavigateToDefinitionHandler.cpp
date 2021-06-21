@@ -86,7 +86,7 @@ struct DefinitionProvider
             auto icu = static_cast<CompilationUnit*>(target);
             lsLocation location;
             location.uri = icu->working_file->filename;
-            auto lex = icu->_lexer.getILexStream();
+            auto lex = icu->parse_unit->_lexer.getILexStream();
             auto pos = ASTUtils::toPosition(lex, 1);
             if (pos)
             {
@@ -116,17 +116,17 @@ struct DefinitionProvider
 void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition& position, 
     std::vector<lsLocation>& out, Monitor* monitor)
 {
-    if (!unit ||!unit->root)
+    if (!unit ||!unit->parse_unit->root)
     {
         return;
     }
-    auto offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), position);
+    auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
 	if(offset < 0)
 	{
 		return;
 	}
     LPGSourcePositionLocator locator;
-    auto selNode = locator.findNode(unit->root, offset);
+    auto selNode = locator.findNode(unit->parse_unit->root, offset);
     if (selNode == nullptr) return ;
     auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(selNode));
     if (policy.macro)
@@ -140,7 +140,7 @@ void process_definition(std::shared_ptr<CompilationUnit>&unit, const lsPosition&
             if (result->def_set.empty())
             {
                 std::wstringex name = result->macro_name;
-                name.trim_left(unit->_lexer.escape_token);
+                name.trim_left(unit->parse_unit->_lexer.escape_token);
                 auto key = IcuUtil::ws2s(name);
                 if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
                     return;

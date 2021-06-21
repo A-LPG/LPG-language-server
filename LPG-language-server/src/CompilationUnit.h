@@ -62,9 +62,15 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	void insert_local_macro(const char* name);
 	std::shared_ptr<WorkingFile> working_file;
 	WorkSpaceManager& parent;
-	LPGLexer _lexer; // Create the lexer
-	LPGParser _parser;
-	LPGParser_top_level_ast::LPG* root = nullptr;
+
+	struct RunTimeUnit
+	{
+		LPGLexer _lexer; // Create the lexer
+		LPGParser _parser;
+		LPGParser_top_level_ast::LPG* root = nullptr;
+		std::recursive_mutex mutex;
+	};
+	std::shared_ptr<RunTimeUnit> parse_unit= std::make_shared<RunTimeUnit>();
 	void parser(Monitor* monitor);
 	/**
  * Get the target for a given source node in the AST represented by a given
@@ -130,7 +136,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 		JikesPGLexStream lex_stream;
 		bool collectFirstSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
 		bool collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
-
+		std::unordered_set<std::shared_ptr<RunTimeUnit>> unit_table;
 	};
 	std::vector< lsDocumentSymbol > document_symbols;
 
@@ -142,7 +148,9 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 		std::vector<std::string>  include_files;
 	};
 	DependenceInfo dependence_info;
-	std::shared_ptr<JikesPG2> data;
+	
+	friend struct LPGBindingVisitor;
+	std::shared_ptr<JikesPG2> GetBinding();
 private:
-
+	std::shared_ptr<JikesPG2> data;
 };

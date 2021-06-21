@@ -123,8 +123,9 @@ void CompilationUnit::insert_local_macro(const char* name)
 }
 void CompilationUnit::parser(Monitor* monitor)
 {
-	_lexer.lexer(monitor, _parser.getIPrsStream());
-	root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(_parser.parser(monitor,1000));
+	parse_unit->
+	_lexer.lexer(monitor, parse_unit->_parser.getIPrsStream());
+	parse_unit->root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(parse_unit->_parser.parser(monitor,1000));
 
 }
 
@@ -157,11 +158,11 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
     do
     {
         if (!InMacroInBlock(target)) break;
-        auto lex = _lexer.getILexStream();
+        auto lex = parse_unit-> _lexer.getILexStream();
         auto line = ASTUtils::getLine(lex, position.line + 1);
         if (line.size() <= position.character)break;
         auto temp = line.substr(0, position.character);
-        auto escape = _lexer.escape_token;
+        auto escape = parse_unit->_lexer.escape_token;
         auto index = temp.rfind(escape);
         if (std::wstring::npos == index) break;
         temp = line.substr(index);
@@ -190,7 +191,7 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
 
 bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken* node)
 {
-	for (auto& it : _parser._macro_name_symbo)
+	for (auto& it : parse_unit->_parser._macro_name_symbo)
 	{
 		if (it == node)return true;
 	}
@@ -200,7 +201,7 @@ bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken
 
 void CompilationUnit::FindIn_noTerm(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto range = _parser._non_terms.equal_range(name);
+	auto range = parse_unit->_parser._non_terms.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it)
 	{
 		candidates.push_back(it->second);
@@ -208,7 +209,7 @@ void CompilationUnit::FindIn_noTerm(const std::wstring& name, std::vector<Object
 }
 void CompilationUnit::FindIn_Term(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto  range = _parser._terms.equal_range(name);
+	auto  range = parse_unit->_parser._terms.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it) {
 		candidates.push_back(it->second);
 	}
@@ -223,7 +224,7 @@ void CompilationUnit::FindIn_Export(const std::wstring& name, std::vector<Object
 }
 void CompilationUnit::FindIn_define(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto  range = _parser._define_specs.equal_range(name);
+	auto  range = parse_unit-> _parser._define_specs.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it) {
 		candidates.push_back(it->second);
 	}
@@ -332,4 +333,22 @@ bool CompilationUnit::JikesPG2::collectFollowSet(LPGParser_top_level_ast::nonTer
 		}
 	}
 	return true;
+}
+
+std::shared_ptr<CompilationUnit::JikesPG2> CompilationUnit::GetBinding()
+{
+	std::lock_guard<std::recursive_mutex> lock(parse_unit->mutex);
+	if (!parse_unit->root)
+	{
+		return nullptr;
+	}
+	if(!data)
+	{
+		data = std::make_shared<JikesPG2>(parse_unit->_parser.prsStream->tokens);
+		
+	}
+	
+
+	
+	return  data;
 }

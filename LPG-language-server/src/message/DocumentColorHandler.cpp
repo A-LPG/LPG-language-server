@@ -366,12 +366,12 @@ struct DocumentColorHandlerData
 	shared_ptr_wstring buffer;
 	DocumentColorHandlerData(std::shared_ptr<CompilationUnit>& u, std::vector<ColorInformation>& o) :unit(u)
 	{
-		if (!unit || !unit->root)
+		if (!unit || !unit->parse_unit->root)
 		{
 			return;
 		}
 		Init();
-		auto lex = unit->_lexer.getILexStream();
+		auto lex = unit->parse_unit->_lexer.getILexStream();
 		auto process_token = [&](IToken* token)
 		{
 			ColorInformation information;
@@ -390,7 +390,7 @@ struct DocumentColorHandlerData
 			o.emplace_back(information);
 		};
 		{
-			Tuple<IToken*>& tokens = u->_parser.prsStream->tokens;
+			Tuple<IToken*>& tokens = u->parse_unit->_parser.prsStream->tokens;
 			for (int i = 0; i < tokens.size(); ++i)
 			{
 				IToken* token = tokens[i];
@@ -398,7 +398,7 @@ struct DocumentColorHandlerData
 			}
 		}
 		{
-			Tuple<IToken*>& tokens = u->_parser.prsStream->adjuncts;
+			Tuple<IToken*>& tokens = u->parse_unit->_parser.prsStream->adjuncts;
 			for (int i = 0; i < tokens.size(); ++i)
 			{
 				IToken* token = tokens[i];
@@ -408,18 +408,18 @@ struct DocumentColorHandlerData
 	}
 	void Init()
 	{
-		auto& parser = unit->_parser;
+		auto& parser = unit->parse_unit->_parser;
 		auto  tokenKindNames = parser.orderedTerminalSymbols();
 		fIsKeyword.resize(tokenKindNames.size());
 
-		auto keywordKinds = unit->_lexer.kwLexer->keywordKind;
-		auto length = unit->_lexer.kwLexer->keywordKindLenth;
+		auto keywordKinds = unit->parse_unit->_lexer.kwLexer->keywordKind;
+		auto length = unit->parse_unit->_lexer.kwLexer->keywordKindLenth;
 		for (int i = 1; i < length; i++) {
 			int index = parser.getIPrsStream()->mapKind(keywordKinds[i]);
 			fIsKeyword[index] = true;
 
 		}
-		buffer = unit->_parser.getIPrsStream()->getInputChars();
+		buffer = unit->parse_unit->_parser.getIPrsStream()->getInputChars();
 	}
 	std::vector<bool>fIsKeyword;
 	bool isKeyword(int kind) {

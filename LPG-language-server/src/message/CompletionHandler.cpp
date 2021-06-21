@@ -93,7 +93,7 @@ void  CompletionHandler::MakeCompletionItem(const std::string& proposal, const s
     lsTextEdit edit;
     edit.newText = text;
 
-    auto lex = unit->_lexer.getILexStream();
+    auto lex = unit->parse_unit->_lexer.getILexStream();
     auto  pos = ASTUtils::toPosition(lex, region.getOffset());
 	if(pos)
 	{
@@ -170,7 +170,7 @@ void CompletionHandler::computeMacroCompletions(const string& prefix) {
 
 
     std::vector<ASTNodeToken*> macros;
-	ASTUtils::getMacros(unit->root, macros);
+	ASTUtils::getMacros(unit->parse_unit->root, macros);
 
     for (auto& iter : macros) {
         auto macro = iter;
@@ -184,7 +184,7 @@ void CompletionHandler::computeMacroCompletions(const string& prefix) {
 void CompletionHandler::computeNonTerminalCompletions(const string& prefix) {
    
     std::vector<nonTerm*>  nonTerms;
-	ASTUtils::getNonTerminals(unit->root,nonTerms);
+	ASTUtils::getNonTerminals(unit->parse_unit->root,nonTerms);
 
     for (auto& nt : nonTerms) {
       	
@@ -204,7 +204,7 @@ void CompletionHandler::computeNonTerminalCompletions(const string& prefix) {
 void CompletionHandler::computeTerminalCompletions(const string& prefix) {
 
     std::vector<terminal*> terms;
-	ASTUtils::getTerminals(unit->root, terms);
+	ASTUtils::getTerminals(unit->parse_unit->root, terms);
 
     for (auto& iter : terms) {
         auto t = (terminal*)iter;
@@ -223,20 +223,20 @@ CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, Comple
 :unit(u), out(o)
 {
     out.isIncomplete = false;
-    if (!unit || !unit->root)
+    if (!unit || !unit->parse_unit->root)
     {
         return;
     }
     lsPosition pos = params.position;
     //pos.line += 1;
 	
-    offset = ASTUtils::toOffset(unit->_lexer.getILexStream(), pos);
+    offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), pos);
     if (offset < 0)
     {
         return;
     }
     LPGSourcePositionLocator locator;
-    auto thisNode =static_cast<ASTNode*>(locator.findNode(unit->root, offset));
+    auto thisNode =static_cast<ASTNode*>(locator.findNode(unit->parse_unit->root, offset));
     if (thisNode == nullptr) return;
 	auto thisLeftToken = thisNode->getLeftIToken();
     auto temp = thisLeftToken->to_utf8_string();
