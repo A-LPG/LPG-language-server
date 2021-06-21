@@ -6,7 +6,11 @@
 #include <LibLsp/lsp/textDocument/foldingRange.h>
 #include <LibLsp/lsp/textDocument/documentColor.h>
 #include <LibLsp/lsp/textDocument/rename.h>
+#include "LibLsp/JsonRpc/RequestInMessage.h"
+#include "LibLsp/JsonRpc/lsResponseMessage.h"
 
+#include "LibLsp/lsp/lsWorkspaceEdit.h"
+#include "LibLsp/lsp/lsTextDocumentIdentifier.h"
 struct Monitor;
 struct lsFormattingOptions;
 struct FoldingRangeRequestParams;
@@ -116,17 +120,205 @@ struct SemanticTokensHandler
 
 };
 
-struct ReferencesOrRenameHandler
+struct ReferencesHandler
 {
 
-	ReferencesOrRenameHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& position, std::vector<lsLocation>&, Monitor* monitor);
-	ReferencesOrRenameHandler(std::shared_ptr<CompilationUnit>&, const TextDocumentRename::Params& position,
-		std::vector< lsWorkspaceEdit::Either >&, Monitor* monitor);
+	ReferencesHandler(std::shared_ptr<CompilationUnit>&, const lsPosition& , std::vector<lsLocation>&, Monitor* );
+
 	
-	~ReferencesOrRenameHandler();
+
 
 	struct Data;
+	std::shared_ptr<Data>  d_ptr;
+
+};
+
+struct RenameHandler
+{
+
 	
-	Data* d_ptr;
+	RenameHandler(std::shared_ptr<CompilationUnit>&, const TextDocumentRename::Params&,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+
+	
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
+
+};
+
+
+
+namespace InlineNonTerminal {
+	struct Params {
+		// The document to format.
+		lsTextDocumentIdentifier textDocument;
+
+		// The position at which this request was sent.
+		lsPosition position;
+
+		bool	fInlineAll =false;
+		MAKE_SWAP_METHOD(Params,
+			textDocument,
+			position,
+			fInlineAll)
+	};
+};
+MAKE_REFLECT_STRUCT(InlineNonTerminal::Params,
+	textDocument,
+	position,
+	fInlineAll);
+
+
+
+
+/**
+ * The rename request is sent from the client to the server to do a
+ * workspace wide rename of a symbol.
+ *
+ * Registration Options: TextDocumentRegistrationOptions
+ */
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_inlineNonTerminal, InlineNonTerminal::Params, lsWorkspaceEdit, "lpg/inlineNonTerminal");
+
+
+struct InlineNonTerminalHandler
+{
+
+	InlineNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const InlineNonTerminal::Params&,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
+
+};
+
+
+
+namespace MakeEmptyNonTerminal {
+	struct Params {
+		// The document to format.
+		lsTextDocumentIdentifier textDocument;
+
+		// The position at which this request was sent.
+		lsPosition position;
+
+		MAKE_SWAP_METHOD(Params,
+			textDocument,
+			position)
+	};
+};
+MAKE_REFLECT_STRUCT(MakeEmptyNonTerminal::Params,
+	textDocument,
+	position);
+
+
+
+
+/**
+ * The rename request is sent from the client to the server to do a
+ * workspace wide rename of a symbol.
+ *
+ * Registration Options: TextDocumentRegistrationOptions
+ */
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeEmpty, MakeEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/makeEmpty");
+
+
+struct MakeEmptyNonTerminalHandler
+{
+
+	MakeEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const MakeEmptyNonTerminal::Params&,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
+
+};
+
+
+
+namespace MakeNonEmptyNonTerminal {
+	struct Params {
+		// The document to format.
+		lsTextDocumentIdentifier textDocument;
+
+		// The position at which this request was sent.
+		lsPosition position;
+
+		MAKE_SWAP_METHOD(Params,
+			textDocument,
+			position)
+	};
+};
+MAKE_REFLECT_STRUCT(MakeNonEmptyNonTerminal::Params,
+	textDocument,
+	position);
+
+
+
+
+/**
+ * The rename request is sent from the client to the server to do a
+ * workspace wide rename of a symbol.
+ *
+ * Registration Options: TextDocumentRegistrationOptions
+ */
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeNonEmpty, MakeNonEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/NonEmpty");
+
+
+struct MakeNonEmptyNonTerminalHandler
+{
+
+	MakeNonEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const MakeNonEmptyNonTerminal::Params&,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
+
+};
+
+
+
+
+namespace MakeLeftRecursive {
+	struct Params {
+		// The document to format.
+		lsTextDocumentIdentifier textDocument;
+
+		// The position at which this request was sent.
+		lsPosition position;
+
+		MAKE_SWAP_METHOD(Params,
+			textDocument,
+			position)
+	};
+};
+MAKE_REFLECT_STRUCT(MakeLeftRecursive::Params,
+	textDocument,
+	position);
+
+
+
+
+/**
+ * The rename request is sent from the client to the server to do a
+ * workspace wide rename of a symbol.
+ *
+ * Registration Options: TextDocumentRegistrationOptions
+ */
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_MakeLeftRecursive, MakeLeftRecursive::Params, lsWorkspaceEdit, "lpg/MakeLeftRecursive");
+
+
+struct MakeLeftRecursiveHandler
+{
+
+	MakeLeftRecursiveHandler(std::shared_ptr<CompilationUnit>&, const MakeLeftRecursive::Params&,
+		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
 
 };
