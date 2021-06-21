@@ -389,9 +389,116 @@ struct LPGBindingVisitor :public AbstractVisitor {
         
     }
 
+    bool ImportTerminals(const std::string& file_name) const
+    {
+        auto include_unit = unit->parent.lookupImportedFile(unit->working_file->directory, file_name, nullptr);
+        if (!include_unit)
+        {
+            // warning
+            return false;
+        }
+        auto include_binding = include_unit->GetBinding();
+        if (!include_binding)return false;
+
+        if (include_unit->data->lex_stream.NumTokens() == 0)
+            return false;
+
+        for (auto& it : include_binding->unit_table)
+        {
+            unit->data->unit_table.insert(it);
+        }
+
+
+        //
+		// Merge the symbols inherited from filter files
+		// with the symbols that are to be exported by the parser.
+		//
+        Tuple<int> imports;
+        
+        for (int i = 0; i < include_unit->data->lex_stream.NumImportedFilters(); i++)
+                imports.Next() = include_unit->data->lex_stream.ImportedFilter(i);
+        
+        {
+            for (int i = 0; i < include_binding->lpg_data->exports.Length(); i++)
+                imports.Next() = include_binding->lpg_data->exports[i];
+        	
+        }
+
+        Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+        VariableLookupTable& variable_table = unit->data->variable_table;
+        MacroLookupTable& macro_table = unit->data->macro_table;
+        auto& variable_index = lex_stream->variable_index;
+        int offset = lex_stream->token_stream.size();
+        //
+		// Contruct the final list of imported symbols in lex_stream.
+		//
+        for (int i = 0; i < imports.Length(); i++)
+        {
+            int import = imports[i];
+            VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
+            IToken* token = include_unit->data->lex_stream.token_stream[i];
+            lex_stream->token_stream.Next() = token;
+            variable_index.push_back(variable_table.FindOrInsertName(symbol->Name(), symbol->NameLength()));
+            this->lex_stream->AddImportedTerminal(offset + i);
+        }
+    	return true;
+    }
+    bool ProcessFilters(const std::string& file_name) const
+    {
+        auto include_unit = unit->parent.lookupImportedFile(unit->working_file->directory, file_name, nullptr);
+        if (!include_unit)
+        {
+            // warning
+            return false;
+        }
+        auto include_binding = include_unit->GetBinding();
+        if (!include_binding)return false;
+
+        if (include_unit->data->lex_stream.NumTokens() == 0)
+            return false;
+
+        for (auto& it : include_binding->unit_table)
+        {
+            unit->data->unit_table.insert(it);
+        }
+
+
+        //
+        // Merge the symbols inherited from filter files
+        // with the symbols that are to be exported by the parser.
+        //
+        Tuple<int> imports;
+
+        for (int i = 0; i < include_unit->data->lex_stream.NumImportedFilters(); i++)
+            imports.Next() = include_unit->data->lex_stream.ImportedFilter(i);
+
+        {
+            for (int i = 0; i < include_binding->lpg_data->exports.Length(); i++)
+                imports.Next() = include_binding->lpg_data->exports[i];
+
+        }
+
+        Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+        VariableLookupTable& variable_table = unit->data->variable_table;
+        MacroLookupTable& macro_table = unit->data->macro_table;
+        auto& variable_index = lex_stream->variable_index;
+        int offset = lex_stream->token_stream.size();
+        //
+        // Contruct the final list of imported symbols in lex_stream.
+        //
+        for (int i = 0; i < imports.Length(); i++)
+        {
+            int import = imports[i];
+            VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
+            IToken* token = include_unit->data->lex_stream.token_stream[i];
+            lex_stream->token_stream.Next() = token;
+            variable_index.push_back(variable_table.FindOrInsertName(symbol->Name(), symbol->NameLength()));
+            this->lex_stream->AddImportedFilter(offset + i);
+        }
+        return true;
+    }
     bool visit(KeywordsSeg* n) {
         
-    
         return true;
     }
 
@@ -995,7 +1102,15 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 	{
         visitor.process_include(unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1]);
 	}
-
+    for (auto& file : unit->dependence_info.import_terminals_files)
+    {
+       (void) visitor.ImportTerminals(file);
+    }
+    for (auto& file : unit->dependence_info.filter_files)
+    {
+        (void)visitor.ProcessFilters(file);
+    }
+    
 	 try
 	 {
          data-> control = std::make_shared<Control>(&pg_option,&data->lex_stream,data->lpg_data.get(), &data->variable_table);     

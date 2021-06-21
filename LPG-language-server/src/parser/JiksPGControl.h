@@ -124,6 +124,17 @@ public:
         macro_table[i] = symbol;
     }
     Tuple<IToken*> token_stream;
+	
+    Tuple<int> imported_terminals,
+        imported_filters;
+
+    void AddImportedTerminal(int i) { imported_terminals.Next() = i; }
+    void AddImportedFilter(int i) { imported_filters.Next() = i; }
+    inline int ImportedTerminal(int i) { return imported_terminals[i]; }
+    inline int NumImportedTerminals() { return imported_terminals.Length(); }
+
+    inline int ImportedFilter(int i) { return imported_filters[i]; }
+    inline int NumImportedFilters() { return imported_filters.Length(); }
 private:
     std::string& UnknowKindTokenNameString(TokenIndex i)
     {

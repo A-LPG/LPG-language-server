@@ -165,7 +165,10 @@ void Grammar::ProcessExportedTerminals(void)
     // with the symbols that are to be locally exported.
     //
     Tuple<int> imports;
-   
+    {
+        for (int i = 0; i < lex_stream->NumImportedFilters(); i++)
+            imports.Next() = lex_stream->ImportedFilter(i);
+    }
     {
         for (int i = 0; i < parser.exports.Length(); i++)
             imports.Next() = parser.exports[i];
@@ -282,7 +285,16 @@ void Grammar::ProcessTerminals(Tuple<int> &declared_terminals)
     }
 
     BitSet imported_term_set(variable_table -> Size(), BitSet::EMPTY);
- 
+    {
+        for (int i = 0; i < lex_stream->NumImportedTerminals(); i++) // imported from another grammar
+        {
+            int import = lex_stream->ImportedTerminal(i);
+            VariableSymbol* terminal = lex_stream->GetVariableSymbol(import);
+            declared_terminals.Next() = AssignSymbolIndex(terminal);
+
+            imported_term_set.AddElement(terminal->Index());
+        }
+    }
 
     {
         for (int i = 0; i < parser.keywords.Length(); i++)
