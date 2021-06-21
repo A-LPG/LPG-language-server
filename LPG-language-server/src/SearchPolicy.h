@@ -34,6 +34,15 @@ struct SearchPolicy
 		bool export_term = false;
 		bool import_term = false;
 		FileScope _scope;
+		bool IsValid() const
+		{
+			if (terminal)return true;
+			if (no_terminal)return true;
+			if (export_term)return true;
+			if (import_term)return true;
+		
+			return false;
+		}
 	
 	};
 	boost::optional< Variable >  variable;
@@ -51,11 +60,31 @@ struct SearchPolicy
 		bool export_macro = false;
 		bool undeclared_macro = false;
 		bool build_in_macro = false;
-
+		bool IsValid() const
+		{
+			if(local_macro)return true;
+			if (rule_macro)return true;
+			if (filter_macro)return true;
+			if (export_macro)return true;
+			if (undeclared_macro)return true;
+			if (build_in_macro)return true;
+			return false;
+		}
 		FileScope _scope;
 	};
 	boost::optional<Macro> macro;
-
+	bool IsValid() const
+	{
+		if(variable)
+		{
+			if (variable->IsValid()) return true;
+		}
+		if (macro)
+		{
+			if (macro->IsValid()) return true;
+		}
+		return false;
+	}
 	static  boost::optional<Macro> getMacroInstance(bool value = false);
 	static  boost::optional<Variable> getVariableInstance(bool value = false);
 	static SearchPolicy suggest(LPGParser_top_level_ast::ASTNode* node);

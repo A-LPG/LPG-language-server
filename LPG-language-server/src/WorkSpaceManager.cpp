@@ -145,9 +145,11 @@ void WorkSpaceManager::collect_def(
 {
 	includedFiles.insert(refUnit->working_file->filename);
 
+	if (!policy.IsValid())return;
+	
 	auto collect_method = [&](const SearchPolicy& collect_policy,const std::string& fileName)
 	{
-
+		if(!collect_policy.IsValid())return;
 		auto include_unit = lookupImportedFile(refUnit->working_file->directory, fileName, monitor);
 		
 		if (!include_unit)return;
@@ -200,9 +202,11 @@ void WorkSpaceManager::collect_def(
 		}
 		if (policy.variable->_scope._filter)
 		{
-			SearchPolicy collect_policy = policy;
-			collect_policy.variable.value().no_terminal = false;
-			collect_policy.variable.value().terminal = false;
+			SearchPolicy collect_policy;
+			SearchPolicy::Variable variable = policy.variable.value();
+			variable.no_terminal = false;
+			variable.terminal = false;
+			collect_policy.variable = std::move(variable);
 			for (auto& fileName : refUnit->dependence_info.filter_files)
 			{
 				collect_method(collect_policy,fileName);
@@ -210,9 +214,11 @@ void WorkSpaceManager::collect_def(
 		}
 		if (policy.variable->_scope._import_terminals)
 		{
-			SearchPolicy collect_policy = policy;
-			collect_policy.variable.value().no_terminal = false;
-			collect_policy.variable.value().terminal = false;
+			SearchPolicy collect_policy;
+			SearchPolicy::Variable variable = policy.variable.value();
+			variable.no_terminal = false;
+			variable.terminal = false;
+			collect_policy.variable = std::move(variable);
 			for (auto& fileName : refUnit->dependence_info.import_terminals_files)
 			{
 				collect_method(collect_policy,fileName);
