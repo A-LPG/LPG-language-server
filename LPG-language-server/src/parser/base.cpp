@@ -3,6 +3,7 @@
 #include "control.h"
 #include <string.h>
 #include <iostream>
+#include <stringex.h>
 using namespace std;
 
 int Base::MAX_LENGTH = PRINT_LINE_SIZE - 4;
@@ -1654,6 +1655,52 @@ void Base::QuickSortSymbols(Array<int> &array, int low, int high)
 void Base::PrintNonTerminalFirst(void)
 {
    
+    char line[PRINT_LINE_SIZE + 1],
+        tok[SYMBOL_SIZE + 1];
+
+    //
+    // First, flush any data left in the report buffer.
+    //
+    option->FlushReport();
+    std::cout << "\n All the terminals:\n\n";
+    for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+    {
+        grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+        std::cout << tok << " ";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "\nFirst map for non-terminals:\n\n" ;
+
+    for (int nt = grammar->FirstNonTerminal(); nt <= grammar->LastNonTerminal(); nt++)
+    {
+        grammar->RestoreSymbol(tok, grammar->RetrieveString(nt));
+        grammar->PrintLargeToken(line, tok, "", PRINT_LINE_SIZE - 7);
+        strcat(line, "  ==>> ");
+        for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+        {
+            if (nt_first[nt][t])
+            {
+                grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+                if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 1)
+                {
+                    std::stringex temp;
+                	temp.format("\n%s", line);
+                    std::cout << temp;
+                    grammar->PrintLargeToken(line, tok, "    ", MAX_LENGTH);
+                }
+                else
+                    strcat(line, tok);
+                strcat(line, " ");
+            }
+        }
+        {
+            std::stringex temp;
+            temp.format("\n%s", line);
+            std::cout << temp;
+        }
+       
+    }
 
     return;
 }
@@ -1674,7 +1721,45 @@ void Base::PrintSymbolMap(const char *header, Array<BitSet> &map)
 //
 void Base::PrintFollowMap(void)
 {
-    
+    //
+    // First, flush any data left in the report buffer.
+    //
+    option->FlushReport();
+
+  
+     std::cout << "\nFollow Map:\n\n";
+    for (int nt = grammar->FirstNonTerminal(); nt <= grammar->LastNonTerminal(); nt++)
+    {
+        char line[PRINT_LINE_SIZE + 1],
+            tok[SYMBOL_SIZE + 1];
+
+        grammar->RestoreSymbol(tok, grammar->RetrieveString(nt));
+        grammar->PrintLargeToken(line, tok, "", PRINT_LINE_SIZE - 7);
+        strcat(line, "  ==>> ");
+        for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+        {
+            if (follow[nt][t])
+            {
+                grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+                if (strlen(line) + strlen(tok) > PRINT_LINE_SIZE - 2)
+                {
+                    std::stringex temp;
+                    temp.format("\n%s", line);
+                    std::cout << temp;
+                    grammar->PrintLargeToken(line, tok, "    ", MAX_LENGTH);
+                }
+                else
+                    strcat(line, tok);
+                strcat(line, " ");
+            }
+        }
+        {
+            std::stringex temp;
+            temp.format("\n%s", line);
+            std::cout << temp;
+        }
+
+    }
     return;
 }
 

@@ -765,7 +765,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
                ParseData::RuleDefinition& rule_definition = dropped_rules[index];
                rule_definition.lhs_index = rule->getSYMBOL()->getLeftIToken()->getTokenIndex();
                rule_definition.separator_index = rule->lpg_produces->getLeftIToken()->getTokenIndex();
-               rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex();
+               rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex()+1;
            }
 
 
@@ -783,7 +783,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
                    rule_definition.lhs_index = dropped_rules[index - 1].lhs_index;   	   	
                    rule_definition.separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
     	   	   	
-                   rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex();
+                   rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex()+1;
     	   	   }
     	   }
     	}
@@ -826,7 +826,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
                 rule_definition.array_element_type_index = 0;
             }
             rule_definition.separator_index = n->getproduces()->getLeftIToken()->getTokenIndex();
-            rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex();
+            rule_definition.end_rhs_index = rule_list->getruleAt(0)->getRightIToken()->getTokenIndex() + 1;
 
         }
      
@@ -845,7 +845,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
                 rule_definition.lhs_index = rules[index - 1].lhs_index;
                 rule_definition.classname_index = rules[index - 1].classname_index;
                 rule_definition.separator_index = rhs_item->getLeftIToken()->getTokenIndex() - 1;
-                rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex();
+                rule_definition.end_rhs_index = rhs_item->getRightIToken()->getTokenIndex()+ 1;
             	
             }
         }

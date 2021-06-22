@@ -2,6 +2,7 @@
 #include "control.h"
 #include "grammar.h"
 #include <iostream>
+#include <stringex.h>
 
 
 int HashPrimes::primes[] = { DEFAULT_HASH_SIZE, 8191, 16411, MAX_HASH_SIZE };
@@ -1603,15 +1604,17 @@ void Grammar::RestoreSymbol(char *out, char *in)
 //
 void Grammar::PrintLargeToken(char *line, const char *token, const char *indent, int len)
 {
-   /* int toklen;
-
+    int toklen;
+    std::stringex format;
+   
     char temp[SYMBOL_SIZE + 1];
 
     toklen = strlen(token);
 
     if (toklen > len && toklen <= PRINT_LINE_SIZE - 1)
     {
-        fprintf(option -> syslis, "\n%s", token);
+        format.format( "\n%s", token);
+        std::cout << format;
         strcpy(line, indent);
     }
     else
@@ -1620,7 +1623,8 @@ void Grammar::PrintLargeToken(char *line, const char *token, const char *indent,
         {
             memcpy(temp, token, len);
             temp[len] = '\0';
-            fprintf(option -> syslis, "\n%s",temp);
+            format.format("\n%s",temp);
+            std::cout << format;
             strcpy(temp, token+len + 1);
             token = temp;
         }
@@ -1628,7 +1632,7 @@ void Grammar::PrintLargeToken(char *line, const char *token, const char *indent,
         strcat(line, token);
     }
 
-    return;*/
+    return;
 }
 
 

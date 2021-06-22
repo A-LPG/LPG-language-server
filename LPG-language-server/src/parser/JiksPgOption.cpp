@@ -594,7 +594,7 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     //
     //
-    if (verbose)
+    //if (verbose)
     {
         first = true;
         follow = true;
