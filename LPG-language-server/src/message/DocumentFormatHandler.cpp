@@ -309,21 +309,21 @@ struct FormatVisitor : public AbstractVisitor {
 DocumentFormatHandler::DocumentFormatHandler(std::shared_ptr<CompilationUnit>&u  , std::vector<lsTextEdit>&o,
     const lsFormattingOptions& options) :unit(u), out(o)
 {
-    if (!unit || !unit->parse_unit->root)
+    if (!unit || !unit->runtime_unit->root)
     {
         return;
     }
     FormatVisitor visitor(options);
-    unit->parse_unit->root->accept(&visitor);
+    unit->runtime_unit->root->accept(&visitor);
 
-    ILexStream* lex = unit->parse_unit->_lexer.getILexStream();
+    ILexStream* lex = unit->runtime_unit->_lexer.getILexStream();
     lsTextEdit edit;
-    auto pos = ASTUtils::toPosition(lex, unit->parse_unit->root->getLeftIToken()->getStartOffset());
+    auto pos = ASTUtils::toPosition(lex, unit->runtime_unit->root->getLeftIToken()->getStartOffset());
 	if(pos)
 	{
         edit.range.start = pos.value();
 	}
-     pos = ASTUtils::toPosition(lex, unit->parse_unit->root->getLeftIToken()->getEndOffset());
+     pos = ASTUtils::toPosition(lex, unit->runtime_unit->root->getLeftIToken()->getEndOffset());
     if (pos)
     {
         edit.range.end = pos.value();

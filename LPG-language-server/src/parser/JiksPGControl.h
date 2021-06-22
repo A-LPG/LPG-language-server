@@ -2,12 +2,20 @@
 
 #include <IToken.h>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "JiksPgOption.h"
+#include "LPGLexer.h"
+#include "LPGParser.h"
 #include "LPGParsersym.h"
 #include "ParseData.h"
 #include "node.h"
 
+
+namespace LPGParser_top_level_ast {
+	struct LPG;
+	struct nonTerm;
+}
 
 class Pda;
 class Base;
@@ -178,4 +186,38 @@ public:
     }
     JikesPGLexStream* lex_stream;
     
+};
+
+struct DependenceInfo
+{
+    std::vector<std::string>  template_files;
+    std::vector<std::string>  import_terminals_files;
+    std::vector<std::string>  filter_files;
+    std::vector<std::string>  include_files;
+};
+
+struct RunTimeUnit
+{
+    LPGLexer _lexer; // Create the lexer
+    LPGParser _parser;
+    LPGParser_top_level_ast::LPG* root = nullptr;
+    std::recursive_mutex mutex;
+};
+
+
+struct JikesPG2
+{
+
+    JikesPG2(Tuple<IToken*>& t) :lex_stream(t)
+    {
+
+    }
+    std::shared_ptr<Control>  control;
+    VariableLookupTable     variable_table;
+    MacroLookupTable        macro_table;
+    std::shared_ptr<ParseData> lpg_data;
+    JikesPGLexStream lex_stream;
+    bool collectFirstSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
+    bool collectFollowSet(LPGParser_top_level_ast::nonTerm*, std::unordered_set<string>& out);
+    std::unordered_set<std::shared_ptr<RunTimeUnit>> unit_table;
 };

@@ -31,35 +31,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
     {
      
         lex_stream = &u->data->lex_stream;
-        Tuple<IToken*>& tokens = u->parse_unit->_parser.prsStream->tokens;
-        VariableLookupTable& variable_table = u->data->variable_table;
-        MacroLookupTable& macro_table = u->data->macro_table;
-        auto& variable_index = lex_stream->variable_index;
-       
-        variable_index.resize(tokens.size());
-        for (int i = 0; i < tokens.size(); ++i)
-        {
-            IToken* token = tokens[i];
-            auto kind =  token->getKind();
-            if(LPGParsersym::TK_BLOCK == kind)
-            {
-               jikspg_data.initial_blocks.Next() = token->getTokenIndex();
-              
-            }
-            else if(LPGParsersym::TK_SYMBOL == kind)
-            {
-                auto name = token->to_utf8_string();
-                variable_index[i] = variable_table.FindOrInsertName(name.c_str(), name.size());
-                
-            }
-            else if (LPGParsersym::TK_MACRO_NAME == kind)
-            {
-                auto name = token->to_utf8_string();
-                auto symbol =  macro_table.FindOrInsertName(name.c_str(), name.size());
-                lex_stream->macro_table.insert({ i ,symbol });
-            }
-            
-        }
+        
     }
    
     bool visit(AliasSeg* n) {
@@ -252,7 +224,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
             unit->data->unit_table.insert(it);
     	}
        
-        Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+        Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
         VariableLookupTable& variable_table = unit->data->variable_table;
         MacroLookupTable& macro_table = unit->data->macro_table;
         auto& variable_index = lex_stream->variable_index;
@@ -424,7 +396,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         	
         }
 
-        Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+        Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
         VariableLookupTable& variable_table = unit->data->variable_table;
         MacroLookupTable& macro_table = unit->data->macro_table;
         auto& variable_index = lex_stream->variable_index;
@@ -478,7 +450,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
 
         }
 
-        Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+        Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
         VariableLookupTable& variable_table = unit->data->variable_table;
         MacroLookupTable& macro_table = unit->data->macro_table;
         auto& variable_index = lex_stream->variable_index;
@@ -691,7 +663,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         auto index = n->getSYMBOL()->getTokenIndex();
         int length = lex_stream->NameStringLength(index) + 1;
         char* macro_name = new char[length + 1];
-        macro_name[0] = static_cast<char>(unit->parse_unit->_lexer.escape_token);
+        macro_name[0] = static_cast<char>(unit->runtime_unit->_lexer.escape_token);
         strcpy(macro_name + 1, lex_stream->NameString(index));
 
         MacroSymbol* macro_symbol = unit->data->macro_table.FindName(macro_name, length);
@@ -1033,14 +1005,14 @@ namespace
 }
 void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler)
 {
-	 if(!unit->parse_unit->root)
+	 if(!unit->runtime_unit->root)
 	 {
 		 return;
 	 }	
-     CompilationUnit::JikesPG2* data = unit->GetBinding().get();
+     JikesPG2* data = unit->GetBinding().get();
      if(!data)
          return;
-     data->unit_table.insert(unit->parse_unit);
+     data->unit_table.insert(unit->runtime_unit);
      JiksPgOption pg_option(&data->lex_stream, unit->working_file->filename.path);
      pg_option.SetMessageHandler(handler);
      pg_option.CompleteOptionProcessing();
@@ -1048,7 +1020,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 
 
      auto lex_stream = &data->lex_stream;
-     Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+     Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
      VariableLookupTable& variable_table = data->variable_table;
      MacroLookupTable& macro_table = data->macro_table;
      auto& variable_index = lex_stream->variable_index;
@@ -1076,7 +1048,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      }
 
     LPGBindingVisitor visitor(unit);
-    unit->parse_unit->root->accept(&visitor);
+    unit->runtime_unit->root->accept(&visitor);
     if (!visitor.macroToVariableIndex.empty())
     {
         auto ChangeMacroToVariable = [&](int index)

@@ -256,7 +256,7 @@ struct FoldingVisitor :public AbstractVisitor {
        auto lexStream = prsStream->getILexStream();
        if (lexStream == nullptr)
            return;
-       auto& tokens = u->parse_unit->_parser.prsStream->rangeTokens;
+       auto& tokens = u->runtime_unit->_parser.prsStream->rangeTokens;
        auto find_next_comment = [&](size_t start)
        {
            size_t index = start;
@@ -297,12 +297,12 @@ struct FoldingVisitor :public AbstractVisitor {
 FoldingRangeHandler::FoldingRangeHandler(std::shared_ptr<CompilationUnit>& u, std::vector<FoldingRange>& o,
     const FoldingRangeRequestParams&) :unit(u), out(o)
 {
-    if (!unit || !unit->parse_unit->root)
+    if (!unit || !unit->runtime_unit->root)
     {
         return;
     }
-    FoldingVisitor visitor(this,unit->parse_unit->_lexer.getILexStream(),unit->parse_unit->_parser.prsStream);
-    unit->parse_unit->root->accept(&visitor);
+    FoldingVisitor visitor(this,unit->runtime_unit->_lexer.getILexStream(),unit->runtime_unit->_parser.prsStream);
+    unit->runtime_unit->root->accept(&visitor);
     visitor.makeLpgAdjunctsFoldable(u);
 }
 

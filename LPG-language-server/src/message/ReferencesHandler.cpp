@@ -57,17 +57,17 @@ struct ReferencesHandler::Data
 		std::vector<lsLocation>& o  ,Monitor* _monitor):
 	    out(o), unit(u),monitor(_monitor)
     {
-	    if (!unit || !unit->parse_unit->root)
+	    if (!unit || !unit->runtime_unit->root)
 	    {
 		    return;
 	    }
-	    auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
+	    auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), position);
 	    if (offset < 0)
 	    {
 		    return;
 	    }
 	    LPGSourcePositionLocator locator;
-	    auto node = static_cast<ASTNode*>(locator.findNode(unit->parse_unit->root, offset));
+	    auto node = static_cast<ASTNode*>(locator.findNode(unit->runtime_unit->root, offset));
 	    if (node == nullptr) return;
 
 		// Handles (I think) symbols in the terminals section
@@ -75,8 +75,8 @@ struct ReferencesHandler::Data
 		if(dynamic_cast<terminal_symbol0*>(node))
 		{
            getLocation(unit, node->getLeftIToken(), node->getRightIToken());
-		   auto lex = unit->parse_unit->_lexer.getILexStream();
-		   Tuple<IToken*>& tokens = u->parse_unit->_parser.prsStream->tokens;
+		   auto lex = unit->runtime_unit->_lexer.getILexStream();
+		   Tuple<IToken*>& tokens = u->runtime_unit->_parser.prsStream->tokens;
 		   auto nodeString = node->toString();
 		   for (int i = 1; i < tokens.size(); ++i)
 		   {

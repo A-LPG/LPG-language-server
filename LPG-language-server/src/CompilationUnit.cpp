@@ -74,6 +74,11 @@ SearchPolicy SearchPolicy::suggest(ASTNode* node)
 	return policy;
 }
 
+std::shared_ptr<CompilationUnit> CompilationUnit::getptr()
+{
+	return shared_from_this();
+}
+
 bool CompilationUnit::NeedToCompile() const
 {
 	return (counter.load(std::memory_order_relaxed) != working_file->counter.load(std::memory_order_relaxed));
@@ -123,9 +128,9 @@ void CompilationUnit::insert_local_macro(const char* name)
 }
 void CompilationUnit::parser(Monitor* monitor)
 {
-	parse_unit->
-	_lexer.lexer(monitor, parse_unit->_parser.getIPrsStream());
-	parse_unit->root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(parse_unit->_parser.parser(monitor,1000));
+	runtime_unit->
+	_lexer.lexer(monitor, runtime_unit->_parser.getIPrsStream());
+	runtime_unit->root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(runtime_unit->_parser.parser(monitor,1000));
 
 }
 
@@ -158,11 +163,11 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
     do
     {
         if (!InMacroInBlock(target)) break;
-        auto lex = parse_unit-> _lexer.getILexStream();
+        auto lex = runtime_unit-> _lexer.getILexStream();
         auto line = ASTUtils::getLine(lex, position.line + 1);
         if (line.size() <= position.character)break;
         auto temp = line.substr(0, position.character);
-        auto escape = parse_unit->_lexer.escape_token;
+        auto escape = runtime_unit->_lexer.escape_token;
         auto index = temp.rfind(escape);
         if (std::wstring::npos == index) break;
         temp = line.substr(index);
@@ -191,7 +196,7 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
 
 bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken* node)
 {
-	for (auto& it : parse_unit->_parser._macro_name_symbo)
+	for (auto& it : runtime_unit->_parser._macro_name_symbo)
 	{
 		if (it == node)return true;
 	}
@@ -201,7 +206,7 @@ bool CompilationUnit::is_macro_name_symbol(LPGParser_top_level_ast::ASTNodeToken
 
 void CompilationUnit::FindIn_noTerm(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto range = parse_unit->_parser._non_terms.equal_range(name);
+	auto range = runtime_unit->_parser._non_terms.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it)
 	{
 		candidates.push_back(it->second);
@@ -209,7 +214,7 @@ void CompilationUnit::FindIn_noTerm(const std::wstring& name, std::vector<Object
 }
 void CompilationUnit::FindIn_Term(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto  range = parse_unit->_parser._terms.equal_range(name);
+	auto  range = runtime_unit->_parser._terms.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it) {
 		candidates.push_back(it->second);
 	}
@@ -224,7 +229,7 @@ void CompilationUnit::FindIn_Export(const std::wstring& name, std::vector<Object
 }
 void CompilationUnit::FindIn_define(const std::wstring& name, std::vector<Object*>& candidates)
 {
-	auto  range = parse_unit-> _parser._define_specs.equal_range(name);
+	auto  range = runtime_unit-> _parser._define_specs.equal_range(name);
 	for (auto it = range.first; it != range.second; ++it) {
 		candidates.push_back(it->second);
 	}
@@ -267,84 +272,16 @@ std::vector<Object*>  CompilationUnit::FindDefineIn_Term_and_noTerms(const std::
 	return candidates;
 }
 
-//https://blog.csdn.net/liujian20150808/article/details/72998039
-
-//https://www.jianshu.com/p/210fda081c76
-bool IsEmptyRule(const std::wstring& name)
+std::shared_ptr<JikesPG2> CompilationUnit::GetBinding()
 {
-	return  name == L"$empty" || name == L"%empty";
-}
-
-
-//计算FIRST(X)的方法
-//
-//如果 X 是终结符号，那么FIRST(X) = { X }
-//如果 X 是非终结符号，且 X->Y1 Y2 Y3 … Yk 是产生式
-//如果a在FIRST(Yi)中，且 ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yi - 1)中，那么a也在FIRST(X)中；
-//如果ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yk)中，那么ε在FIRST(X)中；
-//如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
-
-
-
-
-bool CompilationUnit::JikesPG2::collectFirstSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<std::string>& out)
-{
-	if (!control)return false;
-	if(!control->grammar) return false;
-	auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
-	auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
-	if(!symbole) return false;
-	auto symbol_index = symbole->SymbolIndex();
-
-	auto grammar = control->grammar;
-	if (!grammar->IsNonTerminal(symbol_index))
-		return false;
-	char tok[SYMBOL_SIZE + 1];
-	auto&  first_set = control->base->NonterminalFirst(symbol_index);
-	for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
-	{
-		if (first_set[t]) {
-			grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
-			out.insert(tok);
-		}
-	}
-	return true;
-}
-
-bool CompilationUnit::JikesPG2::collectFollowSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<string>& out)
-{
-	if (!control)return false;
-	if (!control->grammar) return false;
-	auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
-	auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
-	if (!symbole) return false;
-	auto symbol_index = symbole->SymbolIndex();
-
-	auto grammar = control->grammar;
-	if (!grammar->IsNonTerminal(symbol_index))
-		return false;
-	char tok[SYMBOL_SIZE + 1];
-	auto& first_set = control->base->NonterminalFollow(symbol_index);
-	for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
-	{
-		if (first_set[t]) {
-			grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
-			out.insert(tok);
-		}
-	}
-	return true;
-}
-
-std::shared_ptr<CompilationUnit::JikesPG2> CompilationUnit::GetBinding()
-{
-	std::lock_guard<std::recursive_mutex> lock(parse_unit->mutex);
-	if (!parse_unit->root)
+	std::lock_guard<std::recursive_mutex> lock(runtime_unit->mutex);
+	if (!runtime_unit->root)
 	{
 		return nullptr;
 	}
 	if(!data)
 	{
-		data = std::make_shared<JikesPG2>(parse_unit->_parser.prsStream->tokens);
+		data = std::make_shared<JikesPG2>(runtime_unit->_parser.prsStream->tokens);
 		
 	}
 	

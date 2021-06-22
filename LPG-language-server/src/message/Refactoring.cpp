@@ -61,13 +61,13 @@ struct RenameHandler::Data
 	}
 	void GetData(const lsPosition& position)
 	{
-		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
+		auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto node = static_cast<ASTNode*>(locator.findNode(unit->parse_unit->root, offset));
+		auto node = static_cast<ASTNode*>(locator.findNode(unit->runtime_unit->root, offset));
 		if (node == nullptr) return;
 
 		// Handles (I think) symbols in the terminals section
@@ -75,8 +75,8 @@ struct RenameHandler::Data
 		if (dynamic_cast<terminal_symbol0*>(node))
 		{
 			getTextEdit(unit, node->getLeftIToken(), node->getRightIToken());
-			auto lex = unit->parse_unit->_lexer.getILexStream();
-			Tuple<IToken*>& tokens = unit->parse_unit->_parser.prsStream->tokens;
+			auto lex = unit->runtime_unit->_lexer.getILexStream();
+			Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
 			auto nodeString = node->toString();
 			for (int i = 1; i < tokens.size(); ++i)
 			{
@@ -134,7 +134,7 @@ struct RenameHandler::Data
 	Data(std::shared_ptr<CompilationUnit>& u, const TextDocumentRename::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->parse_unit->root)
+		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
 		}
@@ -210,18 +210,18 @@ struct InlineNonTerminalHandler::Data
 	Data(std::shared_ptr<CompilationUnit>& u, const InlineNonTerminal::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->parse_unit->root)
+		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
 		}
 
-		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), params.position);
+		auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), params.position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto fNode = locator.findNode(unit->parse_unit->root, offset);
+		auto fNode = locator.findNode(unit->runtime_unit->root, offset);
 		if (fNode == nullptr) return;
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
@@ -362,7 +362,7 @@ struct MakeEmptyNonTerminalHandler::Data
 
 		if (!ast_unit)
 			return;
-		auto lex = ast_unit->parse_unit->_lexer.getILexStream();
+		auto lex = ast_unit->runtime_unit->_lexer.getILexStream();
 		lsAnnotatedTextEdit document_edit;
 
 
@@ -393,18 +393,18 @@ struct MakeEmptyNonTerminalHandler::Data
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeEmptyNonTerminal::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->parse_unit->root)
+		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
 		}
 
-		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), params.position);
+		auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), params.position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto fNode = locator.findNode(unit->parse_unit->root, offset);
+		auto fNode = locator.findNode(unit->runtime_unit->root, offset);
 		if (fNode == nullptr) return;
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
@@ -553,7 +553,7 @@ struct MakeNonEmptyNonTerminalHandler::Data
 
 		if (!ast_unit)
 			return;
-		auto lex = ast_unit->parse_unit->_lexer.getILexStream();
+		auto lex = ast_unit->runtime_unit->_lexer.getILexStream();
 		lsAnnotatedTextEdit document_edit;
 
 
@@ -584,18 +584,18 @@ struct MakeNonEmptyNonTerminalHandler::Data
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeNonEmptyNonTerminal::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->parse_unit->root)
+		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
 		}
 
-		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), params.position);
+		auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), params.position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto fNode = locator.findNode(unit->parse_unit->root, offset);
+		auto fNode = locator.findNode(unit->runtime_unit->root, offset);
 		if (fNode == nullptr) return;
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
@@ -751,7 +751,7 @@ struct MakeLeftRecursiveHandler::Data
 
 		if (!ast_unit)
 			return;
-		auto lex = ast_unit->parse_unit->_lexer.getILexStream();
+		auto lex = ast_unit->runtime_unit->_lexer.getILexStream();
 		lsAnnotatedTextEdit document_edit;
 
 
@@ -782,18 +782,18 @@ struct MakeLeftRecursiveHandler::Data
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeLeftRecursive::Params& params,
 		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
 	{
-		if (!unit || !unit->parse_unit->root)
+		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
 		}
 
-		auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), params.position);
+		auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), params.position);
 		if (offset < 0)
 		{
 			return;
 		}
 		LPGSourcePositionLocator locator;
-		auto fNode = locator.findNode(unit->parse_unit->root, offset);
+		auto fNode = locator.findNode(unit->runtime_unit->root, offset);
 		if (fNode == nullptr) return;
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)

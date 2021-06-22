@@ -167,18 +167,18 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
     const lsPosition& position, TextDocumentHover::Result& out, Monitor* monitor)
 {
 
-    if (!unit || !unit->parse_unit->root)
+    if (!unit || !unit->runtime_unit->root)
     {
         return;
     }
   
-    auto offset = ASTUtils::toOffset(unit->parse_unit->_lexer.getILexStream(), position);
+    auto offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), position);
     if (offset < 0)
     {
         return;
     }
     LPGSourcePositionLocator locator;
-    auto selNode = locator.findNode(unit->parse_unit->root, offset);
+    auto selNode = locator.findNode(unit->runtime_unit->root, offset);
     if (selNode == nullptr) return;
     auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(selNode));
     if(policy.macro)
@@ -192,7 +192,7 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
             if (result->def_set.empty())
             {
                 std::wstringex name = result->macro_name;
-                name.trim_left(unit->parse_unit->_lexer.escape_token);
+                name.trim_left(unit->runtime_unit->_lexer.escape_token);
                 auto key = IcuUtil::ws2s(name);
                 if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
                     std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;

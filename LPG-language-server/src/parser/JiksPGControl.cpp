@@ -1,7 +1,7 @@
 #include  "JiksPGControl.h"
 #include "control.h"
 #include "grammar.h"
-
+#include "LPGParser_top_level_ast.h"
 
 #include <iostream>
 
@@ -214,4 +214,72 @@ void Control::CleanUp()
     delete grammar; grammar = NULL;
     delete base; base = NULL;
     delete pda; pda = NULL;
+}
+
+//https://blog.csdn.net/liujian20150808/article/details/72998039
+
+//https://www.jianshu.com/p/210fda081c76
+bool IsEmptyRule(const std::wstring& name)
+{
+    return  name == L"$empty" || name == L"%empty";
+}
+
+
+//计算FIRST(X)的方法
+//
+//如果 X 是终结符号，那么FIRST(X) = { X }
+//如果 X 是非终结符号，且 X->Y1 Y2 Y3 … Yk 是产生式
+//如果a在FIRST(Yi)中，且 ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yi - 1)中，那么a也在FIRST(X)中；
+//如果ε 在FIRST(Y1)，FIRST(Y2)，…，FIRST(Yk)中，那么ε在FIRST(X)中；
+//如果X是非终结符号，且有X->ε，那么ε在FIRST(X)中
+
+
+
+
+bool JikesPG2::collectFirstSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<std::string>& out)
+{
+    if (!control)return false;
+    if (!control->grammar) return false;
+    auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+    auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
+    if (!symbole) return false;
+    auto symbol_index = symbole->SymbolIndex();
+
+    auto grammar = control->grammar;
+    if (!grammar->IsNonTerminal(symbol_index))
+        return false;
+    char tok[SYMBOL_SIZE + 1];
+    auto& first_set = control->base->NonterminalFirst(symbol_index);
+    for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+    {
+        if (first_set[t]) {
+            grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+            out.insert(tok);
+        }
+    }
+    return true;
+}
+
+bool JikesPG2::collectFollowSet(LPGParser_top_level_ast::nonTerm* fNonTerm, std::unordered_set<string>& out)
+{
+    if (!control)return false;
+    if (!control->grammar) return false;
+    auto nt_name = fNonTerm->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+    auto   symbole = variable_table.FindName(nt_name.c_str(), nt_name.size());
+    if (!symbole) return false;
+    auto symbol_index = symbole->SymbolIndex();
+
+    auto grammar = control->grammar;
+    if (!grammar->IsNonTerminal(symbol_index))
+        return false;
+    char tok[SYMBOL_SIZE + 1];
+    auto& first_set = control->base->NonterminalFollow(symbol_index);
+    for (int t = grammar->FirstTerminal(); t <= grammar->LastTerminal(); t++)
+    {
+        if (first_set[t]) {
+            grammar->RestoreSymbol(tok, grammar->RetrieveString(t));
+            out.insert(tok);
+        }
+    }
+    return true;
 }

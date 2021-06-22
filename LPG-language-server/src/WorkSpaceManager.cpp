@@ -51,7 +51,7 @@ struct WorkSpaceManagerData
 		readLock a(_rw_mutex);
 		for(auto& it : units)
 		{
-			if (lex == it.second->parse_unit->_lexer.getILexStream())
+			if (lex == it.second->runtime_unit->_lexer.getILexStream())
 				return  it.second;
 		}
 
@@ -303,9 +303,9 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 Object* WorkSpaceManager::findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor)
 {
 	auto unit = lookupImportedFile(directory, fileName,monitor);
-	if(unit && unit->parse_unit->root)
+	if(unit && unit->runtime_unit->root)
 	{
-		return  unit->parse_unit->root;
+		return  unit->runtime_unit->root;
 	}
 	return nullptr;
 }
@@ -472,12 +472,12 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 
 		handle.notify.params.uri = _change->filename;
 
-		unit->parse_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+		unit->runtime_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
 
-		unit->parse_unit->_parser.reset(unit->parse_unit->_lexer.getLexStream());
+		unit->runtime_unit->_parser.reset(unit->runtime_unit->_lexer.getLexStream());
 
-		unit->parse_unit->_lexer.getLexStream()->setMessageHandler(&handle);
-		unit->parse_unit->_parser.getIPrsStream()->setMessageHandler(&handle);
+		unit->runtime_unit->_lexer.getLexStream()->setMessageHandler(&handle);
+		unit->runtime_unit->_parser.getIPrsStream()->setMessageHandler(&handle);
 		if (monitor && monitor->isCancelled())
 			return nullptr;
 
@@ -486,11 +486,11 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 			return nullptr;
 		d_ptr->update_unit(_change->filename, unit);
 		process_symbol(unit);
-		unit->parse_unit->mutex.lock();
+		unit->runtime_unit->mutex.lock();
 	}
 	lsp::make_scope_exit([&]
 	{
-		unit->parse_unit->mutex.unlock();
+		unit->runtime_unit->mutex.unlock();
 	});
 		
 	process_type_binding(unit, &handle);
