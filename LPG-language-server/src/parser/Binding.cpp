@@ -217,7 +217,9 @@ struct LPGBindingVisitor :public AbstractVisitor {
 	        // warning
         	return false;
         }
+      
         auto include_binding =  include_unit->GetBinding();
+        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
     	if(!include_binding)return false;
     	for(auto& it : include_binding->unit_table)
     	{
@@ -369,7 +371,9 @@ struct LPGBindingVisitor :public AbstractVisitor {
             // warning
             return false;
         }
+    
         auto include_binding = include_unit->GetBinding();
+        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
         if (!include_binding)return false;
 
         if (include_unit->data->lex_stream.NumTokens() == 0)
@@ -424,6 +428,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
             return false;
         }
         auto include_binding = include_unit->GetBinding();
+        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
+
         if (!include_binding)return false;
 
         if (include_unit->data->lex_stream.NumTokens() == 0)
@@ -1018,6 +1024,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      pg_option.CompleteOptionProcessing();
      data->lpg_data = std::make_shared<ParseData>(&pg_option);
 
+     unit->removeDependency();
 
      auto lex_stream = &data->lex_stream;
      Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
@@ -1092,5 +1099,4 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 	 catch (...)
 	 {
 	 }
-	
 }

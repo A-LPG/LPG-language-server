@@ -289,3 +289,22 @@ std::shared_ptr<JikesPG2> CompilationUnit::GetBinding()
 	
 	return  data;
 }
+
+void CompilationUnit::removeDependency()
+{
+	parent.removeDependency(working_file->filename);
+}
+
+void CompilationUnit::ResetBinding()
+{
+	std::lock_guard<std::recursive_mutex> lock(runtime_unit->mutex);
+	if (!runtime_unit->root)
+	{
+		return ;
+	}
+	
+	if (data)
+	{
+		data.reset();
+	}
+}

@@ -29,12 +29,12 @@ using namespace lsp;
 
 struct WorkSpaceManagerData
 {
-	WorkSpaceManagerData(WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log): working_files(_w),
+	WorkSpaceManagerData(WorkSpaceManager* onwer,WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log):_owner(onwer), working_files(_w),
 		end_point(_end_point),
 		logger(_log)
 	{
 	}
-
+	WorkSpaceManager* _owner;
 	WorkingFiles& working_files;
 	RemoteEndPoint& end_point;
 	lsp::Log& logger;
@@ -44,7 +44,7 @@ struct WorkSpaceManagerData
 	boost::shared_mutex _rw_mutex;
 
 	std::map<std::string, std::shared_ptr<CompilationUnit>> units;
-	std::map<std::string, std::shared_ptr<JikesPG2>> bindings;
+
 	std::vector<Directory>includeDirs;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream* lex)
 	{
@@ -57,6 +57,8 @@ struct WorkSpaceManagerData
 
 		return {};
 	}
+	std::map<AbsolutePath, std::vector< AbsolutePath> >  _references;
+	std::mutex mutex_for_reference;
 	void update_unit(const std::string& path, std::shared_ptr<CompilationUnit>& unit)
 	{
 
@@ -111,7 +113,10 @@ struct WorkSpaceManagerData
 			}
 
 		}
-		
+		for (auto& it : files_to_be_delete)
+		{
+			_owner->removeDependency(it);
+		}
 		
 	}
 };
@@ -254,10 +259,6 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	return OnChange(_open,std::move(content), monitor);
 }
 
-void WorkSpaceManager::collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
-{
-	
-}
 
 
 
@@ -418,7 +419,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePa
 	return  unit;
 }
 
-WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(_w , end_point, _log))
+WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(this,_w , end_point, _log))
 {
 	
 }
@@ -450,14 +451,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		return {};
 	ProblemHandler handle;
 	std::shared_ptr<CompilationUnit> unit;
-	unit = d_ptr->find(_change->filename);
-	if (unit)
-	{
-		if (unit->counter.load(std::memory_order_relaxed) == _change->counter.load(std::memory_order_relaxed))
-		{
-			return  unit;
-		}
-	}
+	
 	if (content.empty())
 	{
 		if (!_change->parent.GetFileBufferContent(_change, content))
@@ -492,12 +486,82 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	{
 		unit->runtime_unit->mutex.unlock();
 	});
+
+	if(!checkFileRecursiveInclude(unit,monitor))
+	{
+		process_type_binding(unit, &handle);
+		d_ptr->end_point.sendNotification(handle.notify);
 		
-	process_type_binding(unit, &handle);
-	
-	
-	d_ptr->end_point.sendNotification(handle.notify);
+		auto affected_unit = GetAffectedReferences(_change->filename);
+		for (auto it : affected_unit)
+		{
+			auto _file = find(it);
+			if (!_file) continue;
+			_file->ResetBinding();
+			process_type_binding(_file, nullptr);
+		}
+	}
+   
 	return unit;
+}
+
+bool WorkSpaceManager::checkFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
+{
+	std::set<AbsolutePath> includedFiles;
+	try
+	{
+		ProcessCheckFileRecursiveInclude(includedFiles, refUnit, monitor);
+		
+	}
+	catch (...)
+	{
+		return  false;
+	}
+	
+	return true;
+	
+}
+void WorkSpaceManager::ProcessCheckFileRecursiveInclude(
+	std::set<AbsolutePath>& includedFiles,
+	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
+{
+	includedFiles.insert(refUnit->working_file->filename);
+
+	auto detector = [&](const std::string& fileName)
+	{
+		
+		auto include_unit = lookupImportedFile(refUnit->working_file->directory, fileName, monitor);
+
+		if (!include_unit)return;
+
+		if (includedFiles.find(include_unit->working_file->filename) != includedFiles.end())
+		{
+			throw std::out_of_range("");
+		}
+		if (monitor && monitor->isCancelled())
+			return;
+		ProcessCheckFileRecursiveInclude(includedFiles, include_unit, monitor);
+	};
+
+	for (auto& fileName : refUnit->dependence_info.include_files)
+	{
+		detector(fileName);
+	}
+
+	for (auto& fileName : refUnit->dependence_info.template_files)
+	{
+		detector(fileName);
+	}
+
+	for (auto& fileName : refUnit->dependence_info.filter_files)
+	{
+		detector(fileName);
+	}
+
+	for (auto& fileName : refUnit->dependence_info.import_terminals_files)
+	{
+		detector(fileName);
+	}
 }
 
 void WorkSpaceManager::OnClose(const lsDocumentUri& close)
@@ -536,12 +600,54 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::FindFile(ILexStream* lex)
 	return  d_ptr->FindFile(lex);
 }
 
-std::shared_ptr<JikesPG2> WorkSpaceManager::GetLpgBinding(const AbsolutePath& path, Monitor* monitor)
+
+
+void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references)
 {
-	auto findIt = d_ptr->bindings.find(path);
-	if (findIt != d_ptr->bindings.end())
-		return  findIt->second;
-	return nullptr;
+
+	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
+	for(auto& it : references)
+	{
+		d_ptr->_references[from].push_back(it);
+	}
+}
+
+void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference)
+{
+	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
+	d_ptr->_references[from].push_back(reference);
+}
+
+void WorkSpaceManager::removeDependency(const AbsolutePath& from)
+{
+	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
+	d_ptr->_references.erase(from);
+}
+
+std::vector<AbsolutePath> WorkSpaceManager::GetReference(const AbsolutePath& from)
+{
+	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
+	const auto it = d_ptr->_references.find(from);
+	if (it != d_ptr->_references.end()) return it->second;
+	return {};
+}
+
+std::vector<AbsolutePath> WorkSpaceManager::GetAffectedReferences(const AbsolutePath& from)
+{
+	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
+	std::vector<AbsolutePath> out;
+	for(auto& it : d_ptr->_references)
+	{
+		for(auto& p : it.second)
+		{
+			if(p == from)
+			{
+				out.push_back(it.first);
+				break;
+			}
+		}
+	}
+	return out;
 }
 
 

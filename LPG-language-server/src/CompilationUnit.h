@@ -105,10 +105,10 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	
 	std::vector< lsDocumentSymbol > document_symbols;
 
-
+	void removeDependency();
 	DependenceInfo dependence_info;
 	
-
+	void  ResetBinding();
 private:
 	std::shared_ptr<JikesPG2> data;
 };

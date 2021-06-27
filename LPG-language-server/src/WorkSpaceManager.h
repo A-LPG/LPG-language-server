@@ -2,6 +2,8 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 
@@ -35,7 +37,7 @@ struct WorkSpaceManagerData;
 struct WorkSpaceManager {
 	
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path, Monitor* monitor);
-	void   collectIncludedFiles(std::set<std::string>& result, const std::shared_ptr<CompilationUnit>& refUnit , Monitor* monitor);
+
 	std::shared_ptr<CompilationUnit> lookupImportedFile(Directory& directory, const std::string& fileName, Monitor* monitor);
 	Object* findAndParseSourceFile(Directory& directory, const std::string& fileName, Monitor* monitor);
 	std::vector<Object*> findDefOf(const SearchPolicy& , std::wstring id, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
@@ -54,13 +56,24 @@ struct WorkSpaceManager {
 	RemoteEndPoint& GetEndPoint()const;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
 
-	std::shared_ptr<JikesPG2> GetLpgBinding(const AbsolutePath& path, Monitor* monitor);
+
+
+	void addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references);
+	void addAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference);
+
+	void removeDependency(const AbsolutePath& from);
+
+	std::vector<AbsolutePath> GetReference(const AbsolutePath& from);
+	std::vector<AbsolutePath> GetAffectedReferences(const AbsolutePath& from);
+	
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
     std::vector< Object*>	 findDefOf_internal(const SearchPolicy&, std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
 	void collect_def(std::set<AbsolutePath>& includedFiles, std::vector<Object*>& result, const SearchPolicy& policy,
 	                 std::wstring id, const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&&, Monitor* monitor);
-	
+	bool checkFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& , Monitor* );
+	void ProcessCheckFileRecursiveInclude(std::set<AbsolutePath>& includedFiles,
+	                                      const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 };
 
