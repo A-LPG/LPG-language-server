@@ -147,7 +147,21 @@ struct RenameHandler
 
 };
 
-
+struct RefactorWorkspaceEdit
+{
+	lsWorkspaceEdit edit;
+	boost::optional<lsCommandWithAny> 
+	command;
+	boost::optional < std::string > errorMessage;
+	MAKE_SWAP_METHOD(RefactorWorkspaceEdit,
+		edit,
+		command,
+		errorMessage)
+};
+MAKE_REFLECT_STRUCT(RefactorWorkspaceEdit,
+	edit,
+	command,
+	errorMessage)
 
 namespace InlineNonTerminal {
 	struct Params {
@@ -167,7 +181,7 @@ namespace InlineNonTerminal {
 MAKE_REFLECT_STRUCT(InlineNonTerminal::Params,
 	textDocument,
 	position,
-	fInlineAll);
+	fInlineAll)
 
 
 
@@ -178,14 +192,14 @@ MAKE_REFLECT_STRUCT(InlineNonTerminal::Params,
  *
  * Registration Options: TextDocumentRegistrationOptions
  */
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_inlineNonTerminal, InlineNonTerminal::Params, lsWorkspaceEdit, "lpg/inlineNonTerminal");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_inlineNonTerminal, InlineNonTerminal::Params, RefactorWorkspaceEdit, "lpg/inlineNonTerminal");
 
 
 struct InlineNonTerminalHandler
 {
 
 	InlineNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const InlineNonTerminal::Params&,
-		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+		RefactorWorkspaceEdit&, Monitor*);
 
 	struct Data;
 
@@ -221,14 +235,14 @@ MAKE_REFLECT_STRUCT(MakeEmptyNonTerminal::Params,
  *
  * Registration Options: TextDocumentRegistrationOptions
  */
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeEmpty, MakeEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/makeEmpty");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeEmpty, MakeEmptyNonTerminal::Params, RefactorWorkspaceEdit, "lpg/makeEmpty");
 
 
 struct MakeEmptyNonTerminalHandler
 {
 
 	MakeEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const MakeEmptyNonTerminal::Params&,
-		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+		RefactorWorkspaceEdit&, Monitor*);
 
 	struct Data;
 
@@ -264,14 +278,14 @@ MAKE_REFLECT_STRUCT(MakeNonEmptyNonTerminal::Params,
  *
  * Registration Options: TextDocumentRegistrationOptions
  */
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeNonEmpty, MakeNonEmptyNonTerminal::Params, lsWorkspaceEdit, "lpg/MakeNonEmpty");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_makeNonEmpty, MakeNonEmptyNonTerminal::Params, RefactorWorkspaceEdit, "lpg/MakeNonEmpty");
 
 
 struct MakeNonEmptyNonTerminalHandler
 {
 
 	MakeNonEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>&, const MakeNonEmptyNonTerminal::Params&,
-		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+		RefactorWorkspaceEdit&, Monitor*);
 
 	struct Data;
 
@@ -308,14 +322,14 @@ MAKE_REFLECT_STRUCT(MakeLeftRecursive::Params,
  *
  * Registration Options: TextDocumentRegistrationOptions
  */
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_MakeLeftRecursive, MakeLeftRecursive::Params, lsWorkspaceEdit, "lpg/MakeLeftRecursive");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_MakeLeftRecursive, MakeLeftRecursive::Params, RefactorWorkspaceEdit, "lpg/MakeLeftRecursive");
 
 
 struct MakeLeftRecursiveHandler
 {
 
 	MakeLeftRecursiveHandler(std::shared_ptr<CompilationUnit>&, const MakeLeftRecursive::Params&,
-		std::vector< lsWorkspaceEdit::Either >&, Monitor*);
+		RefactorWorkspaceEdit&, Monitor*);
 
 	struct Data;
 

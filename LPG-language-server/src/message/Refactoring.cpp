@@ -208,8 +208,9 @@ struct InlineNonTerminalHandler::Data
 	}
 	
 	Data(std::shared_ptr<CompilationUnit>& u, const InlineNonTerminal::Params& params,
-		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
+		RefactorWorkspaceEdit& o, Monitor* _monitor) : unit(u), monitor(_monitor),refactor_workspace_edit(o)
 	{
+		
 		if (!unit || !unit->runtime_unit->root)
 		{
 			return;
@@ -226,10 +227,7 @@ struct InlineNonTerminalHandler::Data
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Inline Non-Terminal is only valid for non-terminal symbols";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Inline Non-Terminal is only valid for non-terminal symbols";
 			return;
 		}
 		auto targets = unit->getLinkTarget(policy, fNode, monitor);
@@ -249,29 +247,20 @@ struct InlineNonTerminalHandler::Data
 		}
 		if(!fNonTerm)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Inline Non-Terminal is only valid for non-terminal symbols";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage  = "Inline Non-Terminal is only valid for non-terminal symbols";
 			return;
 		}
 		auto rules = fNonTerm->getruleList();
 
 		if (rules->size() != 1)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Inline Non-Terminal is only valid for non-terminals with a single production";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Inline Non-Terminal is only valid for non-terminals with a single production";
 			return;
 		}
 		auto rule_ = static_cast<rule*>(rules->getElementAt(0));
 		if (rule_->getopt_action_segment() != nullptr)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Non-terminal to be inlined cannot have an action block";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Non-terminal to be inlined cannot have an action block";
 			return;
 		}
 		symWithAttrsList* fRHS = rule_->getsymWithAttrsList();
@@ -298,6 +287,7 @@ struct InlineNonTerminalHandler::Data
 		{
 			getTextEdit(unit, iter->getLeftIToken(), iter->getLeftIToken());
 		}
+		std::vector< lsWorkspaceEdit::Either > out;
 		for (auto& it : edits)
 		{
 			lsWorkspaceEdit::Either item;
@@ -306,16 +296,19 @@ struct InlineNonTerminalHandler::Data
 			edit.textDocument.version = 2;
 			edit.edits.swap(it.second);
 			item.first = std::move(edit);
-			o.emplace_back(item);
+			out.emplace_back(item);
 		}
+		o.edit.documentChanges = std::move(out);
 	}
 
 	std::shared_ptr<CompilationUnit>& unit;
+	RefactorWorkspaceEdit& refactor_workspace_edit;
+
 };
 
 
 InlineNonTerminalHandler::InlineNonTerminalHandler(std::shared_ptr<CompilationUnit>& u, const InlineNonTerminal::Params& params,
-	std::vector<lsWorkspaceEdit::Either>&o, Monitor* m) :d_ptr(new  Data(u, params, o, m))
+	RefactorWorkspaceEdit&o, Monitor* m) :d_ptr(new  Data(u, params, o, m))
 {
 }
 
@@ -391,7 +384,7 @@ struct MakeEmptyNonTerminalHandler::Data
 	}
 
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeEmptyNonTerminal::Params& params,
-		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
+		RefactorWorkspaceEdit& o, Monitor* _monitor) : unit(u), monitor(_monitor),refactor_workspace_edit(o)
 	{
 		if (!unit || !unit->runtime_unit->root)
 		{
@@ -409,10 +402,7 @@ struct MakeEmptyNonTerminalHandler::Data
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Empty is only valid for non-terminals";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Make Empty is only valid for non-terminals";
 			return;
 		}
 		auto targets = unit->getLinkTarget(policy, fNode, monitor);
@@ -432,20 +422,14 @@ struct MakeEmptyNonTerminalHandler::Data
 		}
 		if (!nt)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Empty is only valid for non-terminals";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Make Empty is only valid for non-terminals";
 			return;
 		}
 		auto rhSides = nt->getruleList();
 
 		if (rhSides->size() != 2)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Empty is only valid for non-terminals with 2 productions";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Make Empty is only valid for non-terminals with 2 productions";
 			return;
 		}
 		auto rhs1 = static_cast<rule*>(rhSides->getElementAt(0));
@@ -468,19 +452,14 @@ struct MakeEmptyNonTerminalHandler::Data
 		for (int i = 0; i < rhs1Syms->size(); i++) { // make sure the productions are of the form lhs ::= b c ... | a b c ...
 			if (! (rhs1Syms->getElementAt(i)->toString()== (rhs2Syms->getElementAt(i + 1)->toString())))
 			{
-				Notify_ShowMessage::notify notify;
-				notify.params.message = "Non-terminal must have the form 'a ::= b c ... | a b c ...'";
-				notify.params.type = lsMessageType::Warning;
-				unit->parent.GetEndPoint().sendNotification(notify);
+				refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= b c ... | a b c ...'";
 				return;
 			}
 		}
 		if (! (rhs2Syms->getElementAt(0)->toString()==(nt->getruleNameWithAttributes()->getSYMBOL()->toString())))
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Non-terminal must have the form 'a ::= b c ... | a b c ...'";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= b c ... | a b c ...'";
+
 			return;
 		}
 		int N = rhs1Syms->size();
@@ -490,6 +469,7 @@ struct MakeEmptyNonTerminalHandler::Data
 		newName = "$empty";
 		getTextEdit(unit, startOffset, endOffset);
 		
+		std::vector< lsWorkspaceEdit::Either > out;
 		for (auto& it : edits)
 		{
 			lsWorkspaceEdit::Either item;
@@ -498,15 +478,16 @@ struct MakeEmptyNonTerminalHandler::Data
 			edit.textDocument.version = 2;
 			edit.edits.swap(it.second);
 			item.first = std::move(edit);
-			o.emplace_back(item);
+			out.emplace_back(item);
 		}
+		o.edit.documentChanges = std::move(out);
 	}
-
+	RefactorWorkspaceEdit& refactor_workspace_edit;
 	std::shared_ptr<CompilationUnit>& unit;
 };
 
 MakeEmptyNonTerminalHandler::MakeEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>& u, const MakeEmptyNonTerminal::Params& params,
-	std::vector<lsWorkspaceEdit::Either>& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
+	RefactorWorkspaceEdit& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
 {
 }
 
@@ -582,7 +563,7 @@ struct MakeNonEmptyNonTerminalHandler::Data
 	}
 
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeNonEmptyNonTerminal::Params& params,
-		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
+		RefactorWorkspaceEdit& o, Monitor* _monitor) : unit(u), monitor(_monitor),refactor_workspace_edit(o)
 	{
 		if (!unit || !unit->runtime_unit->root)
 		{
@@ -600,10 +581,7 @@ struct MakeNonEmptyNonTerminalHandler::Data
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Non-Empty is only valid for non-terminals";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Make Non-Empty is only valid for non-terminals";
 			return;
 		}
 		auto targets = unit->getLinkTarget(policy, fNode, monitor);
@@ -623,20 +601,14 @@ struct MakeNonEmptyNonTerminalHandler::Data
 		}
 		if (!nt)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Non-Empty is only valid for non-terminals";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Make Non-Empty is only valid for non-terminals";
 			return;
 		}
 		auto rhSides = nt->getruleList();
 
 		if (rhSides->size() != 2)
-		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Non-Empty is only valid for non-terminals with 2 productions";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+		{	
+			refactor_workspace_edit.errorMessage = "Make Non-Empty is only valid for non-terminals with 2 productions";
 			return;
 		}
 		auto rhs1 = static_cast<rule*>(rhSides->getElementAt(0));
@@ -654,19 +626,15 @@ struct MakeNonEmptyNonTerminalHandler::Data
 			rhs2Syms = tmpList;
 		}
 		else if (rhs1Syms->size() != 1 || !( rhs1Syms->getElementAt(0)->toString()==(L"$empty"))) {
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Non-terminal must have the form 'a ::= $empty | a b'";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= $empty | a b'";
 			return;
 		}
 
 		if (! (rhs2Syms->getElementAt(0)->toString()==(nt->getruleNameWithAttributes()->getSYMBOL()->toString())))
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Non-terminal must have the form 'a ::= $empty | a b'";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+		
+			refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= $empty | a b'";
+		
 			return;
 		}
 
@@ -689,6 +657,7 @@ struct MakeNonEmptyNonTerminalHandler::Data
 			newName.append(rhs2Syms->getElementAt(i)->to_utf8_string());
 		}
 		getTextEdit(unit, symToReplace->getLeftIToken(), symToReplace->getRightIToken());
+		std::vector< lsWorkspaceEdit::Either > out;
 		for (auto& it : edits)
 		{
 			lsWorkspaceEdit::Either item;
@@ -697,15 +666,16 @@ struct MakeNonEmptyNonTerminalHandler::Data
 			edit.textDocument.version = 2;
 			edit.edits.swap(it.second);
 			item.first = std::move(edit);
-			o.emplace_back(item);
+			out.emplace_back(item);
 		}
+		o.edit.documentChanges = std::move(out);
 	}
-
+	RefactorWorkspaceEdit& refactor_workspace_edit;
 	std::shared_ptr<CompilationUnit>& unit;
 };
 
 MakeNonEmptyNonTerminalHandler::MakeNonEmptyNonTerminalHandler(std::shared_ptr<CompilationUnit>& u, const MakeNonEmptyNonTerminal::Params& params,
-	std::vector<lsWorkspaceEdit::Either>& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
+	RefactorWorkspaceEdit& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
 {
 }
 
@@ -780,7 +750,7 @@ struct MakeLeftRecursiveHandler::Data
 	}
 
 	Data(std::shared_ptr<CompilationUnit>& u, const MakeLeftRecursive::Params& params,
-		std::vector< lsWorkspaceEdit::Either >& o, Monitor* _monitor) : unit(u), monitor(_monitor)
+		RefactorWorkspaceEdit& o, Monitor* _monitor) : unit(u), monitor(_monitor),refactor_workspace_edit(o)
 	{
 		if (!unit || !unit->runtime_unit->root)
 		{
@@ -798,10 +768,9 @@ struct MakeLeftRecursiveHandler::Data
 		auto policy = SearchPolicy::suggest(static_cast<ASTNode*>(fNode));
 		if (policy.macro)
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Non-Empty is only valid for non-terminals";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+			
+			refactor_workspace_edit.errorMessage = "Make Non-Empty is only valid for non-terminals";
+		
 			return;
 		}
 		auto targets = unit->getLinkTarget(policy, fNode, monitor);
@@ -824,11 +793,8 @@ struct MakeLeftRecursiveHandler::Data
 			}
 		}
 		if (!fNode)
-		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Make Left Recursive is only valid for non-terminals and recursive productions";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+		{			
+			refactor_workspace_edit.errorMessage = "Make Left Recursive is only valid for non-terminals and recursive productions";	
 			return;
 		}
 		if (dynamic_cast<nonTerm*>(fNode))
@@ -856,6 +822,7 @@ struct MakeLeftRecursiveHandler::Data
 			}
 			rewriteProduction(prod, nt);
 		}
+		std::vector< lsWorkspaceEdit::Either > out;
 		for (auto& it : edits)
 		{
 			lsWorkspaceEdit::Either item;
@@ -864,8 +831,9 @@ struct MakeLeftRecursiveHandler::Data
 			edit.textDocument.version = 2;
 			edit.edits.swap(it.second);
 			item.first = std::move(edit);
-			o.emplace_back(item);
+			out.emplace_back(item);
 		}
+		o.edit.documentChanges = std::move(out);
 	}
 	bool checkProduction(rule* prod, nonTerm* nt)
 	{
@@ -875,19 +843,15 @@ struct MakeLeftRecursiveHandler::Data
 		for (int i = 0; i < N; i++) { // make sure the production is of the form a ::= b c ... a
 			if (rhsSyms->getElementAt(i)->toString()==(nt->getruleNameWithAttributes()->getSYMBOL()->toString()))
 			{
-				Notify_ShowMessage::notify notify;
-				notify.params.message = "Non-terminal must have the form 'a ::= b c ... a'";
-				notify.params.type = lsMessageType::Warning;
-				unit->parent.GetEndPoint().sendNotification(notify);
+				refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= b c ... a'";
 				return false;
 			}
 		}
 		if (! (rhsSyms->getElementAt(N - 1)->toString()==(nt->getruleNameWithAttributes()->getSYMBOL()->toString())))
 		{
-			Notify_ShowMessage::notify notify;
-			notify.params.message = "Non-terminal must have the form 'a ::= b c ... a'";
-			notify.params.type = lsMessageType::Warning;
-			unit->parent.GetEndPoint().sendNotification(notify);
+		
+			refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= b c ... a'";
+			
 			return false;
 		}
 		
@@ -907,9 +871,10 @@ struct MakeLeftRecursiveHandler::Data
 		getTextEdit(unit, symToDelete->getLeftIToken(), symToDelete->getRightIToken());
 	}
 	std::shared_ptr<CompilationUnit>& unit;
+	RefactorWorkspaceEdit& refactor_workspace_edit;
 };
 
 MakeLeftRecursiveHandler::MakeLeftRecursiveHandler(std::shared_ptr<CompilationUnit>& u, const MakeLeftRecursive::Params& params,
-	std::vector<lsWorkspaceEdit::Either>& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
+	RefactorWorkspaceEdit& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
 {
 }

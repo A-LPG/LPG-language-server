@@ -425,10 +425,7 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-					std::vector< lsWorkspaceEdit::Either >  edits;
-					InlineNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
-					rsp.result.documentChanges = std::move(edits);
-
+					InlineNonTerminalHandler give_me_a_name(unit, req.params, rsp.result, &_requestMonitor);
 				}
 				return std::move(rsp);
 			});
@@ -443,10 +440,9 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-					std::vector< lsWorkspaceEdit::Either >  edits;
-					MakeEmptyNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
-					rsp.result.documentChanges = std::move(edits);
-
+				
+					MakeEmptyNonTerminalHandler give_me_a_name(unit, req.params, rsp.result, &_requestMonitor);
+				
 				}
 				return std::move(rsp);
 			});
@@ -461,10 +457,9 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-					std::vector< lsWorkspaceEdit::Either >  edits;
-					MakeNonEmptyNonTerminalHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
-					rsp.result.documentChanges = std::move(edits);
-
+					
+					MakeNonEmptyNonTerminalHandler give_me_a_name(unit, req.params, rsp.result, &_requestMonitor);
+		
 				}
 				return std::move(rsp);
 			});
@@ -479,9 +474,9 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-					std::vector< lsWorkspaceEdit::Either >  edits;
-					MakeLeftRecursiveHandler give_me_a_name(unit, req.params, edits, &_requestMonitor);
-					rsp.result.documentChanges = std::move(edits);
+					
+					MakeLeftRecursiveHandler give_me_a_name(unit, req.params, rsp.result, &_requestMonitor);
+		
 
 				}
 				return std::move(rsp);
