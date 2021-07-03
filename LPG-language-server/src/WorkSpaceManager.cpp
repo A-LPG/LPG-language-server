@@ -487,7 +487,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		unit->runtime_unit->mutex.unlock();
 	});
 
-	if(!checkFileRecursiveInclude(unit,monitor))
+	if(!IsFileRecursiveInclude(unit,monitor))
 	{
 		process_type_binding(unit, &handle);
 		d_ptr->end_point.sendNotification(handle.notify);
@@ -505,7 +505,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	return unit;
 }
 
-bool WorkSpaceManager::checkFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
+bool WorkSpaceManager::IsFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
 {
 	std::set<AbsolutePath> includedFiles;
 	try
@@ -515,10 +515,10 @@ bool WorkSpaceManager::checkFileRecursiveInclude(const std::shared_ptr<Compilati
 	}
 	catch (...)
 	{
-		return  false;
+		return  true;
 	}
 	
-	return true;
+	return false;
 	
 }
 void WorkSpaceManager::ProcessCheckFileRecursiveInclude(

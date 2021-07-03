@@ -448,7 +448,12 @@ struct MakeEmptyNonTerminalHandler::Data
 			rhs1Syms = rhs2Syms;
 			rhs2Syms = tmpList;
 		}
-
+		else if(rhs1Syms->size()+1 != rhs2Syms->size())
+		{
+			refactor_workspace_edit.errorMessage = "Non-terminal must have the form 'a ::= b c ... | a b c ...'";
+			return;
+		}
+		
 		for (int i = 0; i < rhs1Syms->size(); i++) { // make sure the productions are of the form lhs ::= b c ... | a b c ...
 			if (! (rhs1Syms->getElementAt(i)->toString()== (rhs2Syms->getElementAt(i + 1)->toString())))
 			{
@@ -769,7 +774,7 @@ struct MakeLeftRecursiveHandler::Data
 		if (policy.macro)
 		{
 			
-			refactor_workspace_edit.errorMessage = "Make Non-Empty is only valid for non-terminals";
+			refactor_workspace_edit.errorMessage = "Make Left Recursive  is only valid for non-terminals";
 		
 			return;
 		}
@@ -778,6 +783,9 @@ struct MakeLeftRecursiveHandler::Data
 		if (targets.empty()) {
 			targets.push_back(fNode);
 		}
+		
+		fNode = nullptr;
+		
 		const auto set = targets;
 		nonTerm* nt = nullptr;
 		for (auto& target : set) {

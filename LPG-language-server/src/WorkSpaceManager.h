@@ -72,7 +72,7 @@ private:
 	void collect_def(std::set<AbsolutePath>& includedFiles, std::vector<Object*>& result, const SearchPolicy& policy,
 	                 std::wstring id, const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&&, Monitor* monitor);
-	bool checkFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& , Monitor* );
+	bool IsFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& , Monitor* );
 	void ProcessCheckFileRecursiveInclude(std::set<AbsolutePath>& includedFiles,
 	                                      const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
 };
