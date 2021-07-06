@@ -481,6 +481,24 @@ public:
 				}
 				return std::move(rsp);
 			});
+		_sp.registerHandler([&](const lpg_call_graph::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_call_graph::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_call_graph::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+
+					CallGraphHandler give_me_a_name(unit,  rsp.result, &_requestMonitor);
+
+
+				}
+				return std::move(rsp);
+			});
 		
 		_sp.registerHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{

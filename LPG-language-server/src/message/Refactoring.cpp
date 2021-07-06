@@ -885,4 +885,6 @@ struct MakeLeftRecursiveHandler::Data
 MakeLeftRecursiveHandler::MakeLeftRecursiveHandler(std::shared_ptr<CompilationUnit>& u, const MakeLeftRecursive::Params& params,
 	RefactorWorkspaceEdit& o, Monitor* m) : d_ptr(new  Data(u, params, o, m))
 {
+	
 }
+

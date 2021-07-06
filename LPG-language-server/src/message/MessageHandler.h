@@ -336,3 +336,31 @@ struct MakeLeftRecursiveHandler
 	std::shared_ptr<Data>  d_ptr;
 
 };
+
+struct ReferenceNodeInfo
+{
+	std::string name;
+	std::vector<std::string> rules;
+	std::vector<std::string> terminal;
+	MAKE_SWAP_METHOD(ReferenceNodeInfo, name,
+		rules,
+		terminal)
+};
+MAKE_REFLECT_STRUCT(ReferenceNodeInfo, name,
+	rules,
+	terminal);
+
+
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_call_graph, MakeLeftRecursive::Params, std::vector<ReferenceNodeInfo>, "lpg/call-graph");
+
+struct CallGraphHandler
+{
+
+	CallGraphHandler(std::shared_ptr<CompilationUnit>&,
+		std::vector<ReferenceNodeInfo>&, Monitor*);
+
+	struct Data;
+
+	std::shared_ptr<Data>  d_ptr;
+
+};

@@ -114,6 +114,9 @@
     <ClCompile Include="src\message\Refactoring.cpp">
       <Filter>message</Filter>
     </ClCompile>
+    <ClCompile Include="src\message\Analysis.cpp">
+      <Filter>message</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">
