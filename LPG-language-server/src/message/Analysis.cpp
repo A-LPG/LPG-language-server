@@ -7,7 +7,8 @@ using namespace LPGParser_top_level_ast;
 struct CallGraphHandlerVisitor :public AbstractVisitor
 {
     std::vector<ReferenceNodeInfo>& out;
-    CallGraphHandlerVisitor(std::vector<ReferenceNodeInfo>& o):out(o)
+    std::string fileName;
+    CallGraphHandlerVisitor(std::vector<ReferenceNodeInfo>& o,const  std::string& n):out(o),fileName(n)
     {
 	    
     }
@@ -18,6 +19,7 @@ struct CallGraphHandlerVisitor :public AbstractVisitor
 	{
 		auto lhsStr = n->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
         ReferenceNodeInfo info;
+        lhsStr = fileName + "." + lhsStr;
         info.name = lhsStr;
         out.emplace_back(info);
         return AbstractVisitor::visit(n);
@@ -34,6 +36,7 @@ struct CallGraphHandlerVisitor :public AbstractVisitor
             {
                 auto sym1 = (symWithAttrs1*)sym;
                 auto rhsStr = sym1->getSYMBOL()->to_utf8_string();
+                rhsStr = fileName + "." + rhsStr;
                 info.rules.emplace_back(rhsStr);
             }
         }
@@ -51,7 +54,14 @@ CallGraphHandler::CallGraphHandler(std::shared_ptr<CompilationUnit>& unit, std::
     
     if (auto _input = unit->runtime_unit->root->getLPG_INPUT(); _input)
     {
-        CallGraphHandlerVisitor visitor(out);
+       
+        std::string name =  JiksPgOption::GetFilename(unit->working_file->filename.path.c_str());
+        auto pos = name.find(".");
+    	if(pos != std::string::npos)
+    	{
+            name = name.substr(0, pos);
+    	}
+        CallGraphHandlerVisitor visitor(out, name);
         _input->accept(&visitor);
     }
     

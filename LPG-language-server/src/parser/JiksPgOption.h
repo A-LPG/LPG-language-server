@@ -36,7 +36,7 @@ class JiksPgOption : public Code, public Util
     void ProcessPath(Tuple<const char*>&, const char*, const char* = NULL);
     JiksPgOption(JikesPGLexStream* ,const std::string& file_path);
     const char* GetFile(const char* directory, const char* file_suffix, const char* file_type);
-    const char* GetFilename(const char* filespec);
+   static  const char* GetFilename(const char* filespec);
     const char* GetType(const char* filespec);
     void CheckGlobalOptionsConsistency();
 
