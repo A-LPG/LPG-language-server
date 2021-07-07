@@ -1,4 +1,6 @@
 # LPG-language-server
+
+![avatar](doc/img/call_graph.png)
 ![avatar](doc/img/completion.png)
 ![avatar](doc/img/dianosic.png)
 ![avatar](doc/img/outline.png)
