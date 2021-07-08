@@ -337,30 +337,63 @@ struct MakeLeftRecursiveHandler
 
 };
 
-struct ReferenceNodeInfo
+struct CallGraphNodeInfo
 {
 	std::string name;
 	std::vector<std::string> rules;
 	std::vector<std::string> terminal;
-	MAKE_SWAP_METHOD(ReferenceNodeInfo, name,
+	MAKE_SWAP_METHOD(CallGraphNodeInfo, name,
 		rules,
 		terminal)
 };
-MAKE_REFLECT_STRUCT(ReferenceNodeInfo, name,
+MAKE_REFLECT_STRUCT(CallGraphNodeInfo, name,
 	rules,
 	terminal);
 
 
-DEFINE_REQUEST_RESPONSE_TYPE(lpg_call_graph, MakeLeftRecursive::Params, std::vector<ReferenceNodeInfo>, "lpg/call-graph");
+struct CallGraphResult
+{
+	std::vector<CallGraphNodeInfo> infos;
+	boost::optional<std::string> errorMessage;
+	MAKE_SWAP_METHOD(CallGraphResult, infos,errorMessage)
+};
+MAKE_REFLECT_STRUCT(CallGraphResult, infos, errorMessage)
+
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_call_graph, MakeLeftRecursive::Params, CallGraphResult, "lpg/call-graph");
 
 struct CallGraphHandler
 {
 
 	CallGraphHandler(std::shared_ptr<CompilationUnit>&,
-		std::vector<ReferenceNodeInfo>&, Monitor*);
+		CallGraphResult&, Monitor*);
 
 	struct Data;
 
 	std::shared_ptr<Data>  d_ptr;
 
 };
+
+struct RailRoadScriptInfo
+{
+	std::string ruleName;
+	std::string rrdInfo;
+	MAKE_SWAP_METHOD(RailRoadScriptInfo, ruleName,rrdInfo)
+};
+MAKE_REFLECT_STRUCT(RailRoadScriptInfo, ruleName,rrdInfo)
+
+
+struct RailRoadResult
+{
+	std::vector<RailRoadScriptInfo> infos;
+	boost::optional<std::string> errorMessage;
+	MAKE_SWAP_METHOD(RailRoadResult, infos, errorMessage)
+};
+MAKE_REFLECT_STRUCT(RailRoadResult, infos, errorMessage)
+
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_rrd_singleRule , MakeLeftRecursive::Params, RailRoadResult, "lpg/rrd.singleRule");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_rrd_allRules,  lsTextDocumentIdentifier, RailRoadResult, "lpg/rrd.allRules");
+
+
+
+void RailRoadForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& out, Monitor*);
+void RailRoadForSingleRule(std::shared_ptr<CompilationUnit>& unit,const  MakeLeftRecursive::Params& params, RailRoadResult& out, Monitor* monitor);

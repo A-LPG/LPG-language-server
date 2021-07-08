@@ -117,9 +117,9 @@ public:
 	};
 	ExitMsgMonitor exit_monitor;
 	boost::optional<Rsp_Error> need_initialize_error;
-	std::shared_ptr<CompilationUnit> GetUnit(const lsTextDocumentIdentifier& uri, Monitor* monitor, bool keep_consist = true)
+	
+	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path, Monitor* monitor, bool keep_consist = true)
 	{
-		const AbsolutePath& path = uri.uri.GetAbsolutePath();
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
@@ -130,9 +130,14 @@ public:
 		}
 		else
 		{
-			unit=  work_space_mgr.CreateUnit(path, monitor);
+			unit = work_space_mgr.CreateUnit(path, monitor);
 		}
 		return  unit;
+	}
+	std::shared_ptr<CompilationUnit> GetUnit(const lsTextDocumentIdentifier& uri, Monitor* monitor, bool keep_consist = true)
+	{
+		const AbsolutePath& path = uri.uri.GetAbsolutePath();
+		return GetUnit(path, monitor, keep_consist);
 	}
 	void on_exit()
 	{
@@ -492,14 +497,40 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-
 					CallGraphHandler give_me_a_name(unit,  rsp.result, &_requestMonitor);
-
-
 				}
 				return std::move(rsp);
 			});
-		
+		_sp.registerHandler([&](const lpg_rrd_allRules::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_rrd_allRules::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_rrd_allRules::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params, &_requestMonitor);
+				if (unit) {
+					RailRoadForAllRule(unit, rsp.result, &_requestMonitor);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_rrd_singleRule::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_rrd_singleRule::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_rrd_singleRule::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					RailRoadForSingleRule(unit, req.params, rsp.result, &_requestMonitor);
+				}
+				return std::move(rsp);
+			});
 		_sp.registerHandler([&](Notify_TextDocumentDidOpen::notify& notify)
 			{
 				if (need_initialize_error){

@@ -1015,7 +1015,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 	 {
 		 return;
 	 }	
-     JikesPG2* data = unit->GetBinding().get();
+     auto data = unit->GetBinding();
      if(!data)
          return;
      data->unit_table.insert(unit->runtime_unit);

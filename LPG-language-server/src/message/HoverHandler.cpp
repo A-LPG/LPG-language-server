@@ -104,10 +104,12 @@ struct DocumentationProvider
           
             auto lex = nt->getLeftIToken()->getILexStream();
             auto  original_unit =  ast_unit->parent.FindFile(lex);
+            auto binding =  original_unit->GetBinding();
+        	if(binding)
             {
           
                 std::unordered_set<std::string> token_strings;
-                original_unit->GetBinding()->collectFirstSet(nt, token_strings);
+                binding->collectFirstSet(nt, token_strings);
             	if(!token_strings.empty())
             	{
                     std::string firstset_str("First set: ");
@@ -118,9 +120,10 @@ struct DocumentationProvider
                     markdown_output.addHeading(5).appendText(firstset_str);
             	}
             }
+            if (binding)
             {
                 std::unordered_set<std::string> token_strings;
-                original_unit->GetBinding()->collectFollowSet(nt, token_strings);
+                binding->collectFollowSet(nt, token_strings);
                 if (!token_strings.empty())
                 {
                     std::string firstset_str("Follow set: ");
