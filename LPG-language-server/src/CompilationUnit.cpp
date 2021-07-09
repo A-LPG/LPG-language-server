@@ -279,14 +279,9 @@ std::shared_ptr<JikesPG2> CompilationUnit::GetBinding()
 	{
 		return nullptr;
 	}
-	if(!data)
-	{
+	if(!data){
 		data = std::make_shared<JikesPG2>(runtime_unit->_parser.prsStream->tokens);
-		
 	}
-	
-
-	
 	return  data;
 }
 

@@ -256,7 +256,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath
 	std::shared_ptr<WorkingFile> _open=d_ptr->working_files.OnOpen(item);
 	if (!_open)
 		return {};
-	return OnChange(_open,std::move(content), monitor);
+	return ProcessFileContent(_open,std::move(content), monitor);
 }
 
 
@@ -418,7 +418,8 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePa
 	}
 	return  unit;
 }
-
+extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
+void process_symbol(std::shared_ptr<CompilationUnit>& unit);
 WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(this,_w , end_point, _log))
 {
 	
@@ -431,18 +432,27 @@ WorkSpaceManager::~WorkSpaceManager()
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open, Monitor* monitor)
 {
-	return OnChange(_open, monitor);
+	return ProcessFileContent(_open, {}, monitor);
 }
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
 
 {
-	return OnChange(_change,{}, monitor);
+	auto unit =  ProcessFileContent(_change,{}, monitor);
+	
+	auto affected_unit = GetAffectedReferences(_change->filename);
+	for (auto it : affected_unit)
+	{
+		auto _file = find(it);
+		if (!_file) continue;
+		_file->ResetBinding();
+		process_type_binding(_file, nullptr);
+	}
+	return unit;
 }
-extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
-void process_symbol(std::shared_ptr<CompilationUnit>& unit);
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
+
+std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::shared_ptr<WorkingFile>& _change, std::wstring&& content , Monitor* monitor)
 {
 
 	if (!_change)
@@ -491,15 +501,6 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	{
 		process_type_binding(unit, &handle);
 		d_ptr->end_point.sendNotification(handle.notify);
-		
-		auto affected_unit = GetAffectedReferences(_change->filename);
-		for (auto it : affected_unit)
-		{
-			auto _file = find(it);
-			if (!_file) continue;
-			_file->ResetBinding();
-			process_type_binding(_file, nullptr);
-		}
 	}
    
 	return unit;
