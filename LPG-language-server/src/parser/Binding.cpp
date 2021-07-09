@@ -8,9 +8,57 @@
 #include "../WorkSpaceManager.h"
 #include "../parser/ParseData.h"
 #include "../parser/JiksPGControl.h"
+
 using namespace LPGParser_top_level_ast;
 
 
+lsRange ProblemHandler::toRange(const Location& location)
+{
+	lsRange range;
+	range.start.line = location.start_line - 1;
+	range.start.character = location.start_column;
+	range.end.line = location.end_line - 1;
+	range.end.character = location.end_column;
+	return range;
+}
+
+void ProblemHandler::handleMessage(int errorCode, const Location& msgLocation, const Location& errorLocation,
+                                   const std::wstring& filename, const std::vector<std::wstring>& errorInfo)
+{
+    lsDiagnostic diagnostic;
+    diagnostic.severity = lsDiagnosticSeverity::Error;
+    diagnostic.range = toRange(msgLocation);
+    std::string info;
+    for (auto& it : errorInfo)
+    {
+        info += IcuUtil::ws2s(it);
+        info += "\n";
+    }
+    diagnostic.message.swap(info);
+    notify.params.diagnostics.emplace_back(std::move(diagnostic));
+}
+
+void ProblemHandler::handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right,
+                                    Tuple<const char*>& msg)
+{
+	if(!left || !right)
+        return;
+	
+    lsDiagnostic diagnostic;
+    diagnostic.severity = severity;
+    auto lex = left->getILexStream();
+	if(!lex)return;
+	
+    diagnostic.range = toRange(lex->getLocation(left->getStartOffset(),right->getEndOffset()));
+    std::string info;
+    for (auto i = 0 ;i  < msg.size(); ++i)
+    {
+        info += msg[i];
+        
+    }
+    diagnostic.message.swap(info);
+    notify.params.diagnostics.emplace_back(std::move(diagnostic));
+}
 
 
 struct LPGBindingVisitor :public AbstractVisitor {

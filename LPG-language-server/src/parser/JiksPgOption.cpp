@@ -716,11 +716,11 @@ void JiksPgOption::Emit(IToken* token,const lsDiagnosticSeverity severity,  Tupl
 
 void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const lsDiagnosticSeverity severity, Tuple<const char*>& msg)
 {
-	/*if(message_handler_)
+	if(message_handler_)
 	{
         message_handler_->handleMessage(severity, startToken, endToken, msg);
 		return;
-	}*/
+	}
     const char* header;
     if (severity == lsDiagnosticSeverity::Error)
     {

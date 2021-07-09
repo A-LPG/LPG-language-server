@@ -60,9 +60,9 @@ void Grammar::Process()
     {
         Tuple<const char *> msg;
         msg.Next() = option -> grm_file;
-        msg.Next() = " is an empty grammar... Processing stopped";
+        msg.Next() = " is an empty grammar";
    
-      option-> EmitError(lex_stream->NumTokens() - 2, msg); // point to the last token
+      option->EmitInformative(lex_stream->NumTokens() - 2, msg); // point to the last token
 
       control->Exit(4);
     }

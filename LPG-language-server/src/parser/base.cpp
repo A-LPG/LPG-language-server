@@ -1654,7 +1654,7 @@ void Base::QuickSortSymbols(Array<int> &array, int low, int high)
 //
 void Base::PrintNonTerminalFirst(void)
 {
-   
+#ifdef _DEBUG_FIRST
     char line[PRINT_LINE_SIZE + 1],
         tok[SYMBOL_SIZE + 1];
 
@@ -1703,6 +1703,8 @@ void Base::PrintNonTerminalFirst(void)
     }
 
     return;
+#endif
+	
 }
 
 
@@ -1721,6 +1723,7 @@ void Base::PrintSymbolMap(const char *header, Array<BitSet> &map)
 //
 void Base::PrintFollowMap(void)
 {
+#ifdef _DEBUG_FIRST
     //
     // First, flush any data left in the report buffer.
     //
@@ -1761,6 +1764,8 @@ void Base::PrintFollowMap(void)
 
     }
     return;
+#endif
+	
 }
 
 
