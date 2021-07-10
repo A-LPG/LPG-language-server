@@ -1106,6 +1106,13 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
              auto symbol = macro_table.FindOrInsertName(name.c_str(), name.size());
              lex_stream->macro_table.insert({ i ,symbol });
          }
+         else if(i == 0)
+         {
+             //
+			// Assign the null string symbol to the 0th token.
+			//
+             variable_index[0] = variable_table.FindOrInsertName("", 0);
+         }
      }
 
     LPGBindingVisitor visitor(unit);

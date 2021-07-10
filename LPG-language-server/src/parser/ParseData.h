@@ -403,18 +403,19 @@ public:
         int block_begin_length_,
         int pool_index_,
         unsigned hash_address_) : Symbol(BLOCK, block_begin_, block_begin_length_, pool_index_, hash_address_),
-        block_end(NULL),
-        block_end_length(0)
-    {}
+                                  block_kind(MAIN_BLOCK),
+                                  block_end(NULL),
+                                  block_end_length(0)
+    {
+    }
 
     virtual ~BlockSymbol();
 
     char* BlockBegin() { return name; }
     int BlockBeginLength() { return length; }
 
-    // TODO Rename these methods and the field - they shadow the base class field/method
-    void SetKind(int kind_) { kind = kind_; }
-    int Kind() { return kind; }
+    void SetBlockKind(int kind_) { block_kind = kind_; }
+    int BlockKind() const { return block_kind; }
 
     void SetBlockEnd(const char* block_end_, int block_end_length_)
     {
@@ -434,7 +435,7 @@ public:
 
 private:
    
-    int kind;
+    int block_kind;
     char* block_end;
     int block_end_length;
 };
@@ -459,6 +460,10 @@ struct ParseData
     class PredecessorSetDefinition
     {
     public:
+        PredecessorSetDefinition(): lhs_index(0), rhs_index(0)
+        {
+        }
+
         int lhs_index,
             rhs_index;
     };
@@ -467,6 +472,10 @@ struct ParseData
     class AliasDefinition
     {
     public:
+        AliasDefinition(): lhs_index(0), rhs_index(0)
+        {
+        }
+
         int lhs_index,
             rhs_index;
     };
@@ -475,6 +484,10 @@ struct ParseData
     class NameDefinition
     {
     public:
+        NameDefinition(): lhs_index(0), rhs_index(0)
+        {
+        }
+
         int lhs_index,
             rhs_index;
     };
@@ -490,6 +503,11 @@ struct ParseData
     class RuleDefinition
     {
     public:
+        RuleDefinition(): lhs_index(0), classname_index(0), array_element_type_index(0), separator_index(0),
+                          end_rhs_index(0)
+        {
+        }
+
         int lhs_index,
             classname_index,
             array_element_type_index,

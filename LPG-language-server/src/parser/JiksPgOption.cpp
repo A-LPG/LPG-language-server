@@ -824,6 +824,14 @@ void JiksPgOption::FlushReport()
 }
 void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnosticSeverity severity, const char* msg)
 {
+
+    if (message_handler_)
+    {
+        Tuple<const char*> msg_tuple;
+        msg_tuple.Next() = msg;
+        message_handler_->handleMessage(severity, startToken, endToken, msg_tuple);
+        return;
+    }
     const char* header;
     if (severity == lsDiagnosticSeverity::Error)
     {
@@ -841,7 +849,7 @@ void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnostic
     report.Put(msg);
     report.PutChar('\n');
 
-    //FlushReport();
+    FlushReport();
 
     return;
 }
