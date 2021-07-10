@@ -44,6 +44,10 @@
     <ClCompile Include="src\parser\JiksPgOption.cpp" />
     <ClCompile Include="src\parser\LPGParser.cpp" />
     <ClCompile Include="src\parser\LPGParser_top_level_ast.cpp" />
+    <ClCompile Include="src\parser\JikesPGOptionDesc.cpp" />
+    <ClCompile Include="src\parser\JikesPGOptionParser.cpp" />
+    <ClCompile Include="src\parser\JikesPGOptions.cpp" />
+    <ClCompile Include="src\parser\JikesPGOptionValues.cpp" />
     <ClCompile Include="src\parser\pda.cpp" />
     <ClCompile Include="src\parser\produce.cpp" />
     <ClCompile Include="src\parser\resolve.cpp" />
@@ -64,6 +68,7 @@
     <ClInclude Include="src\parser\JikesPGUtil.h" />
     <ClInclude Include="src\parser\JiksPGControl.h" />
     <ClInclude Include="src\parser\JiksPgOption.h" />
+    <ClInclude Include="src\parser\JikesPGOptions.h" />
     <ClInclude Include="src\parser\ParseData.h" />
     <ClInclude Include="src\parser\lpgErrorCode.h" />
     <ClInclude Include="src\parser\LPGKWLexer.h" />

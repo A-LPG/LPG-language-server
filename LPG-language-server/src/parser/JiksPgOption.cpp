@@ -2,11 +2,31 @@
 #include "IcuUtil.h"
 #include <IPrsStream.h>
 
+#include "JikesPGOptions.h"
 #include "JiksPGControl.h"
+#include "LPGParser_top_level_ast.h"
+
 //
 // Change the following static to "true" to enable the new options-processing code
 //
-static bool NEW_OPTIONS_CODE = false;
+static constexpr  bool NEW_OPTIONS_CODE = true;
+
+char* JiksPgOption::NewString(const char* in)
+{
+	char* out = new char[strlen(in) + 1];
+	temp_string.Next() = out;
+	strcpy(out, in);
+	return out;
+}
+
+char* JiksPgOption::NewString(const char* in, int length)
+{
+	char* out = new char[length + 1];
+	temp_string.Next() = out;
+	strncpy(out, in, length);
+	out[length] = NULL_CHAR;
+	return out;
+}
 
 const char* JiksPgOption::GetPrefix(const char* filename)
 {
@@ -66,6 +86,11 @@ void JiksPgOption::ProcessPath(Tuple<const char*>& list, const char* path, const
 JiksPgOption::JiksPgOption(JikesPGLexStream* lex,const std::string& file_path)
 : home_directory(nullptr), template_directory(nullptr), ast_directory_prefix(nullptr),lex_stream(lex)
 {
+
+    return_code = 0;
+    optionParser = new OptionParser(OptionDescriptor::getAllDescriptors());
+    optionProcessor = new OptionProcessor(this);
+    OptionDescriptor::initializeAll(optionProcessor);
 	for_parser = true;
     for_lsp = true;
 
@@ -245,6 +270,8 @@ JiksPgOption::JiksPgOption(JikesPGLexStream* lex,const std::string& file_path)
     strcat(temp_lis_file, ".l"); // add .l extension for listing file
     strcat(temp_tab_file, ".t"); // add .t extension for table file
 }
+
+
 const char* JiksPgOption::GetFile(const char* directory, const char* file_suffix, const char* file_type)
 {
     assert(directory);
@@ -282,10 +309,123 @@ const char* JiksPgOption::GetType(const char* filespec)
     int length = (dot == NULL ? strlen(start) : dot - start);
     return NewString(start, length);
 }
+void JiksPgOption::ReportAmbiguousOption(const std::string& desc, const std::string&  choice_msg, IToken* startToken, IToken* endToken)
+{
+   
+    char* str = NewString(desc.data(), desc.size());
 
-//
-//
-//
+    Tuple<const char*> msg;
+    msg.Next() = "The option \"";
+    msg.Next() = str;
+    msg.Next() = "\" is ambiguous: ";
+    msg.Next() = NewString(choice_msg.data(), choice_msg.size());
+    EmitError(startToken, endToken, msg);
+}
+
+void JiksPgOption::ReportValueNotRequired( const std::string& option, IToken* startToken, IToken* endToken)
+{
+    char* str = NewString(option.c_str(), option.size());
+    Tuple<const char*> msg;
+    msg.Next() = "An illegal value was specified for this option: \"";
+    msg.Next() = str;
+    msg.Next() = "\"";
+    EmitError(startToken, endToken, msg);
+}
+void JiksPgOption::ReportMissingValue(const std::string& option, IToken* startToken, IToken* endToken)
+{
+   
+    char* str = NewString(option.c_str(), option.size());
+
+    Tuple<const char*> msg;
+    msg.Next() = "A value is required for this option: \"";
+    msg.Next() = str;
+    msg.Next() = "\"";
+    EmitError(startToken, endToken, msg);
+}
+void JiksPgOption::InvalidTripletValueError(const std::string& str, const std::string& type, const std::string& format, IToken* startToken, IToken* endToken)
+{
+    
+    Tuple<const char*> msg;
+    msg.Next() = "Illegal ";
+    msg.Next() = NewString(type.c_str(), type.size());
+    msg.Next() = " option specified: ";
+    msg.Next() = NewString(str.c_str(), str.size());
+    msg.Next() = ". A value of the form \"";
+    msg.Next() = NewString(format.c_str(), format.size());
+    msg.Next() = "\" was expected.";
+    EmitError(startToken, endToken, msg);
+}
+void JiksPgOption::InvalidValueError(const std::string& value, const std::string& desc,IToken* startToken, IToken* endToken)
+{
+    char* str = NewString(desc.c_str(), desc.size());
+
+    Tuple<const char*> msg;
+    msg.Next() = "\"";
+    msg.Next() = NewString(value.c_str(), value.size());
+    msg.Next() = "\" is an invalid value for option \"";
+    msg.Next() = str;
+    msg.Next() = "\"";
+    EmitError(startToken,endToken, msg);
+}
+using namespace LPGParser_top_level_ast;
+void JiksPgOption::process_option(LPGParser_top_level_ast::option_specList* opt_list)
+{
+	if(!opt_list)return;
+	int size = opt_list->size();
+	for (int i = 0; i < size; ++i)
+	{
+		auto _option_spec = opt_list->getoption_specAt(i);
+		if (!_option_spec)
+		{
+			continue;
+		}
+		optionList* lpg_optionList = _option_spec->getoption_list();
+		if (!lpg_optionList)
+		{
+			continue;
+		}
+		
+		for (size_t k = 0; k < lpg_optionList->list.size(); ++k)
+		{
+			option* _opt = lpg_optionList->getoptionAt(k);
+			if (!_opt)
+				continue;
+		
+			auto sym = _opt->getSYMBOL();
+			std::stringex optName = sym->to_utf8_string();
+			optName.tolower();
+			if (optName == ("import_terminals")
+				|| optName == ("template")
+				|| optName == ("filter"))
+			{
+				continue;
+			}
+            try {
+              
+                auto opt_string = _opt->to_utf8_string();
+                opt_string.push_back('\0');
+                const char* param = opt_string.c_str();
+                auto value = optionParser->parse(param);      
+                if (value) {
+                    value->processSetting(optionProcessor);
+                }
+                else {
+                  // ±¨´í
+                  std::string info;
+                  info = "Missing option handler  for option '" + optName +  "\n";
+                  EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
+                }
+            }
+            catch (ValueFormatException& vfe) {
+                std::string info ;
+                info = "Improper value '" +  vfe.value() + "' for option '" + vfe.optionDescriptor()->getName() + "': " + vfe.message() + "\n";
+                std::cerr << info;
+                EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
+            }
+			
+		}
+	}
+}
 
 void JiksPgOption::CompleteOptionProcessing()
 {

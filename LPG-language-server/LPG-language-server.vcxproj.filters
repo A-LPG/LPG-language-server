@@ -117,6 +117,18 @@
     <ClCompile Include="src\message\Analysis.cpp">
       <Filter>message</Filter>
     </ClCompile>
+    <ClCompile Include="src\parser\JikesPGOptionDesc.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\JikesPGOptionParser.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\JikesPGOptions.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\parser\JikesPGOptionValues.cpp">
+      <Filter>parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\parser\LPGKWLexer.h">
@@ -213,6 +225,9 @@
       <Filter>parser</Filter>
     </ClInclude>
     <ClInclude Include="src\parser\lpgErrorCode.h">
+      <Filter>parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\parser\JikesPGOptions.h">
       <Filter>parser</Filter>
     </ClInclude>
   </ItemGroup>

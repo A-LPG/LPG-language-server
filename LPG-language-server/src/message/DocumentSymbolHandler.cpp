@@ -489,7 +489,8 @@ namespace
                 lsDocumentSymbol children;
                 children.name = _opt->to_utf8_string();
                 auto sym = _opt->getSYMBOL();
-                auto  optName = sym->toString();
+                std::wstringex  optName = sym->toString();
+                optName.tolower();
                 if (optName == (L"import_terminals")
                     || optName == (L"template")
                     || optName == (L"filter"))
@@ -497,6 +498,7 @@ namespace
                     children.kind = lsSymbolKind::File;
                     string fileName;
                     auto  optValue = _opt->getoption_value();
+                	if(!optValue) continue;
                     if (dynamic_cast<option_value0*>(optValue)) {
 
                         fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();

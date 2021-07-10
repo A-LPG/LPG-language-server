@@ -1,5 +1,6 @@
 #pragma once
 #include <IToken.h>
+#include <stringex.h>
 #include <tuple.h>
 #include <LibLsp/lsp/lsp_diagnostic.h>
 
@@ -7,39 +8,22 @@
 #include "JikesPGUtil.h"
 #include "lpgErrorCode.h"
 #include "../code.h"
+
+class OptionDescriptor;
+class OptionParser;
+class OptionProcessor;
+
+namespace LPGParser_top_level_ast {
+	struct option;
+	struct option_specList;
+}
+
 struct IMessageHandler;
 class JikesPGLexStream;
 
 class JiksPgOption : public Code, public Util
 {
-    ProblemHandler* message_handler_ =nullptr;
-    JikesPGLexStream* lex_stream ;
-    Tuple<char*> temp_string;
-    char* NewString(int n) { return temp_string.Next() = new char[n]; }
-    char* NewString(const char* in)
-    {
-        char* out = new char[strlen(in) + 1];
-        temp_string.Next() = out;
-        strcpy(out, in);
-        return out;
-    }
-    char* NewString(const char* in, int length)
-    {
-        char* out = new char[length + 1];
-        temp_string.Next() = out;
-        strncpy(out, in, length);
-        out[length] = NULL_CHAR;
-        return out;
-    }
-    public:
-    const char* GetPrefix(const char* filename);
-    void ProcessPath(Tuple<const char*>&, const char*, const char* = NULL);
-    JiksPgOption(JikesPGLexStream* ,const std::string& file_path);
-    const char* GetFile(const char* directory, const char* file_suffix, const char* file_type);
-   static  const char* GetFilename(const char* filespec);
-    const char* GetType(const char* filespec);
-    void CheckGlobalOptionsConsistency();
-
+public:
     enum
         {
             //
@@ -101,6 +85,7 @@ class JiksPgOption : public Code, public Util
             PREORDER = 2
         };
 
+ 
         int return_code;
 
         const char* home_directory;
@@ -207,6 +192,29 @@ class JiksPgOption : public Code, public Util
 
         bool quiet;
         TextBuffer report;
+        JikesPGLexStream* lex_stream;
+
+        char* NewString(int n) { return temp_string.Next() = new char[n]; }
+		char* NewString(const char* in);
+		char* NewString(const char* in, int length);
+
+        const char* GetPrefix(const char* filename);
+        void ProcessPath(Tuple<const char*>&, const char*, const char* = NULL);
+        JiksPgOption(JikesPGLexStream*, const std::string& file_path);
+
+        const char* GetFile(const char* directory, const char* file_suffix, const char* file_type);
+        static  const char* GetFilename(const char* filespec);
+        const char* GetType(const char* filespec);
+        void ReportAmbiguousOption(const std::string& desc, const std::string& choice_msg, IToken* startToken,
+            IToken* endToken);
+        void ReportValueNotRequired(const std::string& option, IToken* startToken, IToken* endToken);
+        void ReportMissingValue(const std::string& option, IToken* startToken, IToken* endToken);
+        void InvalidTripletValueError(const std::string& str, const std::string& type, const std::string& format,
+            IToken* startToken, IToken* endToken);
+        void InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken);
+        void CheckGlobalOptionsConsistency();
+        void process_option(LPGParser_top_level_ast::option_specList*);
+       
         void EmitHeader(IToken*, const char*);
 	    void CompleteOptionProcessing();
       const char* ExpandFilename(const char* filename);
@@ -253,4 +261,10 @@ class JiksPgOption : public Code, public Util
         {
             message_handler_ = handler;
         }
+
+
+        ProblemHandler* message_handler_ = nullptr;
+        Tuple<char*> temp_string;
+        OptionParser* optionParser;
+        OptionProcessor* optionProcessor;
 };
