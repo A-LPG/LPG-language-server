@@ -13,6 +13,7 @@
 
 
 namespace LPGParser_top_level_ast {
+	struct ASTNode;
 	struct LPG;
 	struct nonTerm;
 }
@@ -190,10 +191,10 @@ public:
 
 struct DependenceInfo
 {
-    std::vector<std::string>  template_files;
-    std::vector<std::string>  import_terminals_files;
-    std::vector<std::string>  filter_files;
-    std::vector<std::string>  include_files;
+    std::vector<std::pair<std::string, LPGParser_top_level_ast::ASTNode*>>  template_files;
+    std::vector<std::pair<std::string, LPGParser_top_level_ast::ASTNode*>>  import_terminals_files;
+    std::vector<std::pair<std::string, LPGParser_top_level_ast::ASTNode*>>  filter_files;
+    std::vector<std::pair<std::string, LPGParser_top_level_ast::ASTNode*> >  include_files;
 };
 
 struct RunTimeUnit
@@ -201,6 +202,7 @@ struct RunTimeUnit
     LPGLexer _lexer; // Create the lexer
     LPGParser _parser;
     LPGParser_top_level_ast::LPG* root = nullptr;
+    std::vector<lsDiagnostic> diagnostics;
     std::recursive_mutex mutex;
 };
 

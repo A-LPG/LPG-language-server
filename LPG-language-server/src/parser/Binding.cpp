@@ -35,11 +35,10 @@ void ProblemHandler::handleMessage(int errorCode, const Location& msgLocation, c
         info += "\n";
     }
     diagnostic.message.swap(info);
-    notify.params.diagnostics.emplace_back(std::move(diagnostic));
+    diagnostics.emplace_back(std::move(diagnostic));
 }
 
-void ProblemHandler::handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right,
-                                    Tuple<const char*>& msg)
+void ProblemHandler::handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right,const std::string& info)
 {
 	if(!left || !right)
         return;
@@ -50,14 +49,14 @@ void ProblemHandler::handleMessage(const lsDiagnosticSeverity severity, IToken* 
 	if(!lex)return;
 	
     diagnostic.range = toRange(lex->getLocation(left->getStartOffset(),right->getEndOffset()));
-    std::string info;
-    for (auto i = 0 ;i  < msg.size(); ++i)
-    {
-        info += msg[i];
-        
-    }
-    diagnostic.message.swap(info);
-    notify.params.diagnostics.emplace_back(std::move(diagnostic));
+   
+    diagnostic.message=(info);
+    diagnostics.emplace_back(std::move(diagnostic));
+}
+
+void ProblemHandler::handleMessage(lsDiagnostic&& diagnostic)
+{
+   diagnostics.emplace_back(diagnostic);
 }
 
 
@@ -991,75 +990,6 @@ struct LPGBindingVisitor :public AbstractVisitor {
 };
 
 
-namespace
-{
-
-    void travel_option(option_specList* list)
-    {
-        int size = list->size();
-        for (int i = 0; i < size; ++i)
-        {
-            auto _option_spec = list->getoption_specAt(i);
-            if (!_option_spec)
-            {
-                continue;
-            }
-            optionList* lpg_optionList = _option_spec->getoption_list();
-            if (!lpg_optionList)
-            {
-                continue;
-            }
-            for (size_t k = 0; k < lpg_optionList->list.size(); ++k)
-            {
-                option* _opt = lpg_optionList->getoptionAt(k);
-                if (!_opt)
-                    continue;
-             
-                auto sym = _opt->getSYMBOL();
-                auto  optName = sym->toString();
-                if (optName == (L"import_terminals")
-                    || optName == (L"template")
-                    || optName == (L"filter"))
-                {
-                  
-                    string fileName;
-                    auto  optValue = _opt->getoption_value();
-                    if (dynamic_cast<option_value0*>(optValue)) {
-
-                        fileName = static_cast<option_value0*>(optValue)->getSYMBOL()->to_utf8_string();
-
-                    }
-                    else
-                    {
-                        fileName = optValue->to_utf8_string();
-                    }
-                    if (optName == (L"import_terminals"))
-                    {
-                       
-                    }
-                    else if (optName == (L"template"))
-                    {
-                       
-                    }
-                    else
-                    {
-                       
-                    }
-                }
-                else
-                {
-                   
-                }
-
-            }
-
-        }
-    }
-
-}
-
-
-
 void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler)
 {
 	 if(!unit->runtime_unit->root)
@@ -1140,15 +1070,15 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
     }
 	if(!unit->dependence_info.template_files.empty())
 	{
-        visitor.process_include(unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1]);
+        visitor.process_include(unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1].first);
 	}
     for (auto& file : unit->dependence_info.import_terminals_files)
     {
-       (void) visitor.ImportTerminals(file);
+       (void) visitor.ImportTerminals(file.first);
     }
     for (auto& file : unit->dependence_info.filter_files)
     {
-        (void)visitor.ProcessFilters(file);
+        (void)visitor.ProcessFilters(file.first);
     }
     
 	 try

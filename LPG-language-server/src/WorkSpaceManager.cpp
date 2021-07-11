@@ -179,14 +179,14 @@ void WorkSpaceManager::collect_def(
 		{
 			for (auto& fileName : refUnit->dependence_info.include_files)
 			{
-				collect_method(policy,fileName);
+				collect_method(policy,fileName.first);
 			}
 		}
 		if (policy.macro->_scope._template)
 		{
 			for (auto& fileName : refUnit->dependence_info.template_files)
 			{
-				collect_method(policy, fileName);
+				collect_method(policy, fileName.first);
 			}
 		}
 	}
@@ -196,14 +196,14 @@ void WorkSpaceManager::collect_def(
 		{
 			for (auto& fileName : refUnit->dependence_info.include_files)
 			{
-				collect_method(policy, fileName);
+				collect_method(policy, fileName.first);
 			}
 		}
 		if (policy.variable->_scope._template)
 		{
 			for (auto& fileName : refUnit->dependence_info.template_files)
 			{
-				collect_method(policy, fileName);
+				collect_method(policy, fileName.first);
 			}
 		}
 		if (policy.variable->_scope._filter)
@@ -215,7 +215,7 @@ void WorkSpaceManager::collect_def(
 			collect_policy.variable = std::move(variable);
 			for (auto& fileName : refUnit->dependence_info.filter_files)
 			{
-				collect_method(collect_policy,fileName);
+				collect_method(collect_policy, fileName.first);
 			}
 		}
 		if (policy.variable->_scope._import_terminals)
@@ -227,7 +227,7 @@ void WorkSpaceManager::collect_def(
 			collect_policy.variable = std::move(variable);
 			for (auto& fileName : refUnit->dependence_info.import_terminals_files)
 			{
-				collect_method(collect_policy,fileName);
+				collect_method(collect_policy, fileName.first);
 			}
 		}
 	}
@@ -441,12 +441,21 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	auto unit =  ProcessFileContent(_change,{}, monitor);
 	
 	auto affected_unit = GetAffectedReferences(_change->filename);
-	for (auto it : affected_unit)
+	for (const auto& it : affected_unit)
 	{
 		auto _file = find(it);
 		if (!_file) continue;
 		_file->ResetBinding();
-		process_type_binding(_file, nullptr);
+		ProblemHandler handle;
+		process_type_binding(_file, &handle);
+		Notify_TextDocumentPublishDiagnostics::notify notify;
+		notify.params.diagnostics = unit->runtime_unit->diagnostics;
+		
+		notify.params.diagnostics.insert(notify.params.diagnostics.end(),
+			handle.diagnostics.begin(), handle.diagnostics.end());
+		
+		notify.params.uri = _file->working_file->filename;
+		d_ptr->end_point.sendNotification(notify);
 	}
 	return unit;
 }
@@ -474,8 +483,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 		unit = std::make_shared<CompilationUnit>(_change, *this);
 		unit->counter.store(_change->counter.load(std::memory_order_relaxed));
 
-		handle.notify.params.uri = _change->filename;
-
+	
 		unit->runtime_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
 
 		unit->runtime_unit->_parser.reset(unit->runtime_unit->_lexer.getLexStream());
@@ -488,6 +496,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 		unit->parser(monitor);
 		if (monitor && monitor->isCancelled())
 			return nullptr;
+		unit->runtime_unit->diagnostics.swap(handle.diagnostics);
 		d_ptr->update_unit(_change->filename, unit);
 		process_symbol(unit);
 		unit->runtime_unit->mutex.lock();
@@ -496,22 +505,93 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 	{
 		unit->runtime_unit->mutex.unlock();
 	});
-
-	if(!IsFileRecursiveInclude(unit,monitor))
+	
+	std::vector<AbsolutePath> footprint;
+	if(!IsFileRecursiveInclude(unit, footprint,monitor))
 	{
 		process_type_binding(unit, &handle);
-		d_ptr->end_point.sendNotification(handle.notify);
 	}
-   
+	else
+	{
+		if (unit->runtime_unit->root)
+		{
+			auto detector = [&]()-> ASTNode* {
+				for (int i = footprint.size() - 1; i >= 0; --i)
+				{
+					for (auto& it : unit->dependence_info.include_files)
+					{
+						if (it.first == footprint[i].path)
+						{
+							return it.second;
+						}
+					}
+
+					for (auto& value : unit->dependence_info.template_files)
+					{
+						if (value.first == footprint[i].path)
+						{
+							return value.second;
+						}
+					}
+
+					for (auto& value : unit->dependence_info.filter_files)
+					{
+						if (value.first == footprint[i].path)
+						{
+							return value.second;
+						}
+					}
+
+					for (auto& value : unit->dependence_info.import_terminals_files)
+					{
+						if (value.first == footprint[i].path)
+						{
+							return value.second;
+						}
+					}
+				}
+				return nullptr;
+			};
+			auto node = detector();
+			IToken* left;
+			IToken* right;
+			if(!node)
+			{
+				node = unit->runtime_unit->root;
+				left = node->getLeftIToken();
+				right = left;
+			}
+			else
+			{
+				left = node->getLeftIToken();
+				right = node->getRightIToken();
+			}
+			std::stringex info = "file recursive:\n";
+			for (auto& it : footprint)
+			{
+				info += it.path + " -->\n";
+			}
+			info += _change->filename;
+		
+			handle.handleMessage(lsDiagnosticSeverity::Error, left, right,info);
+		}
+	}
+	
+	Notify_TextDocumentPublishDiagnostics::notify notify;
+	notify.params.diagnostics = unit->runtime_unit->diagnostics;
+	notify.params.diagnostics.insert(notify.params.diagnostics.end(), handle.diagnostics.begin(), handle.diagnostics.end());;
+	notify.params.uri = _change->filename;
+	d_ptr->end_point.sendNotification(notify);
+	
 	return unit;
 }
 
-bool WorkSpaceManager::IsFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
+bool WorkSpaceManager::IsFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& refUnit, std::vector<AbsolutePath>& footprint, Monitor* monitor)
 {
 	std::set<AbsolutePath> includedFiles;
 	try
 	{
-		ProcessCheckFileRecursiveInclude(includedFiles, refUnit, monitor);
+		ProcessCheckFileRecursiveInclude(includedFiles, footprint,refUnit, monitor);
 		
 	}
 	catch (...)
@@ -523,11 +603,11 @@ bool WorkSpaceManager::IsFileRecursiveInclude(const std::shared_ptr<CompilationU
 	
 }
 void WorkSpaceManager::ProcessCheckFileRecursiveInclude(
-	std::set<AbsolutePath>& includedFiles,
+	std::set<AbsolutePath>& includedFiles, std::vector<AbsolutePath>& footprint,
 	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
 {
 	includedFiles.insert(refUnit->working_file->filename);
-
+	footprint.push_back(refUnit->working_file->filename);
 	auto detector = [&](const std::string& fileName)
 	{
 		
@@ -541,29 +621,30 @@ void WorkSpaceManager::ProcessCheckFileRecursiveInclude(
 		}
 		if (monitor && monitor->isCancelled())
 			return;
-		ProcessCheckFileRecursiveInclude(includedFiles, include_unit, monitor);
+		ProcessCheckFileRecursiveInclude(includedFiles, footprint, include_unit, monitor);
 	};
 
 	for (auto& fileName : refUnit->dependence_info.include_files)
 	{
-		detector(fileName);
+		detector(fileName.first);
 	}
 
 	for (auto& fileName : refUnit->dependence_info.template_files)
 	{
-		detector(fileName);
+		detector(fileName.first);
 	}
 
 	for (auto& fileName : refUnit->dependence_info.filter_files)
 	{
-		detector(fileName);
+		detector(fileName.first);
 	}
 
 	for (auto& fileName : refUnit->dependence_info.import_terminals_files)
 	{
-		detector(fileName);
+		detector(fileName.first);
 	}
 }
+
 
 void WorkSpaceManager::OnClose(const lsDocumentUri& close)
 {

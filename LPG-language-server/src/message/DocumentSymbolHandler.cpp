@@ -191,7 +191,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         symbol->kind = lsSymbolKind::File;
     	auto file_name = n->getSYMBOL()->to_utf8_string();
         symbol->name += file_name;
-        unit->dependence_info.include_files.push_back(file_name);
+        unit->dependence_info.include_files.push_back({ file_name,n });
         return true;
     }
 
@@ -510,15 +510,15 @@ namespace
                     }
                     if (optName == (L"import_terminals"))
                     {
-                        infos_info.import_terminals_files.push_back(fileName);
+                        infos_info.import_terminals_files.push_back({ fileName,_opt });
                     }
                     else if (optName == (L"template"))
                     {
-                        infos_info.template_files.push_back(fileName);
+                        infos_info.template_files.push_back({ fileName,_opt });
                     }
                     else
                     {
-                        infos_info.filter_files.push_back(fileName);
+                        infos_info.filter_files.push_back({ fileName,_opt });
                     }
                 }
                 else

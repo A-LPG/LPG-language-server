@@ -19,12 +19,22 @@ enum
 
 struct ProblemHandler : public IMessageHandler
 {
-	Notify_TextDocumentPublishDiagnostics::notify notify;
+    std::vector<lsDiagnostic> diagnostics;
 	lsRange toRange(const Location& location);
 
 	void handleMessage(int errorCode, const Location& msgLocation, const Location& errorLocation,
 	                   const std::wstring& filename, const std::vector<std::wstring>& errorInfo) override;
 
-	void handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right,  Tuple<const char*>& msg);
+	void handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right,  Tuple<const char*>& msg)
+	{
+        std::string info;
+        for (auto i = 0; i < msg.size(); ++i)
+        {
+            info += msg[i];
+
+        }
+	}
+    void handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right, const std::string& info);
+    void handleMessage(lsDiagnostic&& diagnostic);
 };
 
