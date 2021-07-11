@@ -102,7 +102,7 @@ struct DocumentationProvider
             header.appendText("non-terminal " + nt_symbol->to_utf8_string() + " in " + file_name);
             markdown_output.addRuler();
           
-            auto lex = nt->getLeftIToken()->getILexStream();
+        /*    auto lex = nt->getLeftIToken()->getILexStream();
             auto  original_unit =  ast_unit->parent.FindFile(lex);
             auto binding =  original_unit->GetBinding();
         	if(binding)
@@ -133,7 +133,7 @@ struct DocumentationProvider
                     }
                     markdown_output.addHeading(5).appendText(firstset_str);
                 }
-            }
+            }*/
         	
             markdown_output.addCodeBlock(nt->to_utf8_string() + " ");
         	

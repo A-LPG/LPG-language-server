@@ -41,7 +41,7 @@ public:
     typedef void (OptionProcessor::*ValueHandler)(OptionValue *);
 
     OptionProcessor(JiksPgOption *);
-
+    void processAstBlock(OptionValue* v);
     void processActionBlock(OptionValue *v);
     void processExportTerminals(OptionValue *v);
     void processFilter(OptionValue *v);

@@ -36,18 +36,36 @@ trimQuotes(std::string& s)
 std::list<OptionDescriptor*> OptionDescriptor::allOptionDescriptors;
 
 OptionDescriptor *actionBlock = new OptionDescriptor(STRING_LIST, "action", "block", "???", &OptionProcessor::processActionBlock);
+OptionDescriptor* astBlock = new OptionDescriptor(STRING_LIST, "ast", "block", "???", &OptionProcessor::processAstBlock);
 
 void
 OptionProcessor::processActionBlock(OptionValue *v)
 {
     StringListOptionValue *slv = static_cast<StringListOptionValue*> (v);
     std::list<std::string> values = slv->getValue();
+    if (values.size() != 3){
+        throw ValueFormatException("action-block value must be a string list of  3 elements", *v->toString(), v->getOptionDescriptor());
+    }
     std::list<std::string>::iterator i = values.begin();
     std::string fileName = trimQuotes(*i++);
     std::string blockBegin = trimQuotes(*i++);
     std::string blockEnd = trimQuotes(*i++);
 
   
+}
+void
+OptionProcessor::processAstBlock(OptionValue* v)
+{
+    StringListOptionValue* slv = static_cast<StringListOptionValue*> (v);
+    std::list<std::string> values = slv->getValue();
+    if (values.size() != 2) {
+        throw ValueFormatException("ast-block value must be a string list of  3 elements", *v->toString(), v->getOptionDescriptor());
+    }
+    std::list<std::string>::iterator i = values.begin();
+    std::string blockBegin = trimQuotes(*i++);
+    std::string blockEnd = trimQuotes(*i++);
+
+
 }
 
 OptionDescriptor *astDirectory = new PathOptionDescriptor("ast", "directory",

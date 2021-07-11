@@ -412,7 +412,7 @@ void JiksPgOption::process_option(LPGParser_top_level_ast::option_specList* opt_
                 else {
                   // ±¨´í
                   std::string info;
-                  info = "Missing option handler  for option '" + optName +  "\n";
+                  info = "\""+ opt_string + "\" is an invalid option";
                   EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
                 }
             }

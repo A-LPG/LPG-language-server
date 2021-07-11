@@ -1281,6 +1281,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
             // for this nonterminal. Here, we keep track of such instances.
             //
             VariableSymbol* array_element_type_symbol = lex_stream->GetVariableSymbol(array_element_type_index);
+            assert(array_element_type_symbol);
             int i;
             for (i = 0; i < special_nonterminal_array[array_element_type_symbol->Index()].Length(); i++)
             {

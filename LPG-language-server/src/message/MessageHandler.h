@@ -394,6 +394,18 @@ DEFINE_REQUEST_RESPONSE_TYPE(lpg_rrd_singleRule , MakeLeftRecursive::Params, Rai
 DEFINE_REQUEST_RESPONSE_TYPE(lpg_rrd_allRules,  lsTextDocumentIdentifier, RailRoadResult, "lpg/rrd.allRules");
 
 
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_firstSet_singleRule, MakeLeftRecursive::Params, RailRoadResult, "lpg/firset.singleRule");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_firstSet_allRules, lsTextDocumentIdentifier, RailRoadResult, "lpg/firset.allRules");
 
-void RailRoadForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& out, Monitor*);
-void RailRoadForSingleRule(std::shared_ptr<CompilationUnit>& unit,const  MakeLeftRecursive::Params& params, RailRoadResult& out, Monitor* monitor);
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_FollowSet_singleRule, MakeLeftRecursive::Params, RailRoadResult, "lpg/fowllow.singleRule");
+DEFINE_REQUEST_RESPONSE_TYPE(lpg_FollowSet_allRules, lsTextDocumentIdentifier, RailRoadResult, "lpg/fowllow.allRules");
+enum  class AnalysePurpose
+{
+	For_RRD,
+	For_FirstSet,
+	For_FollowSet
+};
+
+void AanlyseForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& out, Monitor*, AnalysePurpose purpose);
+void AanlyseSingleRule(std::shared_ptr<CompilationUnit>& unit, const  MakeLeftRecursive::Params& params,
+	RailRoadResult& out, Monitor* monitor, AnalysePurpose purpose);

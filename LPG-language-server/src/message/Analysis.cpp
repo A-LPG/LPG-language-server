@@ -107,7 +107,65 @@ struct RailRoadHandlerVisitor :public AbstractVisitor
         return true;
     }
 };
-void RailRoadForSingleRule(std::shared_ptr<CompilationUnit>& unit, const MakeLeftRecursive::Params& params,  RailRoadResult& out, Monitor* monitor)
+
+struct SetHandlerVisitor :public AbstractVisitor
+{
+    std::shared_ptr<JikesPG2>& binding;
+    std::vector<RailRoadScriptInfo>& out;
+    std::string lhsStr;
+    std::stringex  rightStr;
+    AnalysePurpose purpose;
+    SetHandlerVisitor(std::shared_ptr<JikesPG2>& b,std::vector<RailRoadScriptInfo>& o, AnalysePurpose _p) :binding(b),out(o),purpose(_p)
+    {
+
+    }
+    void unimplementedVisitor(const std::string& s) { }
+
+
+    bool visit(nonTerm* n)
+    {
+        lhsStr = n->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
+
+        rightStr = "ComplexDiagram(Choice(0,";
+        std::unordered_set<std::string> token_strings;
+    	if(AnalysePurpose::For_FirstSet == purpose)
+    	{
+            binding->collectFirstSet(n, token_strings);
+    	}
+        else
+        {
+            binding->collectFollowSet(n, token_strings);
+        }
+        std::stringex script;
+        for (auto& it : token_strings)
+        {
+            std::stringex rhsStr = it;
+            if (rhsStr.find("'") != std::string::npos)
+            {
+                rhsStr.trim('\'');
+                script += "Terminal('";
+                script += rhsStr;
+                script += "'),";
+            }
+            else
+            {
+                script += "Terminal('";
+                script += rhsStr;
+                script += "'),";
+            }
+        }
+        script.trim_right(',');
+        rightStr += "Sequence(" + script + "),";
+    	
+        rightStr.trim_right(',');
+        rightStr += ")).addTo()";
+        out.push_back({ lhsStr ,rightStr });
+    	return false;
+    }
+   
+};
+void AanlyseSingleRule(std::shared_ptr<CompilationUnit>& unit, const MakeLeftRecursive::Params& params, 
+    RailRoadResult& out, Monitor* monitor, AnalysePurpose purpose)
 {
     if (!unit || !unit->runtime_unit->root)
     {
@@ -148,11 +206,24 @@ void RailRoadForSingleRule(std::shared_ptr<CompilationUnit>& unit, const MakeLef
         out.errorMessage = "Show Railroad Diagram for Rule is only valid for non-terminals";
         return;
     }
-    RailRoadHandlerVisitor visitor(out.infos);
-    nt->accept(&visitor);
+    if (AnalysePurpose::For_RRD == purpose)
+    {
+        RailRoadHandlerVisitor visitor(out.infos);
+        nt->accept(&visitor);
+    }
+    else
+    {
+        auto binding = unit->GetBinding();
+        if (binding)
+        {
+            SetHandlerVisitor visitor(binding,out.infos, purpose);
+            nt->accept(&visitor);
+        }
+    }
 }
 
-void RailRoadForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& out, Monitor*)
+void AanlyseForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& out, Monitor*, 
+    AnalysePurpose purpose)
 {
     
     if (!unit || !unit->runtime_unit->root)
@@ -162,9 +233,21 @@ void RailRoadForAllRule(std::shared_ptr<CompilationUnit>& unit, RailRoadResult& 
 
     if (auto _input = unit->runtime_unit->root->getLPG_INPUT(); _input)
     {
+        if(AnalysePurpose::For_RRD ==purpose)
+        {
+            RailRoadHandlerVisitor visitor(out.infos);
+            _input->accept(&visitor);
+        }
+        else
+        {
+            auto binding = unit->GetBinding();
+            if (binding)
+            {
+                SetHandlerVisitor visitor(binding,out.infos, purpose);
+                _input->accept(&visitor);
+            }
 
-        RailRoadHandlerVisitor visitor(out.infos);
-        _input->accept(&visitor);
+        }
     }
 
 }

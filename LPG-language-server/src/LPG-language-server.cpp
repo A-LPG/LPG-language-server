@@ -512,7 +512,7 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params, &_requestMonitor);
 				if (unit) {
-					RailRoadForAllRule(unit, rsp.result, &_requestMonitor);
+					AanlyseForAllRule(unit, rsp.result, &_requestMonitor, AnalysePurpose::For_RRD);
 				}
 				return std::move(rsp);
 			});
@@ -527,7 +527,67 @@ public:
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
 				if (unit) {
-					RailRoadForSingleRule(unit, req.params, rsp.result, &_requestMonitor);
+					AanlyseSingleRule(unit, req.params, rsp.result, &_requestMonitor, AnalysePurpose::For_RRD);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_firstSet_allRules::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_firstSet_allRules::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_firstSet_allRules::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params, &_requestMonitor);
+				if (unit) {
+					AanlyseForAllRule(unit, rsp.result, &_requestMonitor, AnalysePurpose::For_FirstSet);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_firstSet_singleRule::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_firstSet_singleRule::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_firstSet_singleRule::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					AanlyseSingleRule(unit, req.params, rsp.result, &_requestMonitor, AnalysePurpose::For_FirstSet);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_FollowSet_allRules::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_FollowSet_allRules::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_FollowSet_allRules::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params, &_requestMonitor);
+				if (unit) {
+					AanlyseForAllRule(unit, rsp.result, &_requestMonitor, AnalysePurpose::For_FollowSet);
+				}
+				return std::move(rsp);
+			});
+		_sp.registerHandler([&](const lpg_FollowSet_singleRule::request& req,
+			const CancelMonitor& monitor)
+			->lsp::ResponseOrError< lpg_FollowSet_singleRule::response > {
+				if (need_initialize_error)
+				{
+					return need_initialize_error.value();
+				}
+				lpg_FollowSet_singleRule::response rsp;
+				RequestMonitor _requestMonitor(exit_monitor, monitor);
+				auto unit = GetUnit(req.params.textDocument, &_requestMonitor);
+				if (unit) {
+					AanlyseSingleRule(unit, req.params, rsp.result, &_requestMonitor, AnalysePurpose::For_FollowSet);
 				}
 				return std::move(rsp);
 			});
