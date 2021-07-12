@@ -368,63 +368,49 @@ void JiksPgOption::InvalidValueError(const std::string& value, const std::string
     EmitError(startToken,endToken, msg);
 }
 using namespace LPGParser_top_level_ast;
-void JiksPgOption::process_option(LPGParser_top_level_ast::option_specList* opt_list)
+void JiksPgOption::process_option(std::map<std::string, LPGParser_top_level_ast::option*>& lpg_optionList)
 {
-	if(!opt_list)return;
-	int size = opt_list->size();
-	for (int i = 0; i < size; ++i)
+	
+	for (auto& it : lpg_optionList)
 	{
-		auto _option_spec = opt_list->getoption_specAt(i);
-		if (!_option_spec)
+		option* _opt = it.second;
+		if (!_opt)
+			continue;
+	
+		auto sym = _opt->getSYMBOL();
+		std::stringex optName = sym->to_utf8_string();
+		optName.tolower();
+		if (optName == ("import_terminals")
+			|| optName == ("template")
+			|| optName == ("filter"))
 		{
 			continue;
 		}
-		optionList* lpg_optionList = _option_spec->getoption_list();
-		if (!lpg_optionList)
-		{
-			continue;
-		}
-		
-		for (size_t k = 0; k < lpg_optionList->list.size(); ++k)
-		{
-			option* _opt = lpg_optionList->getoptionAt(k);
-			if (!_opt)
-				continue;
-		
-			auto sym = _opt->getSYMBOL();
-			std::stringex optName = sym->to_utf8_string();
-			optName.tolower();
-			if (optName == ("import_terminals")
-				|| optName == ("template")
-				|| optName == ("filter"))
-			{
-				continue;
-			}
-            try {
-              
-                auto opt_string = _opt->to_utf8_string();
-                opt_string.push_back('\0');
-                const char* param = opt_string.c_str();
-                auto value = optionParser->parse(param);      
-                if (value) {
-                    value->processSetting(optionProcessor);
-                }
-                else {
-                  // ±¨´í
-                  std::string info;
-                  info = "\""+ opt_string + "\" is an invalid option";
-                  EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
-                }
+        try {
+          
+            auto opt_string = _opt->to_utf8_string();
+            opt_string.push_back('\0');
+            const char* param = opt_string.c_str();
+            auto value = optionParser->parse(param);      
+            if (value) {
+                value->processSetting(optionProcessor);
             }
-            catch (ValueFormatException& vfe) {
-                std::string info ;
-                info = "Improper value '" +  vfe.value() + "' for option '" + vfe.optionDescriptor()->getName() + "': " + vfe.message() + "\n";
-                std::cerr << info;
-                EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
+            else {
+              // ±¨´í
+              std::string info;
+              info = "\""+ opt_string + "\" is an invalid option";
+              EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
             }
-			
-		}
+        }
+        catch (ValueFormatException& vfe) {
+            std::string info ;
+            info = "Improper value '" +  vfe.value() + "' for option '" + vfe.optionDescriptor()->getName() + "': " + vfe.message() + "\n";
+            std::cerr << info;
+            EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
+        }
+		
 	}
+	
 }
 
 void JiksPgOption::CompleteOptionProcessing()

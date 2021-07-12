@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -7,6 +8,7 @@
 #include <vector>
 
 
+struct ProblemHandler;
 struct JikesPG2;
 struct SearchPolicy;
 struct ILexStream;
@@ -15,6 +17,7 @@ class RemoteEndPoint;
 struct Directory;
 
 namespace LPGParser_top_level_ast {
+	struct option;
 	struct ASTNodeToken;
 }
 
@@ -65,7 +68,11 @@ struct WorkSpaceManager {
 
 	std::vector<AbsolutePath> GetReference(const AbsolutePath& from);
 	std::vector<AbsolutePath> GetAffectedReferences(const AbsolutePath& from);
-	
+
+	void collect_options(std::map<std::string, LPGParser_top_level_ast::option*>&,
+		const std::shared_ptr<CompilationUnit>& refUnit,
+		Monitor* monitor, ProblemHandler*);
+
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;
     std::vector< Object*>	 findDefOf_internal(const SearchPolicy&, std::wstring _word, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
@@ -75,6 +82,9 @@ private:
 	bool IsFileRecursiveInclude(const std::shared_ptr<CompilationUnit>& , std::vector<AbsolutePath>& footprint, Monitor* );
 	void ProcessCheckFileRecursiveInclude(std::set<AbsolutePath>& includedFiles, std::vector<AbsolutePath>& footprint,
 	                                      const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor);
+
+
+	
 
 };
 

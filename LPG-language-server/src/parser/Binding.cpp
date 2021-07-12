@@ -1002,9 +1002,10 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      data->unit_table.insert(unit->runtime_unit);
      JiksPgOption pg_option(&data->lex_stream, unit->working_file->filename.path);
      pg_option.SetMessageHandler(handler);
-	
-     pg_option.process_option(unit->runtime_unit->root->getoptions_segment());
-	
+     std::map<std::string, option*> option_set;
+     unit->parent.collect_options(option_set, unit, nullptr,handler);
+     pg_option.process_option(option_set);
+
      pg_option.CompleteOptionProcessing();
      data->lpg_data = std::make_shared<ParseData>(&pg_option);
 

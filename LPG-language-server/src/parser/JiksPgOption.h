@@ -213,7 +213,7 @@ public:
             IToken* startToken, IToken* endToken);
         void InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken);
         void CheckGlobalOptionsConsistency();
-        void process_option(LPGParser_top_level_ast::option_specList*);
+        void process_option(std::map<std::string, LPGParser_top_level_ast::option*>&);
        
         void EmitHeader(IToken*, const char*);
 	    void CompleteOptionProcessing();

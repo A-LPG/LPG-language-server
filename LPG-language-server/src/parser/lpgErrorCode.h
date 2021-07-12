@@ -31,8 +31,8 @@ struct ProblemHandler : public IMessageHandler
         for (auto i = 0; i < msg.size(); ++i)
         {
             info += msg[i];
-
         }
+        handleMessage(severity, left, right, info);
 	}
     void handleMessage(const lsDiagnosticSeverity severity, IToken* left, IToken* right, const std::string& info);
     void handleMessage(lsDiagnostic&& diagnostic);

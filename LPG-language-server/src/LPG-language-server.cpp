@@ -47,6 +47,10 @@ using namespace std;
 using namespace lsp;
 
 
+#include <thread>
+#include <atomic>
+#include <functional>
+#include <boost/asio.hpp>
 
 class DummyLog :public lsp::Log
 {
@@ -619,30 +623,30 @@ public:
 				return;
 			if(auto work_file= working_files.OnChange(params))
 			{
-				//{
-				//	std::lock_guard lock(mutex_);
-				//	toReconcile.insert(path);
-				//}
-				//timer = std::make_unique<SimpleTimer<>>(500,[&](){
-				//	std::set<AbsolutePath> cusToReconcile;
-				//		{
-				//			std::lock_guard lock2(mutex_);
-				//			cusToReconcile.swap(toReconcile);
-				//		}
-				//		for(auto& file_info : cusToReconcile)
-				//		{
-				//			std::wstring context;
-				//			if(auto file = working_files.GetFileByFilename(file_info); file)
-				//			{
-				//				if(exit_monitor.isCancelled())
-				//				{
-				//					return;
-				//				}
-				//				work_space_mgr.OnChange(file);
-				//				
-				//			}
-				//		}
-				//});	
+				{
+					std::lock_guard lock(mutex_);
+					toReconcile.insert(path);
+				}
+				timer = std::make_unique<SimpleTimer<>>(1000,[&](){
+					std::set<AbsolutePath> cusToReconcile;
+						{
+							std::lock_guard lock2(mutex_);
+							cusToReconcile.swap(toReconcile);
+						}
+						for(auto& file_info : cusToReconcile)
+						{
+							std::wstring context;
+							if(auto file = working_files.GetFileByFilename(file_info); file)
+							{
+								if(exit_monitor.isCancelled())
+								{
+									return;
+								}
+								GetUnit(file_info,&exit_monitor);
+								
+							}
+						}
+				});	
 			}
 			
 		});

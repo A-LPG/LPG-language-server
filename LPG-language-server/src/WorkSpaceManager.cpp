@@ -645,6 +645,82 @@ void WorkSpaceManager::ProcessCheckFileRecursiveInclude(
 	}
 }
 
+void WorkSpaceManager::collect_options(std::map<std::string, LPGParser_top_level_ast::option*>& result,
+	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor, ProblemHandler* handler)
+{
+	auto processor = [&](const std::shared_ptr<CompilationUnit>& unit) {
+		auto opt_list = unit->runtime_unit->root->getoptions_segment();
+		if (!opt_list)return;
+		int size = opt_list->size();
+		for (int i = 0; i < size; ++i)
+		{
+			auto _option_spec = opt_list->getoption_specAt(i);
+			if (!_option_spec)
+			{
+				continue;
+			}
+			optionList* lpg_optionList = _option_spec->getoption_list();
+			if (!lpg_optionList)
+			{
+				continue;
+			}
+
+			for (size_t k = 0; k < lpg_optionList->list.size(); ++k)
+			{
+				option* _opt = lpg_optionList->getoptionAt(k);
+				if (!_opt)
+					continue;
+
+				auto sym = _opt->getSYMBOL();
+				std::stringex optName = sym->to_utf8_string();
+				auto findIt = result.find(optName);
+				if(result.end() == findIt)
+					result.insert({ optName,_opt });
+				else
+				{
+				    if(!handler)continue;
+					
+					std::string info = "option: " + optName + " in " + unit->working_file->filename.path + " will shadowed";
+					lsDiagnostic diagnostic;
+					diagnostic.severity = lsDiagnosticSeverity::Warning;
+					diagnostic.message.swap(info);
+					lsRange range;
+					range.start.line = 1;
+					range.start.character = 0;
+					range.end.character = 0;
+					range.end.line = 0;
+					diagnostic.range = range;
+					handler->handleMessage(std::move(diagnostic));
+				}
+			}
+		}
+	};
+	processor(refUnit);
+	
+	auto seconde_processor = [&](const std::string& fileName)
+	{
+
+		auto include_unit = lookupImportedFile(refUnit->working_file->directory, fileName, monitor);
+
+		if (!include_unit)return;
+
+		if (monitor && monitor->isCancelled())
+			return;
+		collect_options(result, include_unit, monitor, handler);
+	};
+	for (auto& fileName : refUnit->dependence_info.include_files)
+	{
+		seconde_processor(fileName.first);
+	}
+
+	for (auto& fileName : refUnit->dependence_info.template_files)
+	{
+		seconde_processor(fileName.first);
+	}
+
+	
+}
+
 
 void WorkSpaceManager::OnClose(const lsDocumentUri& close)
 {
