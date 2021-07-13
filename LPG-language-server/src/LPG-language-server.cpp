@@ -52,6 +52,9 @@ using namespace lsp;
 #include <functional>
 #include <boost/asio.hpp>
 
+MAKE_REFLECT_STRUCT(GenerationOptions, baseDir, template_search_directory,
+	include_search_directory, outputDir, package, language, visitor, alternativeExe, additionalParameters);
+
 class DummyLog :public lsp::Log
 {
 public:
@@ -165,6 +168,48 @@ public:
 				need_initialize_error.reset();
 				td_initialize::response rsp;
 				lsServerCapabilities capabilities;
+				auto SETTINGS_KEY = "settings";
+				if(req.params.initializationOptions)
+				{
+					
+				
+					do
+					{
+						map<std::string, lsp::Any> initializationOptions;
+						try
+						{
+							lsp::Any init_object = req.params.initializationOptions.value();
+							init_object.Get(initializationOptions);
+						}
+						catch (...)
+						{
+							break;
+						}
+						map<std::string, lsp::Any> settings;
+						try
+						{
+							initializationOptions[SETTINGS_KEY].Get(settings);
+						}
+						catch (...)
+						{
+							break;
+						}
+						GenerationOptions generation_options;
+						try
+						{
+							settings["options"].Get(generation_options);
+						}
+						catch (...)
+						{
+							break;
+						}
+						work_space_mgr.UpdateSetting(generation_options);
+					}
+					while (false);
+
+					
+				}
+		
 			
 		/*		CodeLensOptions code_lens_options;
 				code_lens_options.resolveProvider = false;

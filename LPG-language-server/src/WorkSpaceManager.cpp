@@ -38,7 +38,7 @@ struct WorkSpaceManagerData
 	WorkingFiles& working_files;
 	RemoteEndPoint& end_point;
 	lsp::Log& logger;
-
+	GenerationOptions generation_options;
 	typedef boost::shared_lock<boost::shared_mutex> readLock;
 	typedef boost::unique_lock<boost::shared_mutex> writeLock;
 	boost::shared_mutex _rw_mutex;
@@ -740,6 +740,10 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::FindFile(ILexStream* lex)
 	return  d_ptr->FindFile(lex);
 }
 
+void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
+{
+	d_ptr->generation_options = setting;
+}
 
 
 void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references)
