@@ -1,5 +1,6 @@
 #pragma once
 #include <IToken.h>
+#include <stack>
 #include <stringex.h>
 #include <tuple.h>
 #include <LibLsp/lsp/lsp_diagnostic.h>
@@ -213,7 +214,7 @@ public:
             IToken* startToken, IToken* endToken);
         void InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken);
         void CheckGlobalOptionsConsistency();
-        void process_option(std::map<std::string, LPGParser_top_level_ast::option*>&);
+        void process_option(std::stack<LPGParser_top_level_ast::option*>&);
        
         void EmitHeader(IToken*, const char*);
 	    void CompleteOptionProcessing();

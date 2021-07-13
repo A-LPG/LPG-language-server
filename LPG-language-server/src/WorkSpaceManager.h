@@ -2,6 +2,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -69,9 +70,9 @@ struct WorkSpaceManager {
 	std::vector<AbsolutePath> GetReference(const AbsolutePath& from);
 	std::vector<AbsolutePath> GetAffectedReferences(const AbsolutePath& from);
 
-	void collect_options(std::map<std::string, LPGParser_top_level_ast::option*>&,
+	void collect_options(std::stack<LPGParser_top_level_ast::option*>&,
 		const std::shared_ptr<CompilationUnit>& refUnit,
-		Monitor* monitor, ProblemHandler*);
+		Monitor* monitor);
 
 private:
 	WorkSpaceManagerData* d_ptr = nullptr;

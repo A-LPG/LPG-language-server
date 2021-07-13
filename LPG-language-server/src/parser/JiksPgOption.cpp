@@ -368,12 +368,13 @@ void JiksPgOption::InvalidValueError(const std::string& value, const std::string
     EmitError(startToken,endToken, msg);
 }
 using namespace LPGParser_top_level_ast;
-void JiksPgOption::process_option(std::map<std::string, LPGParser_top_level_ast::option*>& lpg_optionList)
+void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& lpg_optionList)
 {
 	
-	for (auto& it : lpg_optionList)
+	while (!lpg_optionList.empty())
 	{
-		option* _opt = it.second;
+		option* _opt = lpg_optionList.top();
+        lpg_optionList.pop();
 		if (!_opt)
 			continue;
 	

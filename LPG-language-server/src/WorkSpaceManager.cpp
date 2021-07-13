@@ -645,8 +645,8 @@ void WorkSpaceManager::ProcessCheckFileRecursiveInclude(
 	}
 }
 
-void WorkSpaceManager::collect_options(std::map<std::string, LPGParser_top_level_ast::option*>& result,
-	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor, ProblemHandler* handler)
+void WorkSpaceManager::collect_options(std::stack<LPGParser_top_level_ast::option*>& result,
+	const std::shared_ptr<CompilationUnit>& refUnit, Monitor* monitor)
 {
 	auto processor = [&](const std::shared_ptr<CompilationUnit>& unit) {
 		auto opt_list = unit->runtime_unit->root->getoptions_segment();
@@ -671,27 +671,9 @@ void WorkSpaceManager::collect_options(std::map<std::string, LPGParser_top_level
 				if (!_opt)
 					continue;
 
-				auto sym = _opt->getSYMBOL();
-				std::stringex optName = sym->to_utf8_string();
-				auto findIt = result.find(optName);
-				if(result.end() == findIt)
-					result.insert({ optName,_opt });
-				else
-				{
-				    if(!handler)continue;
-					
-					std::string info = "option: " + optName + " in " + unit->working_file->filename.path + " will shadowed";
-					lsDiagnostic diagnostic;
-					diagnostic.severity = lsDiagnosticSeverity::Warning;
-					diagnostic.message.swap(info);
-					lsRange range;
-					range.start.line = 1;
-					range.start.character = 0;
-					range.end.character = 0;
-					range.end.line = 0;
-					diagnostic.range = range;
-					handler->handleMessage(std::move(diagnostic));
-				}
+				
+				result.push(_opt );
+				
 			}
 		}
 	};
@@ -706,7 +688,7 @@ void WorkSpaceManager::collect_options(std::map<std::string, LPGParser_top_level
 
 		if (monitor && monitor->isCancelled())
 			return;
-		collect_options(result, include_unit, monitor, handler);
+		collect_options(result, include_unit, monitor);
 	};
 	for (auto& fileName : refUnit->dependence_info.include_files)
 	{
