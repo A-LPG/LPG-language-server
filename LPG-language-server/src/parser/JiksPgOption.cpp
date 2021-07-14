@@ -5,6 +5,7 @@
 #include "JikesPGOptions.h"
 #include "JiksPGControl.h"
 #include "LPGParser_top_level_ast.h"
+#include "../WorkSpaceManager.h"
 
 //
 // Change the following static to "true" to enable the new options-processing code
@@ -368,6 +369,61 @@ void JiksPgOption::InvalidValueError(const std::string& value, const std::string
     EmitError(startToken,endToken, msg);
 }
 using namespace LPGParser_top_level_ast;
+
+void JiksPgOption::process_workspace_option( const GenerationOptions& options)
+{
+    std::vector<std::string> parameters;
+    if (options.language) {
+        parameters.push_back("programming_language=" + options.language.value());
+    }
+    if (options.quiet) {
+        if (options.quiet.value())
+			parameters.push_back("quiet");
+    }
+    if (options.package) {
+        parameters.push_back("package=" + options.package.value());
+    }
+    if (options.verbose) {
+       
+        if(options.verbose.value())
+			parameters.push_back("verbose");
+    }if (options.visitor) {
+        parameters.push_back("visitor=" + options.visitor.value());
+    }
+
+    if (options.trace) {
+        parameters.push_back("-trace=" + options.trace.value());
+    }
+
+    if (options.include_search_directory) {
+        parameters.push_back("include-directory=" + options.include_search_directory.value());
+    }
+
+    if (options.outputDir) {
+        parameters.push_back("out_directory=" + options.outputDir.value());
+
+    }
+
+    if (options.additionalParameters) {
+        parameters.push_back(options.additionalParameters.value());
+    }
+  
+	 for(auto& it : parameters)
+    {
+        try {
+            it.push_back('\0');
+            auto param = it.c_str();
+            auto value = optionParser->parse(param);
+            if (value) {
+                value->processSetting(optionProcessor);
+            }
+        }
+        catch (ValueFormatException&) {
+        }
+    }
+  
+}
+
 void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& lpg_optionList)
 {
 	

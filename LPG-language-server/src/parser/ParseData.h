@@ -52,8 +52,8 @@ public:
     LookupTable(int estimate = 16384);
     ~LookupTable();
 
-    SubSymbol* FindOrInsertName(const char*, size_t);
-    SubSymbol* InsertName(const char*, size_t);
+    SubSymbol* FindOrInsertName(IToken* loc, const char*, size_t);
+    SubSymbol* InsertName(IToken* loc, const char*, size_t);
     SubSymbol* FindName(const char*, size_t);
 
     int Size() { return symbol_pool.Length(); }
@@ -142,7 +142,7 @@ void LookupTable<SubSymbol>::Rehash()
 
 
 template <class SubSymbol>
-SubSymbol* LookupTable<SubSymbol>::FindOrInsertName(const char* str, size_t len)
+SubSymbol* LookupTable<SubSymbol>::FindOrInsertName(IToken* loc, const char* str, size_t len)
 {
     unsigned hash_address = Hash(str, len);
     int k = hash_address % hash_size;
@@ -152,8 +152,9 @@ SubSymbol* LookupTable<SubSymbol>::FindOrInsertName(const char* str, size_t len)
         if (len == symbol->NameLength() && memcmp(symbol->Name(), str, len * sizeof(char)) == 0)
             return symbol;
     }
-
+   
     symbol = new SubSymbol(str, len, symbol_pool.Length(), hash_address);
+    symbol->SetLocation(loc);
     symbol_pool.Next() = symbol;
 
     symbol->next = base[k];
@@ -187,13 +188,13 @@ SubSymbol* LookupTable<SubSymbol>::FindName(const char* str, size_t len)
 }
 
 template <class SubSymbol>
-SubSymbol* LookupTable<SubSymbol>::InsertName(const char* str, size_t len)
+SubSymbol* LookupTable<SubSymbol>::InsertName(IToken* loc, const char* str, size_t len)
 {
     unsigned hash_address = Hash(str, len);
     int k = hash_address % hash_size;
     SubSymbol* symbol = new SubSymbol(str, len, symbol_pool.Length(), hash_address);
     symbol_pool.Next() = symbol;
-
+    symbol->SetLocation(loc);
     symbol->next = base[k];
     base[k] = symbol;
 

@@ -291,12 +291,15 @@ struct LPGBindingVisitor :public AbstractVisitor {
             else if (LPGParsersym::TK_SYMBOL == kind)
             {
                 auto name = token->to_utf8_string();
-                variable_index[offset + i]=(variable_table.FindOrInsertName(name.c_str(), name.size()));
+                auto  sym = variable_table.FindOrInsertName(token,name.c_str(), name.size());
+               
+                variable_index[offset + i]= sym;
             }
             else if (LPGParsersym::TK_MACRO_NAME == kind)
             {
                 auto name = token->to_utf8_string();
-                auto symbol = macro_table.FindOrInsertName(name.c_str(), name.size());
+                auto symbol = macro_table.FindOrInsertName(token, name.c_str(), name.size());
+                symbol->SetLocation(token);
                 lex_stream->macro_table.insert({ lex_stream->token_stream.size() - 1 ,symbol });
             }
         }
@@ -461,7 +464,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
             VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
             IToken* token = include_unit->data->lex_stream.token_stream[i];
             lex_stream->token_stream.Next() = token;
-            variable_index.push_back(variable_table.FindOrInsertName(symbol->Name(), symbol->NameLength()));
+            auto sym = variable_table.FindOrInsertName(token, symbol->Name(), symbol->NameLength());
+            variable_index.push_back(sym);
             this->lex_stream->AddImportedTerminal(offset + i);
         }
     	return true;
@@ -517,7 +521,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
             VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
             IToken* token = include_unit->data->lex_stream.token_stream[i];
             lex_stream->token_stream.Next() = token;
-            variable_index.push_back(variable_table.FindOrInsertName(symbol->Name(), symbol->NameLength()));
+            auto sym = variable_table.FindOrInsertName(token,symbol->Name(), symbol->NameLength());
+            variable_index.push_back(sym);
             this->lex_stream->AddImportedFilter(offset + i);
         }
         return true;
@@ -722,7 +727,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         MacroSymbol* macro_symbol = unit->data->macro_table.FindName(macro_name, length);
         if (macro_symbol == NULL)
         {
-            macro_symbol = unit->data->macro_table.InsertName(macro_name, length);
+            macro_symbol = unit->data->macro_table.InsertName(n->getSYMBOL(),macro_name, length);
            unit->data->lpg_data->ReportError(MACRO_EXPECTED_INSTEAD_OF_SYMBOL, index);
         }
 
@@ -1004,6 +1009,8 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      pg_option.SetMessageHandler(handler);
      std::stack<option*> option_set;
      unit->parent.collect_options(option_set, unit, nullptr);
+	
+     pg_option.process_workspace_option(unit->parent.GetSetting());
      pg_option.process_option(option_set);
 
      pg_option.CompleteOptionProcessing();
@@ -1029,12 +1036,12 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
          else if (LPGParsersym::TK_SYMBOL == kind)
          {
              auto name = token->to_utf8_string();
-             variable_index[i] = variable_table.FindOrInsertName(name.c_str(), name.size());
+             variable_index[i] = variable_table.FindOrInsertName(token,name.c_str(), name.size());
          }
          else if (LPGParsersym::TK_MACRO_NAME == kind)
          {
              auto name = token->to_utf8_string();
-             auto symbol = macro_table.FindOrInsertName(name.c_str(), name.size());
+             auto symbol = macro_table.FindOrInsertName(token, name.c_str(), name.size());
              lex_stream->macro_table.insert({ i ,symbol });
          }
          else if(i == 0)
@@ -1042,7 +1049,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
              //
 			// Assign the null string symbol to the 0th token.
 			//
-             variable_index[0] = variable_table.FindOrInsertName("", 0);
+             variable_index[0] = variable_table.FindOrInsertName(token, "", 0);
          }
      }
 
@@ -1052,13 +1059,14 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
     {
         auto ChangeMacroToVariable = [&](int index)
         {
+            
             const char* variable_name = data->lex_stream.NameString(index);
             int length = data->lex_stream.NameStringLength(index);
 
             VariableSymbol* variable_symbol = data->variable_table.FindName(variable_name, length);
             if (variable_symbol == NULL)
             {
-                variable_symbol = data->variable_table.InsertName(variable_name, length);
+                variable_symbol = data->variable_table.InsertName(data->lex_stream.GetTokenReference(index), variable_name, length);
                 data->lpg_data->ReportError(SYMBOL_EXPECTED_INSTEAD_OF_MACRO, index);
             }
             data->lex_stream.variable_index[index]=(variable_symbol);

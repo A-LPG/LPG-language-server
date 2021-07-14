@@ -10,6 +10,7 @@
 #include "lpgErrorCode.h"
 #include "../code.h"
 
+struct GenerationOptions;
 class OptionDescriptor;
 class OptionParser;
 class OptionProcessor;
@@ -214,6 +215,7 @@ public:
             IToken* startToken, IToken* endToken);
         void InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken);
         void CheckGlobalOptionsConsistency();
+        void process_workspace_option(const  GenerationOptions&);
         void process_option(std::stack<LPGParser_top_level_ast::option*>&);
        
         void EmitHeader(IToken*, const char*);

@@ -745,6 +745,11 @@ void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 	d_ptr->generation_options = setting;
 }
 
+GenerationOptions& WorkSpaceManager::GetSetting() const
+{
+	return  d_ptr->generation_options;
+}
+
 
 void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references)
 {

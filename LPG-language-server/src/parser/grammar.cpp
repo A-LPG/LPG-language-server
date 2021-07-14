@@ -253,7 +253,7 @@ void Grammar::ProcessTerminals(Tuple<int> &declared_terminals)
         }
 
         if (marker_symbol == NULL)
-             marker_symbol = variable_table -> InsertName(marker_name, strlen(marker_name));
+             marker_symbol = variable_table -> InsertName(lex_stream->GetTokenReference(i),marker_name, strlen(marker_name));
         else
         {
             Tuple<const char *> msg;
@@ -725,7 +725,7 @@ char *Grammar::InsertInterface(SymbolLookupTable &symbol_set, char *name)
     char *type_name = new char[length + 1];
     strcpy(type_name, "I");
     strcat(type_name, name);
-    Symbol *symbol = symbol_set.FindOrInsertName(type_name, length);
+    Symbol *symbol = symbol_set.FindOrInsertName(nullptr,type_name, length);
     delete [] type_name;
 
     return symbol -> Name();
@@ -917,7 +917,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
         char* name = new char[length + 1];
         strcpy(name, option->ast_type);
         strcat(name, "Token");
-        this->ast_token_classname = classname_set.FindOrInsertName(name, length)->Name();
+        this->ast_token_classname = classname_set.FindOrInsertName(nullptr,name, length)->Name();
         delete[] name;
 
         ClassnameElement& element = classname.Next();
@@ -1014,7 +1014,7 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
                             // TODO: GENERATE ERROR MESSAGE !!!
                             assert(0);
                         }
-                        else lhs_symbol = variable_table->InsertName(name, length);
+                        else lhs_symbol = variable_table->InsertName(lex_stream->GetTokenReference(i),name, length);
 
                         int index = attribute_actions.nextIndex();
                         attribute_actions[index].lhs_image = AssignSymbolIndex(lhs_symbol);
@@ -1246,10 +1246,10 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
                     list_name[1] = '\0';
                     strcat(list_name, array_element_name);
                     strcat(list_name, "List");
-                    symbol = classname_set.FindOrInsertName(list_name, length);
+                    symbol = classname_set.FindOrInsertName(nullptr,list_name, length);
                     delete[] list_name;
                 }
-                else symbol = classname_set.FindOrInsertName(name, strlen(name));
+                else symbol = classname_set.FindOrInsertName(nullptr, name, strlen(name));
             }
 
             int index = symbol->Index();

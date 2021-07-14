@@ -42,6 +42,7 @@
 #include "LibLsp/JsonRpc/cancellation.h"
 #include "LibLsp/lsp/textDocument/SemanticTokens.h"
 #include "LibLsp/lsp/textDocument/rename.h"
+#include "LibLsp/lsp/lsAny.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -53,7 +54,10 @@ using namespace lsp;
 #include <boost/asio.hpp>
 
 MAKE_REFLECT_STRUCT(GenerationOptions, baseDir, template_search_directory,
-	include_search_directory, outputDir, package, language, visitor, alternativeExe, additionalParameters);
+	include_search_directory, outputDir, package, language, visitor, trace, quiet, verbose, alternativeExe, additionalParameters);
+
+REFLECT_MAP_TO_STRUCT(GenerationOptions, baseDir, template_search_directory,
+	include_search_directory, outputDir, package, language, visitor, trace, quiet, verbose, alternativeExe, additionalParameters);
 
 class DummyLog :public lsp::Log
 {
@@ -195,14 +199,16 @@ public:
 							break;
 						}
 						GenerationOptions generation_options;
+					
 						try
 						{
-							settings["options"].Get(generation_options);
+ 							settings["options"].GetFromMap(generation_options);
 						}
 						catch (...)
 						{
 							break;
 						}
+						
 						work_space_mgr.UpdateSetting(generation_options);
 					}
 					while (false);
@@ -774,7 +780,7 @@ public:
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])
 {
-
+	
 	using namespace  boost::program_options;
 	options_description desc("Allowed options");
 	desc.add_options()
