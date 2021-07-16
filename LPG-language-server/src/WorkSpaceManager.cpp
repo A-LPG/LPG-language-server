@@ -439,6 +439,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 
 {
 	auto unit =  ProcessFileContent(_change,{}, monitor);
+	if (!unit)return unit;
 	
 	auto affected_unit = GetAffectedReferences(_change->filename);
 	for (const auto& it : affected_unit)
