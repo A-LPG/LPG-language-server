@@ -58,6 +58,7 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 	{
 		return  toOffset(lex, pos.line+1, pos.character);
 	}
+	static std::string getWord(LexStream* lex, int offset);
 	static int toOffset(ILexStream* lex, int line, int column);
 	static boost::optional<lsPosition> toPosition(ILexStream* lex, int offset);
 

@@ -68,16 +68,48 @@ struct LPGBindingVisitor :public AbstractVisitor {
     std::shared_ptr<CompilationUnit>& unit;
     std::vector<std::wstring> template_files;
     JikesPGLexStream* lex_stream = nullptr;
+    std::shared_ptr<JikesPG2> unit_binding;
     void unimplementedVisitor(const std::string& s) { }
 
     void ChangeMacroToVariable(int index)
     {
-        macroToVariableIndex.insert(index);
+       if(!unit_binding)return;
+       auto  token = unit_binding->lex_stream.GetTokenReference(index);
+        const char* variable_name = unit_binding->lex_stream.NameString(index);
+        int length = unit_binding->lex_stream.NameStringLength(index);
+
+        VariableSymbol* variable_symbol = unit_binding->variable_table.FindName(variable_name, length);
+        if (variable_symbol == NULL)
+        {
+            variable_symbol = unit_binding->variable_table.InsertName(token, variable_name, length);
+            unit_binding->lpg_data->ReportError(SYMBOL_EXPECTED_INSTEAD_OF_MACRO, index);
+        }
+        token->setKind(LPGParsersym::TK_SYMBOL);
+        unit_binding->lex_stream.variable_index[index] = (variable_symbol);
     }
-    LPGBindingVisitor(std::shared_ptr<CompilationUnit>& u) :jikspg_data(*u->data->lpg_data.get()), unit(u)
+    void AddVariableName(int index)
+    {
+        if (!unit_binding)return;
+    	
+        const char* variable_name = lex_stream->NameString(index) + 1; // +1 to skip the Escape symbol
+        int length = lex_stream->NameStringLength(index) - 1;
+        auto  token = unit_binding->lex_stream.GetTokenReference(index);
+        VariableSymbol* variable_symbol = unit_binding->variable_table.FindName(variable_name, length);
+        if (variable_symbol == NULL)
+        {
+	        variable_symbol = unit_binding->variable_table.InsertName(token,
+			variable_name, length);
+        }
+    	
+        token->setKind(LPGParsersym::TK_SYMBOL);
+        unit_binding->lex_stream.variable_index[index] = (variable_symbol);
+    	
+    }
+    LPGBindingVisitor(std::shared_ptr<CompilationUnit>& u, std::shared_ptr<JikesPG2> binding)
+	:jikspg_data(*binding->lpg_data.get()), unit(u),unit_binding(binding)
     {
      
-        lex_stream = &u->data->lex_stream;
+        lex_stream = &binding->lex_stream;
         
     }
    
@@ -266,22 +298,25 @@ struct LPGBindingVisitor :public AbstractVisitor {
         }
       
         auto include_binding =  include_unit->GetBinding();
+    	if(!include_binding)
+            return false;
+    	
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
     	if(!include_binding)return false;
     	for(auto& it : include_binding->unit_table)
     	{
-            unit->data->unit_table.insert(it);
+            unit_binding->unit_table.insert(it);
     	}
        
         Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
-        VariableLookupTable& variable_table = unit->data->variable_table;
-        MacroLookupTable& macro_table = unit->data->macro_table;
+        VariableLookupTable& variable_table = unit_binding->variable_table;
+        MacroLookupTable& macro_table = unit_binding->macro_table;
         auto& variable_index = lex_stream->variable_index;
-        variable_index.resize(lex_stream->token_stream.size() + include_unit->data->lex_stream.token_stream.size());
+        variable_index.resize(lex_stream->token_stream.size() + include_binding->lex_stream.token_stream.size());
         int offset = lex_stream->token_stream.size();
-        for(int i = 0  ; i <  include_unit->data->lex_stream.token_stream.size(); ++i)
+        for(int i = 0  ; i < include_binding->lex_stream.token_stream.size(); ++i)
         {
-            IToken* token = include_unit->data->lex_stream.token_stream[i];
+            IToken* token = include_binding->lex_stream.token_stream[i];
             lex_stream->token_stream.Next() = token;
             auto kind = token->getKind();
             if (LPGParsersym::TK_BLOCK == kind)
@@ -381,7 +416,12 @@ struct LPGBindingVisitor :public AbstractVisitor {
     {
         for (int i = 0; i < from.size(); ++i)
         {
-            to.Next() = from[i] + offset;
+            int index = 0;
+        	if(from[i])
+        	{
+                index = from[i] + offset;
+        	}
+            to.Next() = index;
         }
     }
     static  void Pending(Tuple<ParseData:: RuleDefinition>& from, Tuple<ParseData::RuleDefinition>& to, int offset)
@@ -389,14 +429,18 @@ struct LPGBindingVisitor :public AbstractVisitor {
         for (int i = 0; i < from.size(); ++i)
         {
             auto  item = from[i];
-            item.lhs_index += offset;
+        	
+        	if(item.lhs_index)
+        	{
+        		item.lhs_index += offset;
+        	}
             if (item.classname_index)
             {
                 item.classname_index += offset;
             }
             if (item.array_element_type_index)
             {
-                item.array_element_type_index += offset;
+                item.array_element_type_index += offset;    
             }
             if (item.separator_index)
             {
@@ -421,17 +465,18 @@ struct LPGBindingVisitor :public AbstractVisitor {
             // warning
             return false;
         }
-    
         auto include_binding = include_unit->GetBinding();
+        if (!include_binding)return true;
+    	
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
         if (!include_binding)return false;
 
-        if (include_unit->data->lex_stream.NumTokens() == 0)
+        if (include_binding->lex_stream.NumTokens() == 0)
             return false;
 
         for (auto& it : include_binding->unit_table)
         {
-            unit->data->unit_table.insert(it);
+            unit_binding->unit_table.insert(it);
         }
 
 
@@ -441,8 +486,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
 		//
         Tuple<int> imports;
         
-        for (int i = 0; i < include_unit->data->lex_stream.NumImportedFilters(); i++)
-                imports.Next() = include_unit->data->lex_stream.ImportedFilter(i);
+        for (int i = 0; i < include_binding->lex_stream.NumImportedFilters(); i++)
+                imports.Next() = include_binding->lex_stream.ImportedFilter(i);
         
         {
             for (int i = 0; i < include_binding->lpg_data->exports.Length(); i++)
@@ -451,8 +496,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
         }
 
         Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
-        VariableLookupTable& variable_table = unit->data->variable_table;
-        MacroLookupTable& macro_table = unit->data->macro_table;
+        VariableLookupTable& variable_table = unit_binding->variable_table;
+        MacroLookupTable& macro_table = unit_binding->macro_table;
         auto& variable_index = lex_stream->variable_index;
         int offset = lex_stream->token_stream.size();
         //
@@ -461,8 +506,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
         for (int i = 0; i < imports.Length(); i++)
         {
             int import = imports[i];
-            VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
-            IToken* token = include_unit->data->lex_stream.token_stream[i];
+            VariableSymbol* symbol = include_binding->lex_stream.GetVariableSymbol(import);
+            IToken* token = include_binding->lex_stream.token_stream[i];
             lex_stream->token_stream.Next() = token;
             auto sym = variable_table.FindOrInsertName(token, symbol->Name(), symbol->NameLength());
             variable_index.push_back(sym);
@@ -479,16 +524,19 @@ struct LPGBindingVisitor :public AbstractVisitor {
             return false;
         }
         auto include_binding = include_unit->GetBinding();
+    	if(!include_binding)
+            return true;
+    	
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
 
         if (!include_binding)return false;
 
-        if (include_unit->data->lex_stream.NumTokens() == 0)
+        if (include_binding->lex_stream.NumTokens() == 0)
             return false;
 
         for (auto& it : include_binding->unit_table)
         {
-            unit->data->unit_table.insert(it);
+            unit_binding->unit_table.insert(it);
         }
 
 
@@ -498,8 +546,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
         //
         Tuple<int> imports;
 
-        for (int i = 0; i < include_unit->data->lex_stream.NumImportedFilters(); i++)
-            imports.Next() = include_unit->data->lex_stream.ImportedFilter(i);
+        for (int i = 0; i < include_binding->lex_stream.NumImportedFilters(); i++)
+            imports.Next() = include_binding->lex_stream.ImportedFilter(i);
 
         {
             for (int i = 0; i < include_binding->lpg_data->exports.Length(); i++)
@@ -508,8 +556,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         }
 
         Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
-        VariableLookupTable& variable_table = unit->data->variable_table;
-        MacroLookupTable& macro_table = unit->data->macro_table;
+        VariableLookupTable& variable_table = unit_binding->variable_table;
         auto& variable_index = lex_stream->variable_index;
         int offset = lex_stream->token_stream.size();
         //
@@ -518,8 +565,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
         for (int i = 0; i < imports.Length(); i++)
         {
             int import = imports[i];
-            VariableSymbol* symbol = include_unit->data->lex_stream.GetVariableSymbol(import);
-            IToken* token = include_unit->data->lex_stream.token_stream[i];
+            VariableSymbol* symbol = include_binding->lex_stream.GetVariableSymbol(import);
+            IToken* token = include_binding->lex_stream.token_stream[i];
             lex_stream->token_stream.Next() = token;
             auto sym = variable_table.FindOrInsertName(token,symbol->Name(), symbol->NameLength());
             variable_index.push_back(sym);
@@ -724,11 +771,11 @@ struct LPGBindingVisitor :public AbstractVisitor {
         macro_name[0] = static_cast<char>(unit->runtime_unit->_lexer.escape_token);
         strcpy(macro_name + 1, lex_stream->NameString(index));
 
-        MacroSymbol* macro_symbol = unit->data->macro_table.FindName(macro_name, length);
+        MacroSymbol* macro_symbol = unit_binding->macro_table.FindName(macro_name, length);
         if (macro_symbol == NULL)
         {
-            macro_symbol = unit->data->macro_table.InsertName(n->getSYMBOL(),macro_name, length);
-           unit->data->lpg_data->ReportError(MACRO_EXPECTED_INSTEAD_OF_SYMBOL, index);
+            macro_symbol = unit_binding->macro_table.InsertName(n->getSYMBOL(),macro_name, length);
+           unit_binding->lpg_data->ReportError(MACRO_EXPECTED_INSTEAD_OF_SYMBOL, index);
         }
 
         lex_stream->SetSymbol(index,macro_symbol);
@@ -849,7 +896,13 @@ struct LPGBindingVisitor :public AbstractVisitor {
             }
             if (lpg_ruleNameWithAttributes->lpg_arrayElement)
             {
-                rule_definition.array_element_type_index = lpg_ruleNameWithAttributes->lpg_arrayElement->getLeftIToken()->getTokenIndex();
+               auto token =  lpg_ruleNameWithAttributes->lpg_arrayElement->getLeftIToken();
+                rule_definition.array_element_type_index = token->getTokenIndex();
+                AddVariableName(rule_definition.array_element_type_index);
+            	if(rule_definition.array_element_type_index ==0x56)
+            	{
+                    rule_definition.array_element_type_index = 0x56;
+            	}
             }
             else
             {
@@ -1001,11 +1054,11 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 	 {
 		 return;
 	 }	
-     auto data = unit->GetBinding();
-     if(!data)
+     auto unit_binding = unit->GetBinding();
+     if(!unit_binding)
          return;
-     data->unit_table.insert(unit->runtime_unit);
-     JiksPgOption pg_option(&data->lex_stream, unit->working_file->filename.path);
+     unit_binding->unit_table.insert(unit->runtime_unit);
+     JiksPgOption pg_option(&unit_binding->lex_stream, unit->working_file->filename.path);
      pg_option.SetMessageHandler(handler);
      std::stack<option*> option_set;
      unit->parent.collect_options(option_set, unit, nullptr);
@@ -1014,16 +1067,15 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      pg_option.process_option(option_set);
 
      pg_option.CompleteOptionProcessing();
-     data->lpg_data = std::make_shared<ParseData>(&pg_option);
+     unit_binding->lpg_data = std::make_shared<ParseData>(&pg_option);
 
      unit->removeDependency();
 
-     auto lex_stream = &data->lex_stream;
+     auto lex_stream = &unit_binding->lex_stream;
      Tuple<IToken*>& tokens = unit->runtime_unit->_parser.prsStream->tokens;
-     VariableLookupTable& variable_table = data->variable_table;
-     MacroLookupTable& macro_table = data->macro_table;
+     VariableLookupTable& variable_table = unit_binding->variable_table;
+     MacroLookupTable& macro_table = unit_binding->macro_table;
      auto& variable_index = lex_stream->variable_index;
-
      variable_index.resize(tokens.size());
      for (int i = 0; i < tokens.size(); ++i)
      {
@@ -1031,7 +1083,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
          auto kind = token->getKind();
          if (LPGParsersym::TK_BLOCK == kind)
          {
-            data->lpg_data->initial_blocks.Next() = token->getTokenIndex();
+            unit_binding->lpg_data->initial_blocks.Next() = token->getTokenIndex();
          }
          else if (LPGParsersym::TK_SYMBOL == kind)
          {
@@ -1050,33 +1102,13 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 			// Assign the null string symbol to the 0th token.
 			//
              variable_index[0] = variable_table.FindOrInsertName(token, "", 0);
+             token->setKind(LPGParsersym::TK_SYMBOL);
          }
      }
 
-    LPGBindingVisitor visitor(unit);
+    LPGBindingVisitor visitor(unit, unit_binding);
     unit->runtime_unit->root->accept(&visitor);
-    if (!visitor.macroToVariableIndex.empty())
-    {
-        auto ChangeMacroToVariable = [&](int index)
-        {
-            
-            const char* variable_name = data->lex_stream.NameString(index);
-            int length = data->lex_stream.NameStringLength(index);
 
-            VariableSymbol* variable_symbol = data->variable_table.FindName(variable_name, length);
-            if (variable_symbol == NULL)
-            {
-                variable_symbol = data->variable_table.InsertName(data->lex_stream.GetTokenReference(index), variable_name, length);
-                data->lpg_data->ReportError(SYMBOL_EXPECTED_INSTEAD_OF_MACRO, index);
-            }
-            data->lex_stream.variable_index[index]=(variable_symbol);
-        };
-        
-        for(auto i : visitor.macroToVariableIndex)
-        {
-            ChangeMacroToVariable(i);
-        }
-    }
 	if(!unit->dependence_info.template_files.empty())
 	{
         visitor.process_include(unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1].first);
@@ -1092,9 +1124,9 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
     
 	 try
 	 {
-         data-> control = std::make_shared<Control>(&pg_option,&data->lex_stream,data->lpg_data.get(), &data->variable_table);     
-         data->control->ProcessGrammar();
-         data->control->ConstructParser();
+         unit_binding-> control = std::make_shared<Control>(&pg_option,&unit_binding->lex_stream,unit_binding->lpg_data.get(), &unit_binding->variable_table);     
+         unit_binding->control->ProcessGrammar();
+         unit_binding->control->ConstructParser();
 	 }
 	 catch (...)
 	 {

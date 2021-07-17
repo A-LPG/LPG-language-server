@@ -1,7 +1,10 @@
 #include "ASTUtils.h"
 
+#include <LexStream.h>
+#include <stdio.h>
+#include <ctype.h>
 #include "code.h"
-
+#include <LibLsp/lsp/utils.h>
 namespace 
 {
 	struct findRefsOf_AbstractVisitor :public AbstractVisitor
@@ -82,6 +85,24 @@ std::wstring ASTUtils::getLine(ILexStream* lex, int line)
         end_offset = lex->getLineOffsetOfLine(line+1);
     }
    return  lex->toString(start_offset, end_offset);
+}
+
+std::string ASTUtils::getWord(LexStream* lex,  int offset)
+{
+	
+    auto buffer = lex->getInputChars();
+    std::wstring word;
+    if (buffer.size() <= offset) return "";
+    while (offset)
+    {
+        auto c = buffer[offset];
+    	if(isspace(c))
+            break;
+        word.push_back(c);
+        offset -= 1;
+    }
+    std::reverse(word.begin(), word.end());
+    return lsp::ws2s(word);
 }
 
 int ASTUtils::toOffset(ILexStream* lex, int line, int column)

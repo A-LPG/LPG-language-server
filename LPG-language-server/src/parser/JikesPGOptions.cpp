@@ -284,6 +284,8 @@ OptionDescriptor *programmingLang = new EnumOptionDescriptor("programming", "lan
 															 new EnumValue("rt_cpp", JiksPgOption::CPP2),
                                                              new EnumValue("cpp", JiksPgOption::CPP),
                                                              new EnumValue("c++", JiksPgOption::CPP),
+															    new EnumValue("csharp", JiksPgOption::CSHARP),
+															    new EnumValue("c#", JiksPgOption::CSHARP),
                                                              new EnumValue("java", JiksPgOption::JAVA),
                                                              new EnumValue("ml", JiksPgOption::ML),
                                                              new EnumValue("plx", JiksPgOption::PLX),
@@ -356,6 +358,8 @@ OptionDescriptor *table = new EnumOptionDescriptor("table", "???",
 												   new EnumValue("rt_cpp", JiksPgOption::CPP2),
                                                    new EnumValue("cpp", JiksPgOption::CPP),
                                                    new EnumValue("c++", JiksPgOption::CPP),
+												   new EnumValue("csharp", JiksPgOption::CSHARP),
+											       new EnumValue("c#", JiksPgOption::CSHARP),
                                                    new EnumValue("java", JiksPgOption::JAVA),
                                                    new EnumValue("ml", JiksPgOption::ML),
                                                    new EnumValue("none", JiksPgOption::XML),
@@ -379,7 +383,11 @@ OptionProcessor::processTable(OptionValue *v)
         }
         else if (!value.compare("rt_cpp")) {
             options->programming_language = JiksPgOption::CPP2;
-        } else if (!value.compare("java")) {
+        }
+        else if (!value.compare("c#") || !value.compare("csharp")) {
+            options->programming_language = JiksPgOption::CSHARP;
+        }
+    	else if (!value.compare("java")) {
             options->programming_language = JiksPgOption::JAVA;
         } else if (!value.compare("ml")) {
             options->programming_language = JiksPgOption::ML;

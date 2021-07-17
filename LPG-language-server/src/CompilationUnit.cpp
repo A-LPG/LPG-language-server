@@ -300,6 +300,6 @@ void CompilationUnit::ResetBinding()
 	
 	if (data)
 	{
-		data.reset();
+		data=nullptr;
 	}
 }

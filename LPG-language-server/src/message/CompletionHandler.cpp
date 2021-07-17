@@ -11,7 +11,7 @@
 
 namespace 
 {
-    std::vector<std::string> OPTION_KEYS = {
+    std::vector<std::stringex> OPTION_KEYS = {
    "action", "ast_directory", "ast_type", "attributes",
    "automatic_ast", "backtrack", "byte", "conflicts",
    "dat-directory", "dat-file", "dcl-file", "debug",
@@ -30,8 +30,9 @@ namespace
    "verbose", "visitor", "visitor-type", "warnings",
        "xref"
     };
-
-   std::vector<std::string>  OPTION_ARGS = {
+    std::vector<std::stringex> OPTION_KEYS_LOWER = OPTION_KEYS;
+	
+   std::vector<std::stringex>  OPTION_ARGS = {
         "action=(<string>,<string>,<string>)", "ast_directory=<directory_name>", "ast_type=MyASTNode",
         "attributes",
         "automatic_ast={none,nested,toplevel}", "backtrack", "byte", "conflicts",
@@ -55,12 +56,24 @@ namespace
         "verbose", "visitor={none,default,preorder}", "visitor-type=<string>", "warnings",
         "xref"
     };
-   std::vector<std::string> SEGMENT_KEYS = {
+   std::vector<std::stringex> SEGMENT_KEYS = {
       "Define", "Export", "Globals", "Headers", "Identifiers", "Include", "Import",
       "Keywords", "Notice", "Recover", "Rules", "Start", "Terminals", "Types"
    };
-
-  
+   std::vector<std::stringex> SEGMENT_KEYS_LOWER = SEGMENT_KEYS;
+  bool   initilize()
+  {
+      for (int i = 0; i < OPTION_KEYS.size(); i++)
+      {
+          OPTION_KEYS_LOWER[i].tolower();
+      }
+      for (int i = 0; i < SEGMENT_KEYS.size(); i++)
+      {
+          SEGMENT_KEYS_LOWER[i].tolower();
+      }
+      return true;
+  }
+  bool  _81C3EAE2_21BA_4DFF_9D5B_6DC83E2B0F17 = initilize();
 }
 
 
@@ -77,7 +90,7 @@ namespace
 void  CompletionHandler::MakeCompletionItem(const std::string& proposal, const std::string& newText,
                                             const std::string& prefix, const Region& region, int cursorLoc, const std::string& addlInfo)
 {
-    string text;
+    /*string text;
 	if(prefix.empty())
 	{
        text = newText;
@@ -85,16 +98,16 @@ void  CompletionHandler::MakeCompletionItem(const std::string& proposal, const s
     else
     {
         text =newText.substr(prefix.length());
-    }
+    }*/
 	
     lsCompletionItem item;
     item.kind = lsCompletionItemKind::Property;
     item.label = proposal;
     lsTextEdit edit;
-    edit.newText = text;
+    edit.newText = newText;
 
     auto lex = unit->runtime_unit->_lexer.getILexStream();
-    auto  pos = ASTUtils::toPosition(lex, region.getOffset());
+    auto  pos = ASTUtils::toPosition(lex, region.getOffset()-prefix.length()+1);
 	if(pos)
 	{
         edit.range.start = pos.value();
@@ -112,7 +125,7 @@ void  CompletionHandler::MakeCompletionItem(const std::string& proposal, const s
     {
         return;
     }
-    item.insertText = text;
+    item.insertText = newText;
     item.insertTextFormat = lsInsertTextFormat::PlainText;
 	
     item.textEdit = std::move(edit);
@@ -135,9 +148,8 @@ void CompletionHandler::computeSegmentCompletions(const std::string& prefix)
     std::stringex lower_case_prefix = prefix;
     lower_case_prefix.tolower();
     for (int i = 0; i < SEGMENT_KEYS.size(); i++) {
-        std::stringex key = SEGMENT_KEYS[i];
-        std::stringex lower_case_key = key.tolower();
-        if (lower_case_prefix.length() <= 1 || lower_case_key.start_with(lower_case_prefix.substr(1))) {
+        if (lower_case_prefix.length() <= 1 || SEGMENT_KEYS_LOWER[i].start_with(lower_case_prefix.substr(1))) {
+            std::stringex& key = SEGMENT_KEYS[i];
             std::string newText = "%" + key + "\n" + "  " + "\n" + "%End";
 
             std::string addlInfo;
@@ -154,13 +166,15 @@ void CompletionHandler::computeSegmentCompletions(const std::string& prefix)
 }
 
 void  CompletionHandler::computeOptionKeyProposals(const string& prefix) {
-  
+
+    std::stringex prefix_lower = prefix;
+    prefix_lower.tolower();
     for (int i = 0; i < OPTION_KEYS.size(); i++) {
-        std::stringex key = OPTION_KEYS[i];
-        if (key.start_with(prefix)) {
+        if (OPTION_KEYS_LOWER[i].start_with(prefix_lower)) {
             std::string addlInfo;
          //   HTMLPrinter.addSmallHeader(addlInfo, key);
           //  HTMLPrinter.addParagraph(addlInfo, HTMLPrinter.convertToHTMLContent(OPTION_ARGS[i]));
+            std::stringex& key = OPTION_KEYS[i];
             MakeCompletionItem(key, key, prefix, Region(offset, 0), addlInfo);
         }
     }
@@ -207,7 +221,7 @@ void CompletionHandler::computeTerminalCompletions(const string& prefix) {
 	ASTUtils::getTerminals(unit->runtime_unit->root, terms);
 
     for (auto& iter : terms) {
-        auto t = (terminal*)iter;
+        auto t = static_cast<terminal*>(iter);
         std::stringex termRawName = t->getterminal_symbol()->to_utf8_string();
         int idx = termRawName.find('$');
         std::stringex termName = (idx >= 0) ? termRawName.substr(0, idx) : termRawName;
@@ -222,28 +236,51 @@ void CompletionHandler::computeTerminalCompletions(const string& prefix) {
 CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, CompletionList& o, const lsCompletionParams& params , Monitor* monitor)
 :unit(u), out(o)
 {
+    if(!_81C3EAE2_21BA_4DFF_9D5B_6DC83E2B0F17)
+    {
+        initilize();
+    }
     out.isIncomplete = false;
-    if (!unit || !unit->runtime_unit->root)
+    if (!unit)
     {
         return;
     }
     lsPosition pos = params.position;
     //pos.line += 1;
-	
+
     offset = ASTUtils::toOffset(unit->runtime_unit->_lexer.getILexStream(), pos);
     if (offset < 0)
     {
         return;
     }
+  
+    auto    get_for_key_word = [&]()
+    {
+        const   std::stringex prefix = ASTUtils::getWord(unit->runtime_unit->_lexer.lexStream, offset);
+        computeOptionKeyProposals(prefix);
+	    if (prefix.start_with("%") ) {
+	        computeSegmentCompletions(prefix);
+	    }
+    };
+    if (!unit->runtime_unit->root)
+    {
+        get_for_key_word();
+        return;
+    }
     LPGSourcePositionLocator locator;
     auto thisNode =static_cast<ASTNode*>(locator.findNode(unit->runtime_unit->root, offset));
-    if (thisNode == nullptr) return;
+    if (thisNode == nullptr)
+    {
+        get_for_key_word();
+	    return;
+    }
 	auto thisLeftToken = thisNode->getLeftIToken();
     auto temp = thisLeftToken->to_utf8_string();
     auto temp2 = thisNode->to_utf8_string();
     std::string prefixToken = (offset >= thisLeftToken->getStartOffset() && offset <= thisLeftToken->getEndOffset()) ? thisLeftToken->to_utf8_string() : "";
     std::stringex  prefix = (!prefixToken.empty()) ? prefixToken.substr(0, offset - thisLeftToken->getStartOffset()+1) : "";
-
+    string escape_token;
+    escape_token.push_back(unit->runtime_unit->_lexer.escape_token);
     if(dynamic_cast<option*>(thisNode->parent))
     {
         auto opt = static_cast<option*>(thisNode->parent);
@@ -254,7 +291,7 @@ CompletionHandler::CompletionHandler(std::shared_ptr<CompilationUnit>& u, Comple
     else if (dynamic_cast<LPG*>(thisNode->getParent()) || prefix.start_with("%")) {
         computeSegmentCompletions(prefix);
     }
-    else if (prefix.start_with("$")) {
+    else if (prefix.start_with("$") || prefix.start_with(escape_token)) {
        computeMacroCompletions(prefix);
     }
     else

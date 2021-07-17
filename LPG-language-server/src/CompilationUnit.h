@@ -87,7 +87,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 	std::vector<Object*> FindDefine(const SearchPolicy& policy, const std::wstring& name);
 	std::vector<Object*>   FindDefineIn_Term_and_noTerms(const std::wstring& name);
 	
-	friend struct LPGBindingVisitor;
+	//friend struct LPGBindingVisitor;
 	std::shared_ptr<JikesPG2> GetBinding();
 
 
