@@ -8,6 +8,7 @@
 ![avatar](doc/img/refenrence.png)
 ![avatar](doc/img/hover.png)
 ![avatar](doc/img/follow_first_set.png)
+
 ## About LPG-cpp-runtime
 C++ runtime for LPG 2.0. This project is a c++ target for LPG2.0
 * [LPG-cpp-runtime](https://github.com/kuafuwang/LPG-cpp-runtime)
@@ -18,4 +19,4 @@ C++ runtime for LPG 2.0. This project is a c++ target for LPG2.0
 
 
 ## About LPG
-The LALR parser generator ([LPG]( https://sourceforge.net/projects/lpg )) is a tool for developing scanners and parsers written in  C#, Java, C++ or C. Input is specified by BNF rules. LPG supports backtracking (to resolve ambiguity), automatic AST generation and grammar inheritance.
+The LALR parser generator ([LPG]( https://github.com/kuafuwang/LPG2 )) is a tool for developing scanners and parsers written in  C#, Java, C++ or C. Input is specified by BNF rules. LPG supports backtracking (to resolve ambiguity), automatic AST generation and grammar inheritance.
