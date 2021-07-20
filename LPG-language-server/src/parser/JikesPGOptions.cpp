@@ -69,55 +69,55 @@ OptionProcessor::processAstBlock(OptionValue* v)
 }
 
 OptionDescriptor *astDirectory = new PathOptionDescriptor("ast", "directory",
-                                                          "the directory in which generated AST classes will be placed, if automatic-ast is 'toplevel'",
+                                                          "the directory in which generated AST classes will be placed, if automatic-ast is 'toplevel'.The format is ast_directory=<directory_name>",
                                                           NULL,
                                                           &JiksPgOption::ast_directory, true);
 
-OptionDescriptor *astType = new StringOptionDescriptor("ast", "type", "the name of the AST root class", NULL, &JiksPgOption::ast_type, false);
+OptionDescriptor *astType = new StringOptionDescriptor("ast", "type", "the name of the AST root class,the format is ast_type=MyASTNode", NULL, &JiksPgOption::ast_type, false);
 
-OptionDescriptor *attributes = new BooleanOptionDescriptor("attributes", "???", false, &JiksPgOption::attributes);
+OptionDescriptor *attributes = new BooleanOptionDescriptor("attributes", "attributes", false, &JiksPgOption::attributes);
 
 OptionDescriptor *automaticAST = new EnumOptionDescriptor("automatic", "ast", 
-                                                          "determines where generated AST classes will be placed",
+                                                          "determines where generated AST classes will be placed, the format is automatic_ast=<none|nested|toplevel>",
                                                           &JiksPgOption::automatic_ast, "none", "nested", "none",
                                                           new EnumValue("none", JiksPgOption::NONE),
                                                           new EnumValue("nested", JiksPgOption::NESTED),
                                                           new EnumValue("toplevel", JiksPgOption::TOPLEVEL), NULL);
 
-OptionDescriptor *backtrack = new BooleanOptionDescriptor("backtrack", "???", false,
+OptionDescriptor *backtrack = new BooleanOptionDescriptor("backtrack", "backtrack", false,
                                                           &JiksPgOption::backtrack);
 
-OptionDescriptor *byte = new BooleanOptionDescriptor("byte", "???", true,
+OptionDescriptor *byte = new BooleanOptionDescriptor("byte", "byte", true,
                                                      &JiksPgOption::byte);
 
-OptionDescriptor *conflicts = new BooleanOptionDescriptor("conflicts", "???", true,
+OptionDescriptor *conflicts = new BooleanOptionDescriptor("conflicts", "conflicts", true,
                                                           &JiksPgOption::conflicts);
 
-OptionDescriptor *dataDirectory = new PathOptionDescriptor("dat", "directory", "???", NULL,
+OptionDescriptor *dataDirectory = new PathOptionDescriptor("dat", "directory", "dat-directory=<directory_name>", NULL,
                                                        &JiksPgOption::dat_directory);
 
-OptionDescriptor *dataFile = new PathOptionDescriptor("dat", "file", "???", NULL,
+OptionDescriptor *dataFile = new PathOptionDescriptor("dat", "file", "dat-file=<file_name>", NULL,
                                                       &JiksPgOption::dat_file);
 
-OptionDescriptor *dclFile = new PathOptionDescriptor("dcl", "file", "???", NULL,
+OptionDescriptor *dclFile = new PathOptionDescriptor("dcl", "file", "dcl-file=<file_name>", NULL,
                                                      &JiksPgOption::dcl_file);
 
-OptionDescriptor *defFile = new PathOptionDescriptor("def", "file", "???", NULL,
+OptionDescriptor *defFile = new PathOptionDescriptor("def", "file", "def-file=<file_name>", NULL,
                                                      &JiksPgOption::def_file);
 
-OptionDescriptor *dirPrefix = new PathOptionDescriptor("directory", "prefix", "???", NULL,
+OptionDescriptor *dirPrefix = new PathOptionDescriptor("directory", "prefix", "directory-prefix=<directory_name>", NULL,
                                                        &JiksPgOption::directory_prefix, true);
 
-OptionDescriptor *debug = new BooleanOptionDescriptor("debug", "???", false, &JiksPgOption::debug);
+OptionDescriptor *debug = new BooleanOptionDescriptor("debug", "debug", false, &JiksPgOption::debug);
 
-OptionDescriptor *edit = new BooleanOptionDescriptor("edit", "???", false, &JiksPgOption::edit);
+OptionDescriptor *edit = new BooleanOptionDescriptor("edit", "edit", false, &JiksPgOption::edit);
 
-OptionDescriptor *errorMaps = new BooleanOptionDescriptor("error", "maps", "???", false, &JiksPgOption::error_maps);
+OptionDescriptor *errorMaps = new BooleanOptionDescriptor("error", "maps", "error-maps", false, &JiksPgOption::error_maps);
 
-OptionDescriptor *escapeChar = new CharOptionDescriptor("escape", "???", " ",
+OptionDescriptor *escapeChar = new CharOptionDescriptor("escape", "escape=<character>", " ",
                                                         &JiksPgOption::escape);
 
-OptionDescriptor *exportsTerminals = new OptionDescriptor(STRING_LIST, "export", "terminals", "???",
+OptionDescriptor *exportsTerminals = new OptionDescriptor(STRING_LIST, "export", "terminals", "export-terminals=<string>",
                                                           &OptionProcessor::processExportTerminals);
 
 void
@@ -138,21 +138,21 @@ OptionProcessor::processExportTerminals(OptionValue *v)
     }
 }
 
-OptionDescriptor *extendsParseTable = new StringOptionDescriptor("extends", "parsetable", "???", NULL,
+OptionDescriptor *extendsParseTable = new StringOptionDescriptor("extends", "parsetable", "extends-parsetable=<string>", NULL,
                                                                  &JiksPgOption::extends_parsetable, false);
 
-OptionDescriptor *factory = new StringOptionDescriptor("factory", "???", NULL,
+OptionDescriptor *factory = new StringOptionDescriptor("factory", "factory=<string>", NULL,
                                                        &JiksPgOption::factory, false);
 
-OptionDescriptor *filePrefix = new StringOptionDescriptor("file", "prefix", "???", NULL,
+OptionDescriptor *filePrefix = new StringOptionDescriptor("file", "prefix", "file-prefix=<string>", NULL,
                                                           &JiksPgOption::file_prefix, true);
 
 //
 // Can't just do the following b/c the 'filter' option affects two JiksPgOption fields (filter and filter_file)
-//OptionDescriptor *filter = new StringOptionDescriptor("filter", NULL, "???",
+//OptionDescriptor *filter_ = new StringOptionDescriptor("filter", NULL, "???",
 //                                                      &JiksPgOption::filter, false);
 //
-OptionDescriptor *filter = new OptionDescriptor(STRING, "filter", "???", &OptionProcessor::processFilter, false);
+OptionDescriptor *filter_ = new OptionDescriptor(STRING, "filter", "filter=<filter_spec_file_name>", &OptionProcessor::processFilter, false);
 
 void
 OptionProcessor::processFilter(OptionValue *v)
@@ -164,16 +164,16 @@ OptionProcessor::processFilter(OptionValue *v)
     options->filter = valStr;
 }
 
-OptionDescriptor *first = new BooleanOptionDescriptor("first", "???", false, &JiksPgOption::first);
+OptionDescriptor *first = new BooleanOptionDescriptor("first", "Enable first set", false, &JiksPgOption::first);
 
-OptionDescriptor *follow = new BooleanOptionDescriptor("follow", "???", false, &JiksPgOption::follow);
+OptionDescriptor *follow = new BooleanOptionDescriptor("follow", "Enable follow set", false, &JiksPgOption::follow);
 
-OptionDescriptor *glr = new BooleanOptionDescriptor("glr", "???", false, &JiksPgOption::glr);
+OptionDescriptor *glr = new BooleanOptionDescriptor("glr", "glr", false, &JiksPgOption::glr);
 
-OptionDescriptor *gotoDefault = new BooleanOptionDescriptor("goto", "default", "???", false,
+OptionDescriptor *gotoDefault = new BooleanOptionDescriptor("goto", "default", "goto-default", false,
                                                             &JiksPgOption::goto_default);
 
-OptionDescriptor *ignoreBlock = new OptionDescriptor(STRING, "ignore", "block", "???",
+OptionDescriptor *ignoreBlock = new OptionDescriptor(STRING, "ignore", "block", "ignore-block=<string>",
                                                      &OptionProcessor::processIgnoreBlock);
 void
 OptionProcessor::processIgnoreBlock(OptionValue *v)
@@ -186,13 +186,13 @@ OptionProcessor::processIgnoreBlock(OptionValue *v)
    // options->action_blocks.FindOrInsertIgnoredBlock(ignore_block, strlen(ignore_block));
 }
 
-OptionDescriptor *impFile = new StringOptionDescriptor("imp", "file", "???",
+OptionDescriptor *impFile = new StringOptionDescriptor("imp", "file", "imp-file=<string>",
                                                        &JiksPgOption::imp_file);
 
 // Can't just do the following b/c the 'import-terminals' option affects two JiksPgOption fields (import_file and import_terminals)
 //OptionDescriptor *importTerminals = new StringOptionDescriptor("import", "terminals", "???",
 //                                                               &JiksPgOption::import_terminals, false);
-OptionDescriptor *importTerminals = new OptionDescriptor(STRING, "import", "terminals", "???",
+OptionDescriptor *importTerminals = new OptionDescriptor(STRING, "import", "terminals", "import-terminals=<file_name>",
                                                          &OptionProcessor::processImportTerminals);
 void
 OptionProcessor::processImportTerminals(OptionValue *v)
@@ -205,7 +205,7 @@ OptionProcessor::processImportTerminals(OptionValue *v)
 }
 
 OptionDescriptor *includeDirs = new OptionDescriptor(PATH_LIST, "include", "directory",
-                                                     "a semi-colon separated list of directories to search when processing include directives",
+                                                     "a semi-colon separated list of directories to search when processing include directives, the format is include-directory = <directory_name>",
                                                      &OptionProcessor::processIncludeDir, false);
 
 void
@@ -230,29 +230,29 @@ OptionProcessor::processIncludeDir(OptionValue *v)
 }
 
 OptionDescriptor *lalr = new IntegerOptionDescriptor("lalr", "", 1, 1, INT_MAX,
-                                                     "determines how many tokens of look-ahead can be used to disambiguate",
+                                                     "determines how many tokens of look-ahead can be used to disambiguate,lalr-level=<integer>",
                                                      &JiksPgOption::lalr_level);
 
-OptionDescriptor *legacy = new BooleanOptionDescriptor("legacy", "???", true, &JiksPgOption::legacy);
+OptionDescriptor *legacy = new BooleanOptionDescriptor("legacy", "legacy or nolegacy", true, &JiksPgOption::legacy);
 
-OptionDescriptor *list = new BooleanOptionDescriptor("list", "???", false, &JiksPgOption::list);
+OptionDescriptor *list = new BooleanOptionDescriptor("list", "list or nolist", false, &JiksPgOption::list);
 
 OptionDescriptor *margin = new IntegerOptionDescriptor("margin", 0, 1, INT_MAX,
-                                                       "???",
+                                                       "margin=<integer>",
                                                        &JiksPgOption::margin);
 
 OptionDescriptor *maxCases = new IntegerOptionDescriptor("max", "cases", 1024, 1, INT_MAX,
-                                                         "???",
+													"max_cases=<integer>",
                                                          &JiksPgOption::max_cases);
 
-OptionDescriptor *names = new EnumOptionDescriptor("names", "???", &JiksPgOption::names, "optimized", "", "",
+OptionDescriptor *names = new EnumOptionDescriptor("names", "names=<optimized | maximum | minimum> , the value is of them", &JiksPgOption::names, "optimized", "", "",
                                                    new EnumValue("optimized", JiksPgOption::OPTIMIZED),
                                                    new EnumValue("minimum", JiksPgOption::MINIMUM),
                                                    new EnumValue("maximum", JiksPgOption::MAXIMUM), NULL);
 
-OptionDescriptor *ntCheck = new BooleanOptionDescriptor("nt", "check", "???", false, &JiksPgOption::nt_check);
+OptionDescriptor *ntCheck = new BooleanOptionDescriptor("nt", "check", "nt-check", false, &JiksPgOption::nt_check);
 
-OptionDescriptor *orMarker = new CharOptionDescriptor("or", "marker", "???", 
+OptionDescriptor *orMarker = new CharOptionDescriptor("or", "marker", "or-marker=<character>",
                                                       "|",
                                                       &JiksPgOption::or_marker);
 

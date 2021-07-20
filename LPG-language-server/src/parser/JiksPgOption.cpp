@@ -426,7 +426,8 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
 
 void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& lpg_optionList)
 {
-	
+    std::set<OptionDescriptor*> exclude;
+ 
 	while (!lpg_optionList.empty())
 	{
 		option* _opt = lpg_optionList.top();
@@ -437,18 +438,16 @@ void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& 
 		auto sym = _opt->getSYMBOL();
 		std::stringex optName = sym->to_utf8_string();
 		optName.tolower();
-		if (optName == ("import_terminals")
-			|| optName == ("template")
-			|| optName == ("filter"))
-		{
-			continue;
-		}
+
         try {
-          
+            if(OptionDescriptor::IsIncludeOption(optName))
+            {
+	            continue;
+            }
             auto opt_string = _opt->to_utf8_string();
             opt_string.push_back('\0');
             const char* param = opt_string.c_str();
-            auto value = optionParser->parse(param);      
+            auto value = optionParser->parse(param);
             if (value) {
                 value->processSetting(optionProcessor);
             }

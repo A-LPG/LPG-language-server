@@ -102,18 +102,24 @@ OptionParser::getOptionValue(const char *&p)
 
 std::unique_ptr<OptionValue> OptionParser::parse(const char *&start)
 {
+    return  parse(start, {});
+}
+
+std::unique_ptr<OptionValue> OptionParser::parse(const char*& start, const std::set<OptionDescriptor*>& exclude)
+{
     bool noFlag;
-    OptionDescriptor *od = findOption(start, noFlag);
+    OptionDescriptor* od = findOption(start, noFlag);
 
     if (od != NULL) {
+        if (exclude.find(od) != exclude.end()) return  nullptr;
         // This option is a match
         std::string* optValueStr = getOptionValue(start);
         OptionValue* optValue = od->createValue(noFlag);
 
         optValue->parseValue(optValueStr);
-//        // HACK Handle the "no" prefix on boolean options
-        if (od->getType() == BOOLEAN && !noFlag) {
-            BooleanOptionValue *bv = static_cast<BooleanOptionValue*> (optValue);
+        //        // HACK Handle the "no" prefix on boolean options
+        if (od->getType() == BOOLEAN_TYPE && !noFlag) {
+            BooleanOptionValue* bv = static_cast<BooleanOptionValue*> (optValue);
             bv->setValue(!bv->getValue());
         }
         return std::unique_ptr<OptionValue>(optValue);

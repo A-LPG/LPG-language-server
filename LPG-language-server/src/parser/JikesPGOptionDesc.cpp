@@ -11,6 +11,7 @@
 #include <iostream>
 #include <limits>
 #include <cstdarg>
+#include <stringex.h>
 
 #include "JikesPGOptions.h"
 
@@ -21,6 +22,23 @@ OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *wd
 {
     setupName();
     allOptionDescriptors.push_back(this);
+}
+
+bool OptionDescriptor::IsIncludeOption(const std::string& name)
+{
+    std::stringex optName = name;
+    optName.tolower();
+    if (optName == ("import_terminals")
+        || optName == ("import-terminals")
+        || optName == ("template")
+        || optName == ("filter"))
+    {
+	    return true;
+    }
+    else
+    {
+	    return false;
+    }
 }
 
 OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *descrip,
@@ -62,11 +80,11 @@ OptionDescriptor::getTypeDescriptor() const
     std::string result;
     
     switch (type) {
-        case BOOLEAN: {
+        case BOOLEAN_TYPE: {
             result += "boolean";
             break;
         }
-        case CHAR: {
+        case CHAR_TYPE: {
             result += "char";
             break;
         }
@@ -153,7 +171,7 @@ OptionValue *
 OptionDescriptor::createValue(bool noFlag)
 {
     switch (getType()) {
-        case BOOLEAN: {
+        case BOOLEAN_TYPE: {
             BooleanOptionValue *bv = new BooleanOptionValue(this, noFlag);
             return bv;
         }
@@ -193,14 +211,14 @@ OptionDescriptor::createValue(bool noFlag)
 BooleanOptionDescriptor::BooleanOptionDescriptor(const char *wd1, const char *wd2, const char *descrip, bool defValue,
                                                  OptionProcessor::BooleanValueField field, bool valueOpt)
 
-: OptionDescriptor(BOOLEAN, wd1, wd2, descrip, valueOpt), initValue(defValue), boolField(field)
+: OptionDescriptor(BOOLEAN_TYPE, wd1, wd2, descrip, valueOpt), initValue(defValue), boolField(field)
 {
 }
 
 BooleanOptionDescriptor::BooleanOptionDescriptor(const char *wd1, const char *descrip, bool defValue,
                                                  OptionProcessor::BooleanValueField field, bool valueOpt)
 
-: OptionDescriptor(BOOLEAN, wd1, NULL, descrip, valueOpt), initValue(defValue), boolField(field)
+: OptionDescriptor(BOOLEAN_TYPE, wd1, NULL, descrip, valueOpt), initValue(defValue), boolField(field)
 {
 }
 
@@ -336,14 +354,14 @@ StringOptionDescriptor::initializeValue(OptionProcessor *processor)
 CharOptionDescriptor::CharOptionDescriptor(const char *wd1, const char *wd2, const char *descrip,
                                            const char *initValue,
                                            OptionProcessor::CharValueField field)
-: StringOptionDescriptor(CHAR, wd1, wd2, descrip, initValue, NULL,false), charField(field)
+: StringOptionDescriptor(CHAR_TYPE, wd1, wd2, descrip, initValue, NULL,false), charField(field)
 {
 }
 
 CharOptionDescriptor::CharOptionDescriptor(const char *wd1, const char *descrip,
                                            const char *initValue,
                                            OptionProcessor::CharValueField field)
-: StringOptionDescriptor(CHAR, wd1, NULL, descrip, initValue, NULL,false), charField(field)
+: StringOptionDescriptor(CHAR_TYPE, wd1, NULL, descrip, initValue, NULL,false), charField(field)
 {
 }
 

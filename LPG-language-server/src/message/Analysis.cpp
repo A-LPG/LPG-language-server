@@ -262,7 +262,7 @@ CallGraphHandler::CallGraphHandler(std::shared_ptr<CompilationUnit>& unit, CallG
     if (auto _input = unit->runtime_unit->root->getLPG_INPUT(); _input)
     {
        
-        std::string name =  JiksPgOption::GetFilename(unit->working_file->filename.path.c_str());
+         std::string name = unit->fileName;
         auto pos = name.find(".");
     	if(pos != std::string::npos)
     	{

@@ -24,6 +24,7 @@
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
 #include <LibLsp/JsonRpc/ScopeExit.h>
 #include "SearchPolicy.h"
+#include "parser/JikesPGOptions.h"
 using namespace LPGParser_top_level_ast;
 using namespace lsp;
 
@@ -366,11 +367,9 @@ std::vector<Object*> WorkSpaceManager::findDefOf(const SearchPolicy& policy, AST
 
 	if ( dynamic_cast<option*>(grandParent)) {
 		auto opt = static_cast<option*>(grandParent);
-		auto optName = opt->getSYMBOL()->toString();
-
-		if (optName==(L"import_terminals")
-			|| optName==(L"template")
-			|| optName ==(L"filter")) 
+		std::stringex optName = opt->getSYMBOL()->to_utf8_string();
+	
+		if (OptionDescriptor::IsIncludeOption(optName))
 		{
 			auto temp_file =lookupImportedFile(unit->working_file->directory, IcuUtil::ws2s(id), monitor).get();
 			if(temp_file)
@@ -446,9 +445,13 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 	{
 		auto _file = find(it);
 		if (!_file) continue;
-		_file->ResetBinding();
 		ProblemHandler handle;
-		process_type_binding(_file, &handle);
+		{
+			std::lock_guard< std::recursive_mutex > lock_guard(_file->runtime_unit->mutex);
+			_file->ResetBinding();
+			process_type_binding(_file, &handle);
+		}
+
 		Notify_TextDocumentPublishDiagnostics::notify notify;
 		notify.params.diagnostics = unit->runtime_unit->diagnostics;
 		
@@ -729,6 +732,11 @@ void WorkSpaceManager::OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFolde
 void WorkSpaceManager::UpdateIncludePaths(const std::vector<Directory>& dirs)
 {
 	d_ptr->includeDirs = dirs;
+}
+
+std::vector<Directory> WorkSpaceManager::GetIncludeDirs() const
+{
+	return d_ptr->includeDirs;
 }
 
 RemoteEndPoint& WorkSpaceManager::GetEndPoint() const

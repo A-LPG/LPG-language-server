@@ -366,7 +366,7 @@ struct DocumentColorHandlerData
 	shared_ptr_wstring buffer;
 	DocumentColorHandlerData(std::shared_ptr<CompilationUnit>& u, std::vector<ColorInformation>& o) :unit(u)
 	{
-		if (!unit || !unit->runtime_unit->root)
+		if (!unit)
 		{
 			return;
 		}

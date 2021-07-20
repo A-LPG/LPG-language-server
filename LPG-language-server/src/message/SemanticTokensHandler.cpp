@@ -14,7 +14,7 @@ struct SemanticTokensHandler::Data
 	shared_ptr_wstring buffer;
 	Data(std::shared_ptr<CompilationUnit>& u, SemanticTokens& o) :unit(u)
 	{
-		if (!unit || !unit->runtime_unit->root)
+		if (!unit)
 		{
 			return;
 		}
@@ -103,8 +103,6 @@ struct SemanticTokensHandler::Data
 			//}
 		};
 	
-		//IPrsStream::Range  range(u->_parser.getIPrsStream(), u->_parser.getLeftIToken(), u->_parser.getRightIToken());
-		//auto tokens = range.getTokenList();
 		auto& tokens = u->runtime_unit->_parser.prsStream->rangeTokens;
 		for (size_t i = 0; i < tokens.size(); ++i)
 		{

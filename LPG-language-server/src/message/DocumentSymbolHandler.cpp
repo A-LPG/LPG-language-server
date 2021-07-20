@@ -6,6 +6,7 @@
 #include <stack>
 #include "LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
+#include "../parser/JikesPGOptions.h"
 using namespace LPGParser_top_level_ast;
 
 struct LPGModelVisitor :public AbstractVisitor {
@@ -489,11 +490,9 @@ namespace
                 lsDocumentSymbol children;
                 children.name = _opt->to_utf8_string();
                 auto sym = _opt->getSYMBOL();
-                std::wstringex  optName = sym->toString();
+                std::stringex  optName = sym->to_utf8_string();
                 optName.tolower();
-                if (optName == (L"import_terminals")
-                    || optName == (L"template")
-                    || optName == (L"filter"))
+                if (OptionDescriptor::IsIncludeOption(optName))
                 {
                     children.kind = lsSymbolKind::File;
                     string fileName;
@@ -508,11 +507,11 @@ namespace
                     {
                         fileName = optValue->to_utf8_string();
                     }
-                    if (optName == (L"import_terminals"))
+                    if (optName == ("import_terminals")|| optName == ("import-terminals"))
                     {
                         infos_info.import_terminals_files.push_back({ fileName,_opt });
                     }
-                    else if (optName == (L"template"))
+                    else if (optName == ("template"))
                     {
                         infos_info.template_files.push_back({ fileName,_opt });
                     }

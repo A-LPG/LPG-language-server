@@ -107,7 +107,7 @@ struct CompilationUnit : Object,std::enable_shared_from_this<CompilationUnit>
 
 	void removeDependency();
 	DependenceInfo dependence_info;
-	
+	std::string fileName;
 	void  ResetBinding();
 private:
 	std::shared_ptr<JikesPG2> data;

@@ -14,12 +14,13 @@
 
 #include <string>
 #include <list>
+#include <set>
 
 #include "JikesPGUtil.h"
 
 enum OptionType {
-    BOOLEAN,
-    CHAR,
+    BOOLEAN_TYPE,
+    CHAR_TYPE,
     ENUM,
     INTEGER,
     STRING,
@@ -59,6 +60,7 @@ private:
 
 class OptionDescriptor {
 public:
+    static  bool IsIncludeOption(const std::string&);
     OptionDescriptor(OptionType type, const char *word1, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false);
     OptionDescriptor(OptionType type, const char *word1, const char *word2, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false);
 
@@ -350,6 +352,8 @@ public:
     OptionParser(const std::list<OptionDescriptor*> descriptors);
 
    std::unique_ptr<OptionValue>  parse(const char *&start) ;
+   std::unique_ptr<OptionValue>  parse(const char*& start, const std::set<OptionDescriptor*>& exclude);
+  
 
 private:
     OptionDescriptor *findOption(const char *&start, bool& flag);
@@ -359,4 +363,7 @@ private:
     std::list<OptionDescriptor*> allOptions;
 };
 
+extern  OptionDescriptor* importTerminals;
+extern  OptionDescriptor* template_;
+extern  OptionDescriptor* filter_;
 #endif

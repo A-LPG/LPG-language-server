@@ -96,6 +96,7 @@ struct WorkSpaceManager {
 	void OnSave(const lsDocumentUri& _save);
 	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);
 	void UpdateIncludePaths(const std::vector<Directory>&);
+	std::vector<Directory> GetIncludeDirs()const;
 	RemoteEndPoint& GetEndPoint()const;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
 

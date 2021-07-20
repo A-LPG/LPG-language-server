@@ -298,8 +298,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
         }
       
         auto include_binding =  include_unit->GetBinding();
-    	if(!include_binding)
-            return false;
+        if (!include_binding)return true;
+        if (!include_binding->lpg_data)return true;
     	
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
     	if(!include_binding)return false;
@@ -466,8 +466,9 @@ struct LPGBindingVisitor :public AbstractVisitor {
             return false;
         }
         auto include_binding = include_unit->GetBinding();
-        if (!include_binding)return true;
-    	
+        if (!include_binding )return true;
+        if (!include_binding->lpg_data)return true;
+
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
         if (!include_binding)return false;
 
@@ -524,8 +525,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
             return false;
         }
         auto include_binding = include_unit->GetBinding();
-    	if(!include_binding)
-            return true;
+        if (!include_binding)return true;
+        if (!include_binding->lpg_data)return true;
     	
         unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
 
@@ -1011,39 +1012,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
        
     }
 
-     bool visit(option *n) {
-
-        auto value = n->getoption_value();
-        if (value != nullptr)
-        {
-            return false;
-        }
-
-        auto sym = n->getSYMBOL();
-        auto  optName = sym->toString();
-
-       auto  value0= dynamic_cast<option_value0*>(value);
-       if(value0)
-       {
-           auto  symbol_name = value0->getSYMBOL()->to_utf8_string();
-           if (optName == L"import_terminals"
-               || optName == L"template"
-               || optName == L"filter")
-           {
-           }
-       	   else
-       	   {
-	       	   
-       	   }
-        }
-       auto  value1 = dynamic_cast<option_value1*>(value);
-       if (!value1)
-       {
-           return false;
-       }
-          
-       return  false;
-    }
+  
 
 };
 
