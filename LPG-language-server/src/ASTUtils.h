@@ -65,20 +65,5 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 
 	static std::string getLabelFor(ASTNode *n);
 
-	static void scanDirsNoRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret);
-
-	static void scanFilesUseRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret,
-		std::wstring strSuf = L"");
-
-	static void scanFileNamesUseRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret,
-		std::wstring strSuf = L"");
-	static void scanFileNamesUseRecursive(const std::string& rootPath, std::vector<std::string>& ret,
-		std::string strSuf = "");
-	
-	static void scanFilesUseRecursive(const std::string& rootPath, std::vector<std::string>& ret,
-		std::string strSuf = "");
-
-	static void scanDirsUseRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret);
-
 
 };

@@ -1,6 +1,8 @@
 #include <LibLsp/lsp/lsp_completion.h>
 #include <LibLsp/lsp/textDocument/completion.h>
 #include <boost/algorithm/string.hpp>
+#include <LibLsp/lsp/utils.h>
+
 #include "MessageHandler.h"
 #include "../CompilationUnit.h"
 #include "../parser/LPGParser.h"
@@ -406,7 +408,7 @@ void   CompletionHandler::Data::get_for_key_word()
 
             	
                 std::vector<std::string> names;
-                ASTUtils::scanFileNamesUseRecursive(unit->working_file->directory.path, names);
+                lsp::scanFileNamesUseRecursive(unit->working_file->directory.path, names,"");
                 for (auto& name : names)
                 {
                 	if(exclude_include_files.find(name)== exclude_include_files.end())
@@ -420,7 +422,7 @@ void   CompletionHandler::Data::get_for_key_word()
                 for (auto& dir : indir)
                 {
                     names.clear();
-                    ASTUtils::scanFileNamesUseRecursive(dir.path, names);
+                    lsp::scanFileNamesUseRecursive(dir.path, names,"");
                     for (auto& name : names)
                     {
                         if (exclude_include_files.find(name) == exclude_include_files.end())

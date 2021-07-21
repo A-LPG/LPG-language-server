@@ -19,6 +19,7 @@
 #include <boost/asio.hpp>
 #include <iostream>
 
+#include "LibLsp/lsp/ClientPreferences.h"
 #include "CompilationUnit.h"
 #include "LibLsp/lsp/workspace/didChangeWorkspaceFolders.h"
 #include "LibLsp/lsp/textDocument/hover.h"
@@ -43,6 +44,10 @@
 #include "LibLsp/lsp/textDocument/SemanticTokens.h"
 #include "LibLsp/lsp/textDocument/rename.h"
 #include "LibLsp/lsp/lsAny.h"
+#include "LibLsp/lsp/workspace/did_change_configuration.h"
+#include "LibLsp/lsp/client/registerCapability.h"
+#include "LibLsp/lsp/workspace/symbol.h"
+#include "LibLsp/lsp/textDocument/code_action.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
@@ -95,9 +100,18 @@ public:
 	WorkSpaceManager   work_space_mgr;
 	std::unique_ptr<SimpleTimer<>>  timer;
 	RemoteEndPoint& _sp;
+	
+
+	boost::optional<Rsp_Error> need_initialize_error;
+	
+	bool enable_watch_parent_process = false;
+	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
+	std::shared_ptr<ClientPreferences>clientPreferences;
+
+
 	struct ExitMsgMonitor : Monitor
 	{
-		std::atomic_bool is_running_= true;
+		std::atomic_bool is_running_ = true;
 		bool isCancelled()  override
 		{
 			return  !is_running_.load(std::memory_order_relaxed);
@@ -109,25 +123,24 @@ public:
 	};
 	struct RequestMonitor : Monitor
 	{
-		RequestMonitor( ExitMsgMonitor& _exit,const CancelMonitor& _cancel):exit(_exit),cancel(_cancel)
+		RequestMonitor(ExitMsgMonitor& _exit, const CancelMonitor& _cancel) :exit(_exit), cancel(_cancel)
 		{
-			
+
 		}
 
 		bool isCancelled() override
 		{
 			if (exit.isCancelled()) return  true;
-			if(cancel && cancel())
+			if (cancel && cancel())
 			{
 				return  true;
 			}
 			return  false;
 		}
-		 ExitMsgMonitor& exit;
-		const CancelMonitor&  cancel;
+		ExitMsgMonitor& exit;
+		const CancelMonitor& cancel;
 	};
 	ExitMsgMonitor exit_monitor;
-	boost::optional<Rsp_Error> need_initialize_error;
 	
 	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path, Monitor* monitor, bool keep_consist = true)
 	{
@@ -156,8 +169,14 @@ public:
 		server.stop();
 		esc_event.notify(std::make_unique<bool>(true));
 	}
-	bool enable_watch_parent_process = false;
-	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
+	std::map<std::string, Registration> registeredCapabilities;
+	
+	void collectRegisterCapability(const std::string& method) {
+		if (registeredCapabilities.find(method) == registeredCapabilities.end()) {
+			auto reg = Registration::Create(method);
+			registeredCapabilities[method] = reg;
+		}
+	}
 	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files, server.point, _log),
 	_sp(server.point), enable_watch_parent_process(_enable_watch_parent_process), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
@@ -170,6 +189,7 @@ public:
 		_sp.registerHandler([=](const td_initialize::request& req)
 			{
 				need_initialize_error.reset();
+				clientPreferences = std::make_shared<ClientPreferences>(req.params.capabilities) ;
 				td_initialize::response rsp;
 				lsServerCapabilities capabilities;
 				auto SETTINGS_KEY = "settings";
@@ -283,7 +303,8 @@ public:
 				semantic_tokens_opt.full = full;
 				capabilities.semanticTokensProvider = std::move(semantic_tokens_opt);
 				rsp.result.capabilities.swap(capabilities);
-
+				WorkspaceServerCapabilities workspace_server_capabilities;
+				//capabilities.workspace
 			    if(req.params.processId.has_value() && _enable_watch_parent_process)
 			    {
 					parent_process_watcher = std::make_unique<ParentProcessWatcher>(_log,req.params.processId.value(),
@@ -296,6 +317,56 @@ public:
 		_sp.registerHandler([&](Notify_InitializedNotification::notify& notify)
 		{
 
+				if (!clientPreferences)return;
+				
+				if (clientPreferences->isCompletionDynamicRegistered())
+				{
+					collectRegisterCapability(td_completion::request::kMethodInfo);
+				}
+				if (clientPreferences->isWorkspaceSymbolDynamicRegistered())
+				{
+					collectRegisterCapability(wp_symbol::request::kMethodInfo);
+				}
+				if (clientPreferences->isDocumentSymbolDynamicRegistered())
+				{
+					collectRegisterCapability(td_symbol::request::kMethodInfo);
+				}
+				/*if (clientPreferences->isCodeActionDynamicRegistered())
+				{
+					collectRegisterCapability(td_codeAction::request::kMethodInfo);
+				}*/
+				if (clientPreferences->isDefinitionDynamicRegistered())
+				{
+					collectRegisterCapability(td_definition::request::kMethodInfo);
+				}
+				if (clientPreferences->isHoverDynamicRegistered())
+				{
+					collectRegisterCapability(td_hover::request::kMethodInfo);
+				}
+				if (clientPreferences->isReferencesDynamicRegistered())
+				{
+					collectRegisterCapability(td_references::request::kMethodInfo);
+				}
+				if (clientPreferences->isFoldgingRangeDynamicRegistered())
+				{
+					collectRegisterCapability(td_foldingRange::request::kMethodInfo);
+				}
+				if (clientPreferences->isWorkspaceFoldersSupported())
+				{
+					collectRegisterCapability(Notify_WorkspaceDidChangeWorkspaceFolders::notify::kMethodInfo);
+				}
+				if(clientPreferences->isWorkspaceDidChangeConfigurationSupported())
+				{
+					collectRegisterCapability(Notify_WorkspaceDidChangeConfiguration::notify::kMethodInfo);
+				}
+			
+				Req_ClientRegisterCapability::request request;
+				for(auto& it : registeredCapabilities)
+				{
+					request.params.registrations.push_back(it.second);
+				}
+				_sp.send(request);
+				
 		});
 		_sp.registerHandler(
 			[&](const td_symbol::request& req, const CancelMonitor& monitor)
@@ -733,9 +804,12 @@ public:
 		
 		_sp.registerHandler([&](Notify_WorkspaceDidChangeWatchedFiles::notify& notify)
 		{
-			
+		    
 		});
-
+		_sp.registerHandler([&](Notify_WorkspaceDidChangeConfiguration::notify& notify)
+			{
+				_log.info(notify.ToJson());
+			});
 		_sp.registerHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
 		{
 				if (need_initialize_error) {

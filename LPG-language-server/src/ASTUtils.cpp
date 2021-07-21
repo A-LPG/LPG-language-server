@@ -5,9 +5,7 @@
 #include <ctype.h>
 #include "code.h"
 #include <LibLsp/lsp/utils.h>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/algorithm/string.hpp>
+
 namespace 
 {
 	struct findRefsOf_AbstractVisitor :public AbstractVisitor
@@ -273,108 +271,4 @@ std::string ASTUtils::getLabelFor(ASTNode* n)
     }
 
     return "<???>";
-}
-
-void ASTUtils::scanDirsUseRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret)
-{
-    namespace fs = boost::filesystem;
-    fs::path fullpath(rootPath);
-    if (!fs::exists(fullpath)) { return; }
-    fs::recursive_directory_iterator end_iter;
-    for (fs::recursive_directory_iterator iter(fullpath); iter != end_iter; iter++) {
-        try {
-            if (fs::is_directory(*iter)) {
-                ret.push_back(iter->path().wstring());
-            }
-        }
-        catch (const std::exception& ex) {
-            continue;
-        }
-    }
-}
-
-void ASTUtils::scanDirsNoRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret)
-{
-    namespace fs = boost::filesystem;
-    boost::filesystem::path myPath(rootPath);
-    if (!fs::exists(rootPath)) { return; }
-    boost::filesystem::directory_iterator endIter;
-    for (boost::filesystem::directory_iterator iter(myPath); iter != endIter; iter++) {
-        if (boost::filesystem::is_directory(*iter)) {
-            ret.push_back(iter->path().wstring());
-        }
-    }
-}
-
-void ASTUtils::scanFilesUseRecursive(
-    const std::wstring& rootPath,
-    std::vector<std::wstring>& ret,
-    std::wstring suf) {
-    namespace fs = boost::filesystem;
-    boost::to_lower(suf);
-
-    fs::path fullpath(rootPath);
-    if (!fs::exists(fullpath)) { return; }
-    fs::recursive_directory_iterator end_iter;
-    for (fs::recursive_directory_iterator iter(fullpath); iter != end_iter; iter++) {
-        try {
-            if (!fs::is_directory(*iter) && fs::is_regular_file(*iter)) {
-                auto temp_path = iter->path().wstring();
-                auto size = suf.size();
-                if (!size)
-                {
-                    ret.push_back(std::move(temp_path));
-                }
-                else
-                {
-
-                    if (temp_path.size() < size) continue;
-                    auto suf_temp = temp_path.substr(temp_path.size() - size);
-                    boost::to_lower(suf_temp);
-                    if (suf_temp == suf)
-                    {
-                        ret.push_back(std::move(temp_path));
-                    }
-                }
-            }
-        }
-        catch (const std::exception&) {
-            continue;
-        }
-    }
-}
-
-void ASTUtils::scanFileNamesUseRecursive(const std::wstring& rootPath, std::vector<std::wstring>& ret,
-	std::wstring strSuf)
-{
-    scanFilesUseRecursive(rootPath, ret, strSuf);
-    std::vector<std::wstring> names;
-	for(auto& it : ret)
-	{
-		if(it.size() >= rootPath.size())
-		{
-            names.push_back(it.substr(rootPath.size()));
-		}
-	}
-    ret.swap(names);
-}
-
-void ASTUtils::scanFileNamesUseRecursive(const std::string& rootPath, std::vector<std::string>& ret, std::string strSuf)
-{
-    std::vector<std::wstring> out;
-    scanFileNamesUseRecursive(IcuUtil::s2ws(rootPath), out, IcuUtil::s2ws(strSuf));
-    for (auto& it : out)
-    {
-        ret.push_back(IcuUtil::ws2s(it));
-    }
-}
-
-void ASTUtils::scanFilesUseRecursive(const std::string& rootPath, std::vector<std::string>& ret, std::string strSuf)
-{
-    std::vector<std::wstring> out;
-    scanFilesUseRecursive(IcuUtil::s2ws(rootPath), out, IcuUtil::s2ws(strSuf));
-	for(auto& it : out)
-	{
-        ret.push_back(IcuUtil::ws2s(it));
-	}
 }
