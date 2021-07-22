@@ -344,6 +344,7 @@ public:
     PathListOptionValue(OptionDescriptor *od, bool noFlag) : StringListOptionValue(od, noFlag) { }
 
     void parseValue(std::string *v) ;
+    static  void  parsePathList(std::list<std::string>&, const char* pStart);
     const std::string *toString();
 };
 

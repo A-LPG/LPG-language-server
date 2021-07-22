@@ -23,20 +23,148 @@
 #include "message/MessageHandler.h"
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
 #include <LibLsp/JsonRpc/ScopeExit.h>
+
+#include "DependencyUtil.h"
 #include "SearchPolicy.h"
 #include "parser/JikesPGOptions.h"
+#include <boost/algorithm/string.hpp>
 using namespace LPGParser_top_level_ast;
 using namespace lsp;
-
+extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
+void process_symbol(std::shared_ptr<CompilationUnit>& unit);
 struct WorkSpaceManagerData
 {
-	WorkSpaceManagerData(WorkSpaceManager* onwer,WorkingFiles& _w, RemoteEndPoint& _end_point, lsp::Log& _log):_owner(onwer), working_files(_w),
+	WorkSpaceManagerData(WorkSpaceManager* onwer, RemoteEndPoint& _end_point, lsp::Log& _log):_owner(onwer),
 		end_point(_end_point),
 		logger(_log)
 	{
 	}
+	std::mutex mutex_;
+	std::set<AbsolutePath> toReconcile;
+	WorkingFiles working_files;
+	std::set<AbsolutePath> open_by_client;
+	std::unique_ptr<SimpleTimer<>>  timer;
+	std::shared_ptr<WorkingFile> OnOpen(lsTextDocumentItem& item, Monitor* monitor)
+	{
+		auto work_file = working_files.OnOpen(item);
+		
+		return  work_file;
+		
+	}
+	void OnChange(const lsTextDocumentDidChangeParams& params)
+	{
+		if (auto work_file = working_files.OnChange(params))
+		{
+			auto path = params.textDocument.uri.GetAbsolutePath();
+			{
+				std::lock_guard lock(mutex_);
+				toReconcile.insert(path);
+			}
+			timer = std::make_unique<SimpleTimer<>>(1000, [&]() {
+				std::set<AbsolutePath> cusToReconcile;
+				{
+					std::lock_guard lock2(mutex_);
+					cusToReconcile.swap(toReconcile);
+				}
+				for (auto& file_info : cusToReconcile)
+				{
+					std::wstring context;
+					if (auto file = working_files.GetFileByFilename(file_info); file)
+					{
+						auto unit = Find(path);
+						if (unit && unit->NeedToCompile())
+						{
+							_owner->Build(unit->working_file, nullptr);
+						}
+					}
+				}
+				});
+		}
+	}
+
+	typedef std::pair<string, string> Edge;
+	
+
+	void ReBindingAll()
+	{
+		std::vector<Edge> releatioin;
+		{
+			std::lock_guard lock_guard(mutex_for_reference);
+			for (auto& it : _references)
+			{
+				for (auto d : it.second)
+				{
+					releatioin.emplace_back(Edge(it.first.path, d.path));
+				}
+			}
+		}
+		vector< string > all_item;
+		{
+			readLock a(_rw_mutex);
+			for (auto& it : units)
+			{
+				all_item.push_back(it.first);
+			}
+		}
+
+		Jikes::PathModel::A_DependencyUtil depenency_util;
+		depenency_util.AddDependencies(releatioin);
+		vector< string > sort_array = depenency_util.getSort();
+		if (sort_array.empty() && releatioin.size())
+		{
+			const vector <Jikes::PathModel::A_DependencyUtil::cycleArray >& cyclearrays = depenency_util.getCycles();
+			string circle_info;
+			for (size_t i = 0; i < cyclearrays.size(); i++)
+			{
+				string info = cyclearrays[i].to_string();
+				if (i == cyclearrays.size() - 1)
+				{
+					circle_info += info;
+				}
+				else
+				{
+					circle_info += info + "-->";
+				}
+			}
+		
+			logger.error(circle_info);
+			return ;
+		}
+
+		if (sort_array.size() != all_item.size()) {
+			for (auto& it : all_item)
+			{
+				if (find(sort_array.begin(), sort_array.end(), it) == sort_array.end()) {
+					sort_array.push_back(it);
+				}
+			}
+		}
+
+		for(auto& it : sort_array)
+		{
+			auto _file = _owner->find(it);
+			if (!_file) continue;
+			ProblemHandler handle;
+			{
+				std::lock_guard< std::recursive_mutex > lock_guard(_file->runtime_unit->mutex);
+				_file->ResetBinding();
+				process_type_binding(_file, &handle);
+			}
+
+			Notify_TextDocumentPublishDiagnostics::notify notify;
+			notify.params.diagnostics = _file->runtime_unit->diagnostics;
+
+			notify.params.diagnostics.insert(notify.params.diagnostics.end(),
+				handle.diagnostics.begin(), handle.diagnostics.end());
+
+			notify.params.uri = _file->working_file->filename;
+			end_point.sendNotification(notify);
+		}
+	}
+
+	
 	WorkSpaceManager* _owner;
-	WorkingFiles& working_files;
+	
 	RemoteEndPoint& end_point;
 	lsp::Log& logger;
 	GenerationOptions generation_options;
@@ -58,26 +186,40 @@ struct WorkSpaceManagerData
 
 		return {};
 	}
-	std::map<AbsolutePath, std::vector< AbsolutePath> >  _references;
+	std::map<AbsolutePath, std::set< AbsolutePath> >  _references;
 	std::mutex mutex_for_reference;
-	void update_unit(const std::string& path, std::shared_ptr<CompilationUnit>& unit)
-	{
 
+	
+	void OnClose(const lsTextDocumentIdentifier& close)
+	{
+		working_files.OnClose(close);
+		bool  empty = false;
 		{
-		//	writeLock b(_rw_mutex);
-			units[path] = unit;
+			auto path = close.uri.GetAbsolutePath();
+			writeLock a(_rw_mutex);
+			open_by_client.erase(path);
+			units.erase(path);
+			empty = open_by_client.empty();
+		}
+		if(empty)
+		{
+			Clear();
 		}
 	}
-	
-	void remove(const std::string& path)
+	void Clear()
 	{
+		working_files.Clear();
 		{
 			writeLock a(_rw_mutex);
-			units.erase(path);
+			units.clear();
 		}
-	
+
+		{
+			std::lock_guard < std::mutex > lock_guard(mutex_for_reference);
+			_references.clear();
+		}
 	}
-	std::shared_ptr<CompilationUnit> find(const std::string& path)
+	std::shared_ptr<CompilationUnit> Find(const std::string& path)
 	{
 		readLock a(_rw_mutex);
 		auto findIt = units.find(path);
@@ -85,10 +227,10 @@ struct WorkSpaceManagerData
 			return findIt->second;
 		return {};
 	}
-	void remove_in_directory(std::vector<Directory>& directories)
+	void RemoveFromDirectory(std::vector<Directory>& directories)
 	{
 		if (directories.empty()) return;
-		
+		working_files.CloseFilesInDirectory(directories);
 		std::vector<string> files_to_be_delete;
 		{
 			readLock a(_rw_mutex);
@@ -116,7 +258,7 @@ struct WorkSpaceManagerData
 		}
 		for (auto& it : files_to_be_delete)
 		{
-			_owner->removeDependency(it);
+			_owner->RemoveDependency(it);
 		}
 		
 	}
@@ -295,7 +437,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 		refPath.append(fileName);
 		unit = find(AbsolutePath(refPath, false));
 		if (unit) return unit;
-		if (!boost::filesystem::exists(refPath, ec))
+		if (boost::filesystem::exists(refPath, ec))
 		{
 			return  CreateUnit(AbsolutePath(refPath, false),monitor);
 		}
@@ -405,7 +547,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path
 {
 	std::stringex temp(path.path);
 	temp.replace("\\", "/");
-	return  d_ptr->find(temp);
+	return  d_ptr->Find(temp);
 }
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePath& path, Monitor* monitor)
@@ -417,9 +559,9 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::find_or_open(const AbsolutePa
 	}
 	return  unit;
 }
-extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
-void process_symbol(std::shared_ptr<CompilationUnit>& unit);
-WorkSpaceManager::WorkSpaceManager(WorkingFiles& _w, RemoteEndPoint& end_point, lsp::Log& _log):d_ptr(new WorkSpaceManagerData(this,_w , end_point, _log))
+
+WorkSpaceManager::WorkSpaceManager(RemoteEndPoint& end_point, lsp::Log& _log)
+:d_ptr(new WorkSpaceManagerData(this , end_point, _log))
 {
 	
 }
@@ -429,16 +571,23 @@ WorkSpaceManager::~WorkSpaceManager()
 	delete d_ptr;
 }
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnOpen(std::shared_ptr<WorkingFile>& _open, Monitor* monitor)
+void WorkSpaceManager::OnOpen(lsTextDocumentItem& item, Monitor* monitor)
 {
-	return ProcessFileContent(_open, {}, monitor);
+	if (auto work_file = d_ptr->OnOpen(item,monitor))
+	{
+		
+		 ProcessFileContent(work_file, {}, monitor);
+	}
 }
 
-std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
-
+void WorkSpaceManager::OnChange(const lsTextDocumentDidChangeParams& params, Monitor* monitor)
 {
-	auto unit =  ProcessFileContent(_change,{}, monitor);
-	if (!unit)return unit;
+	d_ptr->OnChange(params);
+}
+void WorkSpaceManager::Build(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
+{
+	if (!ProcessFileContent(_change, {}, monitor))
+		return ;
 	
 	auto affected_unit = GetAffectedReferences(_change->filename);
 	for (const auto& it : affected_unit)
@@ -447,13 +596,13 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		if (!_file) continue;
 		ProblemHandler handle;
 		{
-			std::lock_guard< std::recursive_mutex > lock_guard(_file->runtime_unit->mutex);
+			std::lock_guard lock_guard(_file->runtime_unit->mutex);
 			_file->ResetBinding();
 			process_type_binding(_file, &handle);
 		}
 
 		Notify_TextDocumentPublishDiagnostics::notify notify;
-		notify.params.diagnostics = unit->runtime_unit->diagnostics;
+		notify.params.diagnostics = _file->runtime_unit->diagnostics;
 		
 		notify.params.diagnostics.insert(notify.params.diagnostics.end(),
 			handle.diagnostics.begin(), handle.diagnostics.end());
@@ -461,7 +610,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::OnChange(std::shared_ptr<Work
 		notify.params.uri = _file->working_file->filename;
 		d_ptr->end_point.sendNotification(notify);
 	}
-	return unit;
+
 }
 
 
@@ -501,7 +650,9 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 		if (monitor && monitor->isCancelled())
 			return nullptr;
 		unit->runtime_unit->diagnostics.swap(handle.diagnostics);
-		d_ptr->update_unit(_change->filename, unit);
+	
+		d_ptr->units[_change->filename] = unit;
+		
 		process_symbol(unit);
 		unit->runtime_unit->mutex.lock();
 	}
@@ -708,12 +859,12 @@ void WorkSpaceManager::collect_options(std::stack<LPGParser_top_level_ast::optio
 }
 
 
-void WorkSpaceManager::OnClose(const lsDocumentUri& close)
+void WorkSpaceManager::OnClose(const lsTextDocumentIdentifier& close)
 {
-	d_ptr->remove(close.GetAbsolutePath());
+	d_ptr->OnClose(close);
 }
 
-void WorkSpaceManager::OnSave(const lsDocumentUri& _save)
+void WorkSpaceManager::OnSave(const lsTextDocumentIdentifier& _save)
 {
 	
 }
@@ -726,12 +877,11 @@ void WorkSpaceManager::OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFolde
 	{
 		remove.emplace_back(Directory(it.uri.GetAbsolutePath()));
 	}
-	d_ptr->remove_in_directory(remove);
-}
-
-void WorkSpaceManager::UpdateIncludePaths(const std::vector<Directory>& dirs)
-{
-	d_ptr->includeDirs = dirs;
+	if(!remove.empty())
+	{
+		d_ptr->RemoveFromDirectory(remove);
+		d_ptr->ReBindingAll();
+	}
 }
 
 std::vector<Directory> WorkSpaceManager::GetIncludeDirs() const
@@ -751,7 +901,85 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::FindFile(ILexStream* lex)
 
 void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 {
+	bool change =false;
+	std::vector<Directory> remove;
+	if(setting.include_search_directory != d_ptr->generation_options.include_search_directory)
+	{
+		change = true;
+		
+		if(d_ptr->generation_options.include_search_directory)
+		{
+			std::list < std::string > paths;
+			auto value = d_ptr->generation_options.include_search_directory.value();
+			PathListOptionValue::parsePathList(paths, value.c_str());
+			for(auto& it : paths)
+			{
+				boost::replace_all(it, "\\", "/");
+				Directory directory(it);
+				remove.push_back(directory);
+			}
+
+		}
+	}
+	if (setting.template_search_directory != d_ptr->generation_options.template_search_directory)
+	{
+		change = true;
+		if (d_ptr->generation_options.template_search_directory)
+		{
+			std::list < std::string > paths;
+			auto value = d_ptr->generation_options.template_search_directory.value();
+			PathListOptionValue::parsePathList(paths, value.c_str());
+			for (auto& it : paths)
+			{
+				boost::replace_all(it, "\\", "/");
+				Directory directory(it);
+				remove.push_back(directory);
+			}
+		}
+	}
+	if (setting.additionalParameters != d_ptr->generation_options.additionalParameters)
+	{
+		change = true;
+	}
+
+	d_ptr->includeDirs.clear();
+	if(setting.include_search_directory)
+	{
+		auto dir = setting.include_search_directory.value();
+		std::list < std::string > paths;
+		PathListOptionValue::parsePathList(paths, dir.c_str());
+		
+		for(auto& it : paths)
+		{
+			boost::replace_all(it, "\\", "/");
+			Directory directory(it);
+			d_ptr->includeDirs.push_back(directory);
+		}
+		
+	}
+	if (setting.template_search_directory)
+	{
+		auto dir = setting.template_search_directory.value();
+		std::list < std::string > paths;
+		PathListOptionValue::parsePathList(paths, dir.c_str());
+
+		for (auto& it : paths)
+		{
+			boost::replace_all(it, "\\", "/");
+			Directory directory(it);	
+			d_ptr->includeDirs.push_back(directory);
+		}
+	}
+	
 	d_ptr->generation_options = setting;
+
+	d_ptr->RemoveFromDirectory(remove);
+	if(change)
+	{
+		d_ptr->ReBindingAll();
+	}
+
+	//  
 }
 
 GenerationOptions& WorkSpaceManager::GetSetting() const
@@ -760,29 +988,20 @@ GenerationOptions& WorkSpaceManager::GetSetting() const
 }
 
 
-void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references)
-{
 
-	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
-	for(auto& it : references)
-	{
-		d_ptr->_references[from].push_back(it);
-	}
+void WorkSpaceManager::AddAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference)
+{
+	std::lock_guard lock_guard(d_ptr->mutex_for_reference);
+	d_ptr->_references[from].insert(reference);
 }
 
-void WorkSpaceManager::addAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference)
-{
-	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
-	d_ptr->_references[from].push_back(reference);
-}
-
-void WorkSpaceManager::removeDependency(const AbsolutePath& from)
+void WorkSpaceManager::RemoveDependency(const AbsolutePath& from)
 {
 	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
 	d_ptr->_references.erase(from);
 }
 
-std::vector<AbsolutePath> WorkSpaceManager::GetReference(const AbsolutePath& from)
+std::set<AbsolutePath> WorkSpaceManager::GetReference(const AbsolutePath& from)
 {
 	std::lock_guard < std::mutex > lock_guard(d_ptr->mutex_for_reference);
 	const auto it = d_ptr->_references.find(from);

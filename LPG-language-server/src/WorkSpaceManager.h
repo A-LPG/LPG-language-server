@@ -11,6 +11,9 @@
 #include <LibLsp/lsp/lsAny.h>
 
 
+struct lsTextDocumentIdentifier;
+struct lsTextDocumentDidChangeParams;
+struct lsTextDocumentItem;
 struct ProblemHandler;
 struct JikesPG2;
 struct SearchPolicy;
@@ -78,6 +81,13 @@ struct WorkSpaceManagerData;
 
 
 struct WorkSpaceManager {
+
+	void OnOpen(lsTextDocumentItem&, Monitor* monitor);
+	void OnChange(const lsTextDocumentDidChangeParams& params, Monitor* monitor);
+	void OnClose(const lsTextDocumentIdentifier& close);
+	void OnSave(const lsTextDocumentIdentifier& _save);
+	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);
+	
 	
 	std::shared_ptr<CompilationUnit> CreateUnit(const AbsolutePath& path, Monitor* monitor);
 
@@ -87,15 +97,15 @@ struct WorkSpaceManager {
 	std::vector<Object*> findDefOf(const SearchPolicy&, LPGParser_top_level_ast::ASTNodeToken* s, const std::shared_ptr<CompilationUnit>& unit, Monitor* monitor);
 	std::shared_ptr<CompilationUnit> find(const AbsolutePath& path);
 	std::shared_ptr<CompilationUnit> find_or_open(const AbsolutePath& path, Monitor* monitor);
-	WorkSpaceManager(WorkingFiles&, RemoteEndPoint& , lsp::Log&);
+
+	
+	WorkSpaceManager(RemoteEndPoint& , lsp::Log&);
 	~WorkSpaceManager();
 	
-	std::shared_ptr<CompilationUnit> OnOpen(std::shared_ptr<WorkingFile>&, Monitor* monitor);
-	std::shared_ptr<CompilationUnit> OnChange(std::shared_ptr<WorkingFile>&, Monitor* monitor);
-	void OnClose(const lsDocumentUri& close);
-	void OnSave(const lsDocumentUri& _save);
-	void OnDidChangeWorkspaceFolders(const DidChangeWorkspaceFoldersParams&);
-	void UpdateIncludePaths(const std::vector<Directory>&);
+
+
+
+	void Build(std::shared_ptr<WorkingFile>&, Monitor* monitor);
 	std::vector<Directory> GetIncludeDirs()const;
 	RemoteEndPoint& GetEndPoint()const;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);
@@ -103,12 +113,12 @@ struct WorkSpaceManager {
 
 	void UpdateSetting(const GenerationOptions&) const;
 	GenerationOptions& GetSetting() const;
-	void addAsReferenceTo(const AbsolutePath& from, const std::vector<AbsolutePath>& references);
-	void addAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference);
 
-	void removeDependency(const AbsolutePath& from);
+	void AddAsReferenceTo(const AbsolutePath& from, const AbsolutePath& reference);
 
-	std::vector<AbsolutePath> GetReference(const AbsolutePath& from);
+	void RemoveDependency(const AbsolutePath& from);
+
+	std::set<AbsolutePath> GetReference(const AbsolutePath& from);
 	std::vector<AbsolutePath> GetAffectedReferences(const AbsolutePath& from);
 
 	void collect_options(std::stack<LPGParser_top_level_ast::option*>&,

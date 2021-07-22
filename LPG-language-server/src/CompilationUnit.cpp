@@ -289,7 +289,7 @@ std::shared_ptr<JikesPG2> CompilationUnit::GetBinding()
 
 void CompilationUnit::removeDependency()
 {
-	parent.removeDependency(working_file->filename);
+	parent.RemoveDependency(working_file->filename);
 }
 
 void CompilationUnit::ResetBinding()

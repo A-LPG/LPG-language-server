@@ -234,20 +234,25 @@ PathListOptionValue::parseValue(std::string *v)
     }
     
     // Split string at semicolons
-    const char *pStart = v->c_str();
+    parsePathList(values, v->c_str());
+}
+
+void PathListOptionValue::parsePathList(std::list<std::string>& list, const char* pStart)
+{
     do {
-        const char *pEnd = strchr(pStart, ';');
-        std::string *val;
-        
+        const char* pEnd = strchr(pStart, ';');
+        std::string* val;
+
         if (pEnd == NULL) {
             val = new std::string(pStart);
             pStart = pEnd;
-        } else {
+        }
+        else {
             val = new std::string(pStart, pEnd - pStart);
             pStart = pEnd + 1;
         }
-        
-        values.push_back(*val);
+
+        list.push_back(*val);
         delete val;
     } while (pStart != NULL);
 }

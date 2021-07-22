@@ -94,11 +94,10 @@ bool ShouldIgnoreFileForIndexing(const std::string& path) {
 class Server
 {
 public:
-	std::mutex mutex_;
-	std::set<AbsolutePath> toReconcile;
-	WorkingFiles working_files;
+	
+
 	WorkSpaceManager   work_space_mgr;
-	std::unique_ptr<SimpleTimer<>>  timer;
+
 	RemoteEndPoint& _sp;
 	
 
@@ -142,14 +141,17 @@ public:
 	};
 	ExitMsgMonitor exit_monitor;
 	
-	std::shared_ptr<CompilationUnit> GetUnit(const AbsolutePath& path, Monitor* monitor, bool keep_consist = true)
+
+	std::shared_ptr<CompilationUnit> GetUnit(const lsTextDocumentIdentifier& uri, Monitor* monitor, bool keep_consist = true)
 	{
+		const AbsolutePath& path = uri.uri.GetAbsolutePath();
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
 			if (unit->NeedToCompile() && keep_consist)
 			{
-				unit = work_space_mgr.OnChange(unit->working_file, monitor);
+				work_space_mgr.Build(unit->working_file, monitor);
+				
 			}
 		}
 		else
@@ -158,11 +160,7 @@ public:
 		}
 		return  unit;
 	}
-	std::shared_ptr<CompilationUnit> GetUnit(const lsTextDocumentIdentifier& uri, Monitor* monitor, bool keep_consist = true)
-	{
-		const AbsolutePath& path = uri.uri.GetAbsolutePath();
-		return GetUnit(path, monitor, keep_consist);
-	}
+	
 	void on_exit()
 	{
 		exit_monitor.Cancel();
@@ -177,7 +175,7 @@ public:
 			registeredCapabilities[method] = reg;
 		}
 	}
-	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(working_files, server.point, _log),
+	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(server.point, _log),
 	_sp(server.point), enable_watch_parent_process(_enable_watch_parent_process), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
 
@@ -195,8 +193,6 @@ public:
 				auto SETTINGS_KEY = "settings";
 				if(req.params.initializationOptions)
 				{
-					
-				
 					do
 					{
 						map<std::string, lsp::Any> initializationOptions;
@@ -231,9 +227,7 @@ public:
 						
 						work_space_mgr.UpdateSetting(generation_options);
 					}
-					while (false);
-
-					
+					while (false);	
 				}
 		
 			
@@ -726,12 +720,7 @@ public:
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
 					return;
-				if(auto work_file = working_files.OnOpen(params.textDocument))
-			    {
-					work_space_mgr.OnOpen(work_file,&exit_monitor);
-			    }
-					
-				// 解析 
+				work_space_mgr.OnOpen(params.textDocument,&exit_monitor);
 			});
 	
 		_sp.registerHandler([&]( Notify_TextDocumentDidChange::notify& notify)
@@ -743,33 +732,7 @@ public:
 			AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 			if (ShouldIgnoreFileForIndexing(path))
 				return;
-			if(auto work_file= working_files.OnChange(params))
-			{
-				{
-					std::lock_guard lock(mutex_);
-					toReconcile.insert(path);
-				}
-				timer = std::make_unique<SimpleTimer<>>(1000,[&](){
-					std::set<AbsolutePath> cusToReconcile;
-						{
-							std::lock_guard lock2(mutex_);
-							cusToReconcile.swap(toReconcile);
-						}
-						for(auto& file_info : cusToReconcile)
-						{
-							std::wstring context;
-							if(auto file = working_files.GetFileByFilename(file_info); file)
-							{
-								if(exit_monitor.isCancelled())
-								{
-									return;
-								}
-								GetUnit(file_info,&exit_monitor);
-								
-							}
-						}
-				});	
-			}
+			work_space_mgr.OnChange(params,&exit_monitor);
 			
 		});
 		_sp.registerHandler([&](Notify_TextDocumentDidClose::notify& notify)
@@ -782,9 +745,8 @@ public:
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
 					return;
-				working_files.OnClose(params.textDocument);
-				work_space_mgr.OnClose(notify.params.textDocument.uri);
-			    // 通知消失了
+				work_space_mgr.OnClose(params.textDocument);
+
 		});
 		
 		_sp.registerHandler([&](Notify_TextDocumentDidSave::notify& notify)
@@ -797,8 +759,7 @@ public:
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
 				if (ShouldIgnoreFileForIndexing(path))
 					return;
-				working_files.OnClose(params.textDocument);
-				work_space_mgr.OnSave(params.textDocument.uri);
+				work_space_mgr.OnSave(params.textDocument);
 				// 通知消失了
 			});
 		
@@ -808,19 +769,36 @@ public:
 		});
 		_sp.registerHandler([&](Notify_WorkspaceDidChangeConfiguration::notify& notify)
 			{
-				_log.info(notify.ToJson());
+				do
+				{
+					map<std::string, lsp::Any> settings;
+					try
+					{
+						notify.params.settings.Get(settings);
+					}
+					catch (...)
+					{
+						break;
+					}
+					GenerationOptions generation_options;
+
+					try
+					{
+						settings["options"].GetFromMap(generation_options);
+					}
+					catch (...)
+					{
+						break;
+					}
+					work_space_mgr.UpdateSetting(generation_options);
+				} while (false);
+			
 			});
 		_sp.registerHandler([&](Notify_WorkspaceDidChangeWorkspaceFolders::notify& notify)
 		{
 				if (need_initialize_error) {
 					return;
 				}
-				std::vector<Directory> remove;
-			    for(auto& it :notify.params.event.removed)
-			    {
-					remove.emplace_back(Directory(it.uri.GetAbsolutePath()));
-			    }
-				working_files.CloseFilesInDirectory(remove);
 				work_space_mgr.OnDidChangeWorkspaceFolders(notify.params);
 		});
 		

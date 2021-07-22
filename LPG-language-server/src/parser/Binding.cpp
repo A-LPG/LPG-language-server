@@ -285,15 +285,29 @@ struct LPGBindingVisitor :public AbstractVisitor {
     }
     bool visit(include_segment* n)
     {
-        auto file_name = n->getSYMBOL()->to_utf8_string();
-	    return process_include(file_name);
+        const std::string& file_name = n->to_utf8_string();
+	    return process_include(true,file_name,n);
     }
-    bool process_include(const std::string& file_name) const
+    bool process_include(bool for_include_file ,const std::string& file_name,ASTNode* position_node) const
     {
+        
         auto include_unit=  unit->parent.lookupImportedFile(unit->working_file->directory, file_name,nullptr);
         if (!include_unit)
         {
+            if (!unit_binding) return false;
 	        // warning
+            std::string msg;
+           if(for_include_file)
+           {
+	           msg = "The include file ";
+           }
+           else
+           {
+               msg = "The template file ";
+           }
+           msg += file_name;
+           msg += " could not be read.";
+            unit_binding->lpg_data->option->EmitError(position_node->getLeftIToken(), msg.c_str());
         	return false;
         }
       
@@ -301,7 +315,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         if (!include_binding)return true;
         if (!include_binding->lpg_data)return true;
     	
-        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
+        unit->parent.AddAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
     	if(!include_binding)return false;
     	for(auto& it : include_binding->unit_table)
     	{
@@ -457,19 +471,28 @@ struct LPGBindingVisitor :public AbstractVisitor {
         
     }
 
-    bool ImportTerminals(const std::string& file_name) const
+    bool ImportTerminals(const std::string& file_name, ASTNode* position_node) const
     {
         auto include_unit = unit->parent.lookupImportedFile(unit->working_file->directory, file_name, nullptr);
         if (!include_unit)
         {
+            if (!unit_binding) return false;
             // warning
+            std::string msg;
+           
+            msg = "The import terminal file ";
+    
+            msg += file_name;
+            msg += " could not be read.";
+            unit_binding->lpg_data->option->EmitError(position_node->getLeftIToken(), msg.c_str());
             return false;
         }
+
         auto include_binding = include_unit->GetBinding();
         if (!include_binding )return true;
         if (!include_binding->lpg_data)return true;
 
-        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
+        unit->parent.AddAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
         if (!include_binding)return false;
 
         if (include_binding->lex_stream.NumTokens() == 0)
@@ -516,19 +539,25 @@ struct LPGBindingVisitor :public AbstractVisitor {
         }
     	return true;
     }
-    bool ProcessFilters(const std::string& file_name) const
+    bool ProcessFilters(const std::string& file_name, ASTNode* position_node) const
     {
         auto include_unit = unit->parent.lookupImportedFile(unit->working_file->directory, file_name, nullptr);
         if (!include_unit)
         {
-            // warning
+            if (!unit_binding) return false;
+
+            std::string msg = "The filter file ";
+
+            msg += file_name;
+            msg += " could not be read.";
+            unit_binding->lpg_data->option->EmitError(position_node->getLeftIToken(), msg.c_str());
             return false;
         }
         auto include_binding = include_unit->GetBinding();
         if (!include_binding)return true;
         if (!include_binding->lpg_data)return true;
     	
-        unit->parent.addAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
+        unit->parent.AddAsReferenceTo(unit->working_file->filename, include_unit->working_file->filename);
 
         if (!include_binding)return false;
 
@@ -1080,15 +1109,16 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 
 	if(!unit->dependence_info.template_files.empty())
 	{
-        visitor.process_include(unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1].first);
+        auto& it = unit->dependence_info.template_files[unit->dependence_info.template_files.size() - 1];
+        visitor.process_include(false,it.first,it.second);
 	}
     for (auto& file : unit->dependence_info.import_terminals_files)
     {
-       (void) visitor.ImportTerminals(file.first);
+       (void) visitor.ImportTerminals(file.first,file.second);
     }
     for (auto& file : unit->dependence_info.filter_files)
     {
-        (void)visitor.ProcessFilters(file.first);
+        (void)visitor.ProcessFilters(file.first,file.second);
     }
     
 	 try
