@@ -236,18 +236,18 @@ void CompletionHandler::Data::computeSegmentCompletions(const std::string& prefi
 
 void  CompletionHandler::Data::computeOptionKeyProposals(const string& prefix) {
 
-    //std::stringex prefix_lower = prefix;
-    //prefix_lower.tolower();
-    //for (int i = 0; i < OPTION_KEYS.size(); i++) {
-    //    if (OPTION_KEYS_LOWER[i].start_with(prefix_lower)) {
-    //      //  std::string addlInfo;
-    //     //   HTMLPrinter.addSmallHeader(addlInfo, key);
-    //      //  HTMLPrinter.addParagraph(addlInfo, HTMLPrinter.convertToHTMLContent(OPTION_ARGS[i]));
-    //        std::stringex& key = OPTION_KEYS[i];
-    //        MakeCompletionItem(key, key, prefix, Region(offset, 0), OPTION_ARGS[i]);
-    //    }
-    //}
-    get_for_key_word();
+    std::stringex prefix_lower = prefix;
+    prefix_lower.tolower();
+    for (int i = 0; i < OPTION_KEYS.size(); i++) {
+        if (OPTION_KEYS_LOWER[i].start_with(prefix_lower)) {
+          //  std::string addlInfo;
+         //   HTMLPrinter.addSmallHeader(addlInfo, key);
+          //  HTMLPrinter.addParagraph(addlInfo, HTMLPrinter.convertToHTMLContent(OPTION_ARGS[i]));
+            std::stringex& key = OPTION_KEYS[i];
+            MakeCompletionItem(key, key, prefix, Region(offset, 0), OPTION_ARGS[i]);
+        }
+    }
+
 }
 void CompletionHandler::Data::computeMacroCompletions(const string& prefix) {
 
@@ -344,6 +344,10 @@ void   CompletionHandler::Data::get_for_key_word()
                 tokens.push_back(it);
             }
             if (tokens.empty()) return;
+        	if(tokens.size() ==  1 && cses.size() ==2)
+        	{
+                tokens.push_back("");
+        	}
             prefix = tokens[tokens.size()-1];
         }
 
@@ -377,7 +381,11 @@ void   CompletionHandler::Data::get_for_key_word()
             {
                 for (auto& value : it->second)
                 {
-                    if (!value.start_with(prefix))
+                	if(prefix.empty())
+                	{
+                	     	
+                	}
+                    else if (!value.start_with(prefix))
                     {
                         continue;
                     }
@@ -498,7 +506,7 @@ CompletionHandler::Data::Data(std::shared_ptr<CompilationUnit>& u, CompletionLis
 		auto opt = static_cast<option*>(thisNode->parent);
 		if (thisNode == opt->getSYMBOL())
 		{
-			computeOptionKeyProposals(prefix);
+            get_for_key_word();
 		}
 	}
     if (dynamic_cast<option_value0*>(thisNode->parent))
@@ -506,7 +514,7 @@ CompletionHandler::Data::Data(std::shared_ptr<CompilationUnit>& u, CompletionLis
         auto opt = static_cast<option_value0*>(thisNode->parent);
         if (thisNode == opt->getSYMBOL())
         {
-            computeOptionKeyProposals(prefix);
+            get_for_key_word();
         }
     }
 	else if (dynamic_cast<LPG*>(thisNode->getParent()) || prefix.start_with("%"))
@@ -519,6 +527,7 @@ CompletionHandler::Data::Data(std::shared_ptr<CompilationUnit>& u, CompletionLis
 	}
 	else
 	{
+        get_for_key_word();
 		computeNonTerminalCompletions(prefix);
 		computeTerminalCompletions(prefix);
 	}

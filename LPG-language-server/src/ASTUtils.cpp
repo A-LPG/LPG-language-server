@@ -94,6 +94,11 @@ std::string ASTUtils::getWord(LexStream* lex,  int offset)
     auto buffer = lex->getInputChars();
     std::wstring word;
     if (buffer.size() <= offset) return "";
+    auto c = buffer[offset];
+	if(c == '\n')
+	{
+        offset -= 1;
+	}
     while (offset)
     {
         auto c = buffer[offset];

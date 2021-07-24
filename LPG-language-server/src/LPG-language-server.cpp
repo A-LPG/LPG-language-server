@@ -148,10 +148,10 @@ public:
 		auto unit = work_space_mgr.find(path);
 		if (unit)
 		{
+			
 			if (unit->NeedToCompile() && keep_consist)
 			{
-				work_space_mgr.Build(unit->working_file, monitor);
-				
+				unit =work_space_mgr.Build(unit->working_file, monitor);
 			}
 		}
 		else
@@ -191,6 +191,7 @@ public:
 				td_initialize::response rsp;
 				lsServerCapabilities capabilities;
 				auto SETTINGS_KEY = "settings";
+			
 				if(req.params.initializationOptions)
 				{
 					do
@@ -199,6 +200,7 @@ public:
 						try
 						{
 							lsp::Any init_object = req.params.initializationOptions.value();
+						
 							init_object.Get(initializationOptions);
 						}
 						catch (...)
@@ -208,6 +210,7 @@ public:
 						map<std::string, lsp::Any> settings;
 						try
 						{
+							
 							initializationOptions[SETTINGS_KEY].Get(settings);
 						}
 						catch (...)
@@ -218,12 +221,14 @@ public:
 					
 						try
 						{
+						
  							settings["options"].GetFromMap(generation_options);
 						}
 						catch (...)
 						{
 							break;
 						}
+						
 						
 						work_space_mgr.UpdateSetting(generation_options);
 					}
@@ -406,6 +411,12 @@ public:
 				if (unit)
 				{
 					process_hover(unit, req.params.position, rsp.result, &_requestMonitor);
+					if(_requestMonitor.isCancelled())
+					{
+						rsp.result.contents.second.reset();
+						rsp.result.contents.first = TextDocumentHover::Left();
+						return std::move(rsp);
+					}
 					if(!rsp.result.contents.first.has_value() && !rsp.result.contents.second.has_value())
 					{
 						rsp.result.contents.first = TextDocumentHover::Left();
@@ -828,6 +839,7 @@ public:
 	Condition<bool> esc_event;
 
 };
+
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])

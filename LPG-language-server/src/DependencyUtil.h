@@ -1,10 +1,5 @@
 #pragma once
 
-#ifndef BaseDependencyUtil_jikes_PathModel_INCLUDED_INCLUDED
-#define BaseDependencyUtil_jikes_PathModel_INCLUDED_INCLUDED
-
-#include <boost/config.hpp>
-#include <iostream>
 #include <vector>
 #include <boost/graph/strong_components.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -246,5 +241,3 @@ typedef BaseDependencyUtil<wchar_t> W_DependencyUtil;
 
 } // Close namespace Jikes block
 
-
-#endif // _INCLUDED

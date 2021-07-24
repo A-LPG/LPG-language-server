@@ -105,7 +105,7 @@ struct WorkSpaceManager {
 
 
 
-	void Build(std::shared_ptr<WorkingFile>&, Monitor* monitor);
+	std::shared_ptr<CompilationUnit> Build(std::shared_ptr<WorkingFile>&, Monitor* monitor);
 	std::vector<Directory> GetIncludeDirs()const;
 	RemoteEndPoint& GetEndPoint()const;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream*);

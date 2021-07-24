@@ -135,7 +135,7 @@ struct DocumentationProvider
                 }
             }*/
         	
-            markdown_output.addCodeBlock(nt->to_utf8_string() + " ");
+           markdown_output.addCodeBlock(nt->to_utf8_string() + " ");
         	
         }
         else if (dynamic_cast<terminal*>(target)) {

@@ -44,18 +44,36 @@ struct WorkSpaceManagerData
 	WorkingFiles working_files;
 	std::set<AbsolutePath> open_by_client;
 	std::unique_ptr<SimpleTimer<>>  timer;
+	
+	
+	WorkSpaceManager* _owner;
+	
+	RemoteEndPoint& end_point;
+	lsp::Log& logger;
+	GenerationOptions generation_options;
+	typedef boost::shared_lock<boost::shared_mutex> readLock;
+	typedef boost::unique_lock<boost::shared_mutex> writeLock;
+	boost::shared_mutex _rw_mutex;
+
+	std::map<std::string, std::shared_ptr<CompilationUnit>> units;
+
+	std::vector<Directory>includeDirs;
+
+	std::map<AbsolutePath, std::set< AbsolutePath> >  _references;
+	std::mutex mutex_for_reference;
+	
 	std::shared_ptr<WorkingFile> OnOpen(lsTextDocumentItem& item, Monitor* monitor)
 	{
 		auto work_file = working_files.OnOpen(item);
-		
+
 		return  work_file;
-		
+
 	}
 	void OnChange(const lsTextDocumentDidChangeParams& params)
 	{
 		if (auto work_file = working_files.OnChange(params))
 		{
-			auto path = params.textDocument.uri.GetAbsolutePath();
+			/*auto path = params.textDocument.uri.GetAbsolutePath();
 			{
 				std::lock_guard lock(mutex_);
 				toReconcile.insert(path);
@@ -68,22 +86,19 @@ struct WorkSpaceManagerData
 				}
 				for (auto& file_info : cusToReconcile)
 				{
-					std::wstring context;
-					if (auto file = working_files.GetFileByFilename(file_info); file)
+					
+					auto unit = Find(file_info);
+					if (unit && unit->NeedToCompile())
 					{
-						auto unit = Find(path);
-						if (unit && unit->NeedToCompile())
-						{
-							_owner->Build(unit->working_file, nullptr);
-						}
+						_owner->Build(unit->working_file, nullptr);
 					}
 				}
-				});
+				});*/
 		}
 	}
 
 	typedef std::pair<string, string> Edge;
-	
+
 
 	void ReBindingAll()
 	{
@@ -126,9 +141,9 @@ struct WorkSpaceManagerData
 					circle_info += info + "-->";
 				}
 			}
-		
+
 			logger.error(circle_info);
-			return ;
+			return;
 		}
 
 		if (sort_array.size() != all_item.size()) {
@@ -140,7 +155,7 @@ struct WorkSpaceManagerData
 			}
 		}
 
-		for(auto& it : sort_array)
+		for (auto& it : sort_array)
 		{
 			auto _file = _owner->find(it);
 			if (!_file) continue;
@@ -162,19 +177,6 @@ struct WorkSpaceManagerData
 		}
 	}
 
-	
-	WorkSpaceManager* _owner;
-	
-	RemoteEndPoint& end_point;
-	lsp::Log& logger;
-	GenerationOptions generation_options;
-	typedef boost::shared_lock<boost::shared_mutex> readLock;
-	typedef boost::unique_lock<boost::shared_mutex> writeLock;
-	boost::shared_mutex _rw_mutex;
-
-	std::map<std::string, std::shared_ptr<CompilationUnit>> units;
-
-	std::vector<Directory>includeDirs;
 	std::shared_ptr<CompilationUnit> FindFile(ILexStream* lex)
 	{
 		readLock a(_rw_mutex);
@@ -186,10 +188,7 @@ struct WorkSpaceManagerData
 
 		return {};
 	}
-	std::map<AbsolutePath, std::set< AbsolutePath> >  _references;
-	std::mutex mutex_for_reference;
 
-	
 	void OnClose(const lsTextDocumentIdentifier& close)
 	{
 		working_files.OnClose(close);
@@ -263,16 +262,21 @@ struct WorkSpaceManagerData
 		
 	}
 };
-std::wstring stripName(const std::wstring& rawId) {
-	int idx = rawId.find('$');
 
-	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
-}
-std::string stripName(const std::string& rawId) {
-	int idx = rawId.find('$');
+namespace 
+{
+	std::wstring stripName(const std::wstring& rawId) {
+		int idx = rawId.find('$');
 
-	return (idx >= 0) ? rawId.substr(0, idx) : rawId;
+		return (idx >= 0) ? rawId.substr(0, idx) : rawId;
+	}
+	std::string stripName(const std::string& rawId) {
+		int idx = rawId.find('$');
+
+		return (idx >= 0) ? rawId.substr(0, idx) : rawId;
+	}
 }
+
 std::vector<Object*>  WorkSpaceManager::findDefOf_internal( const SearchPolicy& policy, std::wstring _word,
                                               const std::shared_ptr<CompilationUnit>& refUnit,  Monitor* monitor)
 {
@@ -584,10 +588,11 @@ void WorkSpaceManager::OnChange(const lsTextDocumentDidChangeParams& params, Mon
 {
 	d_ptr->OnChange(params);
 }
-void WorkSpaceManager::Build(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
+std::shared_ptr<CompilationUnit> WorkSpaceManager::Build(std::shared_ptr<WorkingFile>& _change, Monitor* monitor)
 {
-	if (!ProcessFileContent(_change, {}, monitor))
-		return ;
+	auto unit = ProcessFileContent(_change, {}, monitor);
+	if (!unit)
+		return nullptr;
 	
 	auto affected_unit = GetAffectedReferences(_change->filename);
 	for (const auto& it : affected_unit)
@@ -610,7 +615,7 @@ void WorkSpaceManager::Build(std::shared_ptr<WorkingFile>& _change, Monitor* mon
 		notify.params.uri = _file->working_file->filename;
 		d_ptr->end_point.sendNotification(notify);
 	}
-
+	return unit;
 }
 
 
