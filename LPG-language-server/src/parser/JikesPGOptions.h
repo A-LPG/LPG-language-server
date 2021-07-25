@@ -295,6 +295,20 @@ private:
     int value;
 };
 
+class CharOptionValue : public OptionValue {
+public:
+    CharOptionValue(OptionDescriptor* od, bool noFlag) : OptionValue(od, noFlag) { }
+
+    void setValue(std::string v) { value = v; }
+    std::string getValue() { return value; }
+
+    void parseValue(std::string* v);
+    const std::string* toString();
+
+private:
+    std::string value;
+};
+
 class StringOptionValue : public OptionValue {
 public:
     StringOptionValue(OptionDescriptor *od, bool noFlag) : OptionValue(od, noFlag) { }

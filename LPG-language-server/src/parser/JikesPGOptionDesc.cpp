@@ -187,6 +187,11 @@ OptionDescriptor::createValue(bool noFlag)
             PathOptionValue *pv = new PathOptionValue(this, noFlag);
             return pv;
         }
+        case CHAR_TYPE:
+	        {
+			  auto cv = new CharOptionValue(this, noFlag);
+              return  cv;
+	        }
         case STRING: {
             StringOptionValue *sv = new StringOptionValue(this, noFlag);
             return sv;

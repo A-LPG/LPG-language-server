@@ -840,18 +840,19 @@ public:
 
 };
 
+const char VERSION[] = "LPG-language-server 0.0.3 (" __DATE__ ")";
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])
 {
 	
 	using namespace  boost::program_options;
-	options_description desc("Allowed options");
+	options_description desc(" LPG-language-server allowed options");
 	desc.add_options()
 		(_PORT_STR, value<int>(), "tcp port")
 		("watchParentProcess", "enable watch parent process")
-		("help,h", "produce help message");
-
+		("help,h", "produce help message")
+		("version,v", VERSION);
 
 
 	variables_map vm;
@@ -865,9 +866,14 @@ int main(int argc, char* argv[])
 	notify(vm);
 
 
-	if (vm.count("help"))
+	if (vm.count("help") || vm.count("h"))
 	{
 		cout << desc << endl;
+		return 1;
+	}
+	if (vm.count("version") ||  vm.count("v"))
+	{
+		cout << VERSION << endl;
 		return 1;
 	}
 	bool  enable_watch_parent_process = false;

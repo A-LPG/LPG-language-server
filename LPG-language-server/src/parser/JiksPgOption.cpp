@@ -446,6 +446,7 @@ void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& 
             }
             auto opt_string = _opt->to_utf8_string();
             opt_string.push_back('\0');
+        	
             const char* param = opt_string.c_str();
             auto value = optionParser->parse(param);
             if (value) {

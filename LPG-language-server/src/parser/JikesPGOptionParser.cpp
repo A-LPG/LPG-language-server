@@ -115,7 +115,9 @@ std::unique_ptr<OptionValue> OptionParser::parse(const char*& start, const std::
         // This option is a match
         std::string* optValueStr = getOptionValue(start);
         OptionValue* optValue = od->createValue(noFlag);
-
+    	
+        if (!optValue)return nullptr;
+    	
         optValue->parseValue(optValueStr);
         //        // HACK Handle the "no" prefix on boolean options
         if (od->getType() == BOOLEAN_TYPE && !noFlag) {
