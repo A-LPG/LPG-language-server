@@ -61,8 +61,8 @@ private:
 class OptionDescriptor {
 public:
     static  bool IsIncludeOption(const std::string&);
-    OptionDescriptor(OptionType type, const char *word1, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false);
-    OptionDescriptor(OptionType type, const char *word1, const char *word2, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false);
+    OptionDescriptor(OptionType type, const char *word1, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false, bool wordIgnoreCase = true);
+    OptionDescriptor(OptionType type, const char *word1, const char *word2, const char *descrip, OptionProcessor::ValueHandler handler, bool valueOptional = false, bool wordIgnoreCase = true);
 
     const char *getWord1() const { return word1; }
     const char *getWord2() const { return (word2 != NULL) ? word2 : ""; }
@@ -71,7 +71,7 @@ public:
     OptionType getType() const { return type; }
     virtual std::string getTypeDescriptor() const;
     bool isValueOptional() const { return valueOptional; }
-
+    bool isWordIgnoreCase() const { return valueOptional; }
     OptionValue *createValue(bool noFlag);
 
     virtual void processSetting(OptionProcessor *processor, OptionValue *value);
@@ -82,7 +82,7 @@ public:
     static std::string describeAllOptions();
 
 protected:
-    OptionDescriptor(OptionType type, const char *word1, const char *word2, const char *descrip, bool valueOptional);
+    OptionDescriptor(OptionType type, const char *word1, const char *word2, const char *descrip, bool valueOptional, bool wordIgnoreCase=true);
 
     void setupName();
     
@@ -94,6 +94,7 @@ protected:
     std::string name;
     const char *description;
     const bool valueOptional;
+    const bool wordIgnoreCase;
     OptionProcessor::ValueHandler valueHandler;
 
     static std::list<OptionDescriptor*> allOptionDescriptors;

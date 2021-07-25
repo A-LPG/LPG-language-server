@@ -36,13 +36,25 @@ OptionParser::findOption(const char *&start, bool& noFlag)
             noFlag = false;
         }
 
-
-        if ((p[0] == *word1 || p[0] == ToUpper(*word1)) &&
-            (word2 != NULL && (p[1] == *word2 || p[1] == ToUpper(*word2)) &&
-             (p[2] == '=' || IsDelimiter(p[2])) ||
-             word2 == NULL && (p[2] == '=' || IsDelimiter(p[2])))) {
-            start += 2;
-            return od;
+        if(!od->isWordIgnoreCase())
+        {
+            if ((p[0] == *word1 || p[0] == ToUpper(*word1)) &&
+                (word2 != NULL && (p[1] == *word2 || p[1] == ToUpper(*word2)) &&
+                    (p[2] == '=' || IsDelimiter(p[2])) ||
+                    word2 == NULL && (p[2] == '=' || IsDelimiter(p[2])))) {
+                start += 2;
+                return od;
+            }
+        }
+        else
+        {
+            if ((  p[0] == *word1 || ToUpper(p[0]) == ToUpper(*word1)) &&
+                (word2 != NULL && (p[1] == *word2 || ToUpper(p[1]) == ToUpper(*word2)) &&
+                    (p[2] == '=' || IsDelimiter(p[2])) ||
+                    word2 == NULL && (p[2] == '=' || IsDelimiter(p[2])))) {
+                start += 2;
+                return od;
+            }
         }
         
         int length1 = strlen(word1);

@@ -6,6 +6,8 @@
  *  Copyright 2011 IBM.
  */
 
+#include <stringex.h>
+
 #include "JikesPGOptions.h"
 
 static const std::string *TRUE_VALUE_STR = new std::string("true");
@@ -148,12 +150,12 @@ EnumOptionValue::parseValue(std::string *v)
     
     int endIdx = v->find_first_of(',');
     
-    std::string enumValue = v->substr(0, endIdx);
+    std::stringex enumValue = v->substr(0, endIdx);
 
     // Check that the given value is one of the allowed values
     bool found = false;
     for (EnumOptionDescriptor::EnumValueList::iterator i = legalValues.begin(); i != legalValues.end(); i++) {
-        if (!enumValue.compare((*i)->first())) {
+        if (!enumValue.compare_nocase((*i)->first())) {
             found = true;
             value = *v;
             return;

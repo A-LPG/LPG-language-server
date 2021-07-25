@@ -17,8 +17,8 @@
 
 using namespace std;
 
-OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *wd2, const char *descrip, bool valueOpt)
-: type(t), word1(wd1), word2(wd2), description(descrip), valueOptional(valueOpt)
+OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *wd2, const char *descrip, bool valueOpt, bool wordIgnoreCase)
+: type(t), word1(wd1), word2(wd2), description(descrip), valueOptional(valueOpt), wordIgnoreCase(wordIgnoreCase)
 {
     setupName();
     allOptionDescriptors.push_back(this);
@@ -42,16 +42,16 @@ bool OptionDescriptor::IsIncludeOption(const std::string& name)
 }
 
 OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *descrip,
-                                   OptionProcessor::ValueHandler handler, bool valueOpt)
-: type(t), word1(wd1), word2(NULL), description(descrip), valueOptional(valueOpt), valueHandler(handler)
+                                   OptionProcessor::ValueHandler handler, bool valueOpt, bool wordIgnoreCase)
+: type(t), word1(wd1), word2(NULL), description(descrip), valueOptional(valueOpt), valueHandler(handler), wordIgnoreCase(wordIgnoreCase)
 {
     setupName();
     allOptionDescriptors.push_back(this);
 }
 
 OptionDescriptor::OptionDescriptor(OptionType t, const char *wd1, const char *wd2, const char *descrip,
-                                   OptionProcessor::ValueHandler handler, bool valueOpt)
-: type(t), word1(wd1), word2(wd2), description(descrip), valueOptional(valueOpt), valueHandler(handler)
+                                   OptionProcessor::ValueHandler handler, bool valueOpt, bool wordIgnoreCase)
+: type(t), word1(wd1), word2(wd2), description(descrip), valueOptional(valueOpt), valueHandler(handler), wordIgnoreCase(wordIgnoreCase)
 {
     setupName();
     allOptionDescriptors.push_back(this);
@@ -504,8 +504,8 @@ EnumOptionDescriptor::findEnumByName(const std::string& nm)
     for (EnumValueList::const_iterator iter = legalValues.begin(); iter != legalValues.end(); iter++) {
         EnumValue *ev = *iter;
         const char *eName = ev->first();
-
-        if (!nm.compare(eName)) {
+        stringex temp(eName ? eName : "");
+        if (!temp.compare_nocase(nm)) {
             return ev;
         }
     }
