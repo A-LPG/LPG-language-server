@@ -142,11 +142,12 @@ struct FoldingVisitor :public AbstractVisitor {
 
  
     bool visit(rule* n) {
-        auto optAction = n->getopt_action_segment();
+        auto optAction = n->getaction_segment_list();
 
         if (optAction != nullptr) {
+           
             // Make the action block and any surrounding whitespace foldable.
-            auto lexStream = optAction->getIToken()->getIPrsStream()->getILexStream();
+            auto lexStream = optAction->getLeftIToken()->getIPrsStream()->getILexStream();
             int start = optAction->getLeftIToken()->getStartOffset();
             int len = optAction->getRightIToken()->getEndOffset() - start + 3;
 

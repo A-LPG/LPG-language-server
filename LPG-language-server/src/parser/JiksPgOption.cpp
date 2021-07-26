@@ -373,9 +373,7 @@ using namespace LPGParser_top_level_ast;
 void JiksPgOption::process_workspace_option( const GenerationOptions& options)
 {
     std::vector<std::string> parameters;
-    if (options.language) {
-        parameters.push_back("programming_language=" + options.language.value());
-    }
+   
     if (options.quiet) {
         if (options.quiet.value())
 			parameters.push_back("quiet");
@@ -395,13 +393,17 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
         parameters.push_back("-trace=" + options.trace.value());
     }
 
-    if (options.include_search_directory) {
-        parameters.push_back("include-directory=" + options.include_search_directory.value());
-    }
-
-    if (options.outputDir) {
-        parameters.push_back("out_directory=" + options.outputDir.value());
-
+    if (options.include_search_directory || options.template_search_directory) {
+        std::string arg = "include-directory=";
+    	if(options.include_search_directory)
+    	{
+            arg += options.include_search_directory.value() + ";";
+    	}
+        if (options.template_search_directory)
+        {
+            arg += options.template_search_directory.value() + ";";
+        }
+        parameters.push_back(arg);
     }
 
     if (options.additionalParameters) {

@@ -1060,7 +1060,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      pg_option.SetMessageHandler(handler);
      std::stack<option*> option_set;
      unit->parent.collect_options(option_set, unit, nullptr);
-	
+  
      pg_option.process_workspace_option(unit->parent.GetSetting());
      pg_option.process_option(option_set);
 

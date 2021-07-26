@@ -529,7 +529,7 @@ void Grammar::ProcessTerminals(Tuple<int> &declared_terminals)
                     msg.Next() = "The undeclared symbol \"";
                     msg.Next() = tok;
                     msg.Next() = "\" is assumed to be a terminal";
-                    option -> EmitError(RetrieveTokenLocation(symbol), msg);
+                    option -> EmitWarning(RetrieveTokenLocation(symbol), msg);
                 }
             }
         }

@@ -58,11 +58,11 @@ using namespace lsp;
 #include <functional>
 #include <boost/asio.hpp>
 
-MAKE_REFLECT_STRUCT(GenerationOptions, baseDir, template_search_directory,
-	include_search_directory, outputDir, package, language, visitor, trace, quiet, verbose, alternativeExe, additionalParameters);
+MAKE_REFLECT_STRUCT(GenerationOptions,  template_search_directory,
+	include_search_directory, package,  visitor, trace, quiet, verbose,  additionalParameters);
 
-REFLECT_MAP_TO_STRUCT(GenerationOptions, baseDir, template_search_directory,
-	include_search_directory, outputDir, package, language, visitor, trace, quiet, verbose, alternativeExe, additionalParameters);
+REFLECT_MAP_TO_STRUCT(GenerationOptions,  template_search_directory,
+	include_search_directory,  package,  visitor, trace, quiet, verbose,  additionalParameters);
 
 class DummyLog :public lsp::Log
 {
@@ -840,7 +840,7 @@ public:
 
 };
 
-const char VERSION[] = "LPG-language-server 0.0.3 (" __DATE__ ")";
+const char VERSION[] = "LPG-language-server 0.0.6 (" __DATE__ ")";
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])

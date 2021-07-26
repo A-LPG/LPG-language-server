@@ -38,9 +38,7 @@ struct lsDocumentUri;
 
 struct GenerationOptions {
 	
-	// The folder in which to run the generation process. Should be an absolute path for predictable results.
-	// Used internally only.
-	boost::optional< std::string > baseDir ;
+	
 
 	// Search template  path for the LPG tool.
 	boost::optional< std::string> template_search_directory ;
@@ -48,15 +46,11 @@ struct GenerationOptions {
 	// Search inlcude  path for the LPG tool.
 	boost::optional< std::string > include_search_directory ;
 
-	// The folder where to place generated files in (relative to baseDir or absolute) (default: grammar dir),
-	boost::optional< std::string>outputDir ;
 
 	// Package or namespace name for generated files (default: none).
 	boost::optional< std::string >package ;
 
-	// The target language for the generated files. (default: what's given in the grammar or Java).
-	boost::optional< std::string >language ;
-
+	
 
 	boost::optional< std::string >visitor ;
 
@@ -65,8 +59,6 @@ struct GenerationOptions {
 	boost::optional< bool > quiet;
 
 	boost::optional< bool > verbose;
-	// Use this jar for work instead of the built-in one(s).
-	boost::optional< std::string >alternativeExe ;
 
 	// Any additional parameter you want to send to LPG for generation (e.g. "-lalr=3").
 	boost::optional< std::string >additionalParameters ;

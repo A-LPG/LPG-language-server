@@ -258,7 +258,7 @@ struct InlineNonTerminalHandler::Data
 			return;
 		}
 		auto rule_ = static_cast<rule*>(rules->getElementAt(0));
-		if (rule_->getopt_action_segment() != nullptr)
+		if (rule_->getaction_segment_list() != nullptr)
 		{
 			refactor_workspace_edit.errorMessage = "Non-terminal to be inlined cannot have an action block";
 			return;

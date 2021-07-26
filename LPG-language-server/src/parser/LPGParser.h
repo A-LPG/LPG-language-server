@@ -27,19 +27,17 @@
     //#line 7 "LPGParser.g
 
     #include <unordered_map>
+namespace LPGParser_top_level_ast {
+    struct ASTNodeToken;
+    struct defineSpec;
+    struct terminal_symbol0;
+    struct recover_symbol;
+    struct terminal;
+    struct nonTerm;
+}
 
-
-
+ 
     //#line 190 "btParserTemplateF.gi
-
-    namespace LPGParser_top_level_ast {
-	    struct ASTNodeToken;
-	    struct defineSpec;
-	    struct terminal_symbol0;
-	    struct recover_symbol;
-	    struct terminal;
-	    struct nonTerm;
-    }
 
  struct LPGParser :public Object ,public RuleAction
 {
@@ -206,7 +204,8 @@
     //
     
 
-    //#line 37 "LPGParser.g
+    //#line 38 "LPGParser.g
+
 
 std::unordered_multimap<std::wstring, LPGParser_top_level_ast::terminal_symbol0*>  terminal_symbol_produce_SYMBOL;
 std::unordered_multimap<std::wstring, LPGParser_top_level_ast::recover_symbol*>  _recover_symbols;
@@ -215,7 +214,7 @@ std::unordered_multimap<std::wstring, LPGParser_top_level_ast::defineSpec*>  _de
 std::unordered_multimap<std::wstring, LPGParser_top_level_ast::nonTerm*>  _non_terms;
 std::unordered_multimap<std::wstring, LPGParser_top_level_ast::terminal*>  _terms;
 std::vector<LPGParser_top_level_ast::ASTNodeToken*>  _macro_name_symbo;
-
+ 
     //#line 364 "btParserTemplateF.gi
 
 };
