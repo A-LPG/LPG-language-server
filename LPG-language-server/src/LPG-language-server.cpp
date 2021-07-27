@@ -175,6 +175,7 @@ public:
 			registeredCapabilities[method] = reg;
 		}
 	}
+
 	Server(const std::string& _port ,bool _enable_watch_parent_process) :work_space_mgr(server.point, _log),
 	_sp(server.point), enable_watch_parent_process(_enable_watch_parent_process), server(_address, _port, protocol_json_handler, endpoint, _log)
 	{
@@ -235,72 +236,83 @@ public:
 					while (false);	
 				}
 		
-			
-		/*		CodeLensOptions code_lens_options;
-				code_lens_options.resolveProvider = false;
-				capabilities.codeLensProvider = code_lens_options;*/
-
+				
+				std::pair<boost::optional<lsTextDocumentSyncKind>,
+				          boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
+				lsTextDocumentSyncOptions options;
+				options.openClose = true;
+				options.change = lsTextDocumentSyncKind::Incremental;
+				options.willSave = false;
+				options.willSaveWaitUntil = false;
+				textDocumentSync.second = options;
+				capabilities.textDocumentSync = textDocumentSync;
+				
+			    if(!clientPreferences->isHoverDynamicRegistered())
+			    {
+					capabilities.hoverProvider = true;
+			    }
+				if (!clientPreferences->isCompletionDynamicRegistered())
 				{
-					std::pair<boost::optional<lsTextDocumentSyncKind>,
-					          boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
-					lsTextDocumentSyncOptions options;
-					options.openClose = true;
-					options.change = lsTextDocumentSyncKind::Incremental;
-					options.willSave = false;
-					options.willSaveWaitUntil = false;
-					textDocumentSync.second = options;
-					capabilities.textDocumentSync = textDocumentSync;
+					lsCompletionOptions completion;
+					completion.resolveProvider = true;
+					capabilities.completionProvider = completion;
 				}
-				capabilities.hoverProvider = true;
-				lsCompletionOptions completion;
-				completion.resolveProvider = true;
-				capabilities.completionProvider = completion;
-			
 				std::pair< boost::optional<bool>, boost::optional<WorkDoneProgressOptions> > option;
 				option.first = true;
 			
-				capabilities.definitionProvider = option;
-		
-				capabilities.foldingRangeProvider = std::pair< boost::optional<bool>, boost::optional<FoldingRangeOptions> >();
-				capabilities.foldingRangeProvider->first = true;
-				capabilities.referencesProvider = option;
-			
-				capabilities.documentSymbolProvider = option;
-
-				capabilities.documentFormattingProvider = option;
-			
-				std::pair< boost::optional<bool>, boost::optional<RenameOptions> > rename_opt;
-				rename_opt.first = true;
-				capabilities.renameProvider = rename_opt;
-			
+				if (!clientPreferences->isDefinitionDynamicRegistered())
 				{
-					
+					capabilities.definitionProvider = option;
 				}
+				if (!clientPreferences->isFoldgingRangeDynamicRegistered())
+				{
+					capabilities.foldingRangeProvider = std::pair< boost::optional<bool>, boost::optional<FoldingRangeOptions> >();
+					capabilities.foldingRangeProvider->first = true;
+				}
+				if (!clientPreferences->isReferencesDynamicRegistered())
+				{
+					capabilities.referencesProvider = option;
+				}
+				if (!clientPreferences->isDocumentSymbolDynamicRegistered())
+				{
+					capabilities.documentSymbolProvider = option;
+				}
+				if (!clientPreferences->isFormattingDynamicRegistrationSupported())
+				{
+					capabilities.documentFormattingProvider = option;
+				}
+				if (!clientPreferences->isRenameDynamicRegistrationSupported())
+				{
+					std::pair< boost::optional<bool>, boost::optional<RenameOptions> > rename_opt;
+					rename_opt.first = true;
+					capabilities.renameProvider = rename_opt;
+				}
+				
+				{
 
-				
-				
-				
-				SemanticTokensWithRegistrationOptions semantic_tokens_opt;
-				auto  semanticTokenTypes = [] {
-					std::vector< std::string>  _type;
-					for (unsigned i = 0; i <= static_cast<unsigned>(SemanticTokenType::lastKind);
-						++i)
-						_type.push_back(to_string(static_cast<SemanticTokenType>(i)));
-					return _type;
-				};
+					SemanticTokensWithRegistrationOptions semantic_tokens_opt;
+					auto  semanticTokenTypes = [] {
+						std::vector< std::string>  _type;
+						for (unsigned i = 0; i <= static_cast<unsigned>(SemanticTokenType::lastKind);
+							++i)
+							_type.push_back(to_string(static_cast<SemanticTokenType>(i)));
+						return _type;
+					};
+
+					semantic_tokens_opt.legend.tokenTypes = semanticTokenTypes();
+
+					std::pair< boost::optional<bool>, boost::optional<lsp::Any> > rang;
+					rang.first = false;
+					semantic_tokens_opt.range = rang;
+
+					std::pair< boost::optional<bool>,
+						boost::optional<SemanticTokensServerFull> > full;
+					full.first = true;
+
+					semantic_tokens_opt.full = full;
+					capabilities.semanticTokensProvider = std::move(semantic_tokens_opt);
+				}
 			
-				semantic_tokens_opt.legend.tokenTypes = semanticTokenTypes();
-			
-				std::pair< boost::optional<bool>, boost::optional<lsp::Any> > rang;
-				rang.first = false;
-				semantic_tokens_opt.range = rang;
-			
-				std::pair< boost::optional<bool>,
-					boost::optional<SemanticTokensServerFull> > full;
-				full.first = true;
-			
-				semantic_tokens_opt.full = full;
-				capabilities.semanticTokensProvider = std::move(semantic_tokens_opt);
 				rsp.result.capabilities.swap(capabilities);
 				WorkspaceServerCapabilities workspace_server_capabilities;
 				//capabilities.workspace
@@ -398,6 +410,7 @@ public:
 				}
 				return std::move(rsp);
 			});
+		
 		_sp.registerHandler(
 			[&](const td_hover::request& req, const CancelMonitor& monitor)
 			->lsp::ResponseOrError< td_hover::response > {
@@ -405,9 +418,18 @@ public:
 				{
 					return need_initialize_error.value();
 				}
+				td_hover::response rsp;
+			/*	if(req_back.params.uri == req.params.uri && req_back.params.position == req.params.position && req_back.params.textDocument.uri == req.params.textDocument.uri)
+				{
+					return std::move(rsp);
+				}
+				else
+				{
+					req_back = req;
+				}*/
 				RequestMonitor _requestMonitor(exit_monitor, monitor);
 				auto unit = GetUnit(req.params.textDocument,&_requestMonitor);
-				td_hover::response rsp;
+				
 				if (unit)
 				{
 					process_hover(unit, req.params.position, rsp.result, &_requestMonitor);
@@ -840,7 +862,7 @@ public:
 
 };
 
-const char VERSION[] = "LPG-language-server 0.0.6 (" __DATE__ ")";
+const char VERSION[] = "LPG-language-server 0.0.7 (" __DATE__ ")";
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])
