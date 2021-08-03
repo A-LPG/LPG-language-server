@@ -391,7 +391,7 @@ OptionProcessor::processTable(OptionValue *v)
             options->programming_language = JiksPgOption::CSHARP;
         }
         else if (!value.compare_nocase("typescript")) {
-            options->programming_language = JiksPgOption::CPP2;
+            options->programming_language = JiksPgOption::TSC;
         }
         
     	else if (!value.compare_nocase("java")) {
