@@ -54,6 +54,7 @@ public:
             ML = 7,
             CPP2 = 8,
             CSHARP=9,
+            TSC = 10,
             //
             // Possible values for option "trace"
             //

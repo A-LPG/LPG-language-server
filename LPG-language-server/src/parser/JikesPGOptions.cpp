@@ -290,7 +290,9 @@ OptionDescriptor *programmingLang = new EnumOptionDescriptor("programming", "lan
                                                              new EnumValue("ml", JiksPgOption::ML),
                                                              new EnumValue("plx", JiksPgOption::PLX),
                                                              new EnumValue("plxasm", JiksPgOption::PLXASM),
-                                                             new EnumValue("xml", JiksPgOption::XML), NULL);
+                                                             new EnumValue("xml", JiksPgOption::XML),
+														new EnumValue("typescript", JiksPgOption::TSC),
+    NULL);
 
 OptionDescriptor *prsFile = new StringOptionDescriptor("prs", "file", "???", NULL,
                                                        &JiksPgOption::prs_file, false);
@@ -365,37 +367,42 @@ OptionDescriptor *table = new EnumOptionDescriptor("table", "???",
                                                    new EnumValue("none", JiksPgOption::XML),
                                                    new EnumValue("plx", JiksPgOption::PLX),
                                                    new EnumValue("plxasm", JiksPgOption::PLXASM),
-                                                   new EnumValue("xml", JiksPgOption::XML), NULL);
+                                                   new EnumValue("xml", JiksPgOption::XML),
+												   new EnumValue("typescript", JiksPgOption::TSC), NULL);
 void
 OptionProcessor::processTable(OptionValue *v)
 {
     EnumOptionValue *ev = static_cast<EnumOptionValue*> (v);
-    std::string value = ev->getValue();
+    std::stringex value = ev->getValue();
 
-    if (!value.compare("none")) {
+    if (!value.compare_nocase("none")) {
         options->table = false;
         options->programming_language = JiksPgOption::XML;
     } else {
-        if (!value.compare("c")) {
+        if (!value.compare_nocase("c")) {
             options->programming_language = JiksPgOption::C;
-        } else if (!value.compare("cpp") || !value.compare("c++")) {
+        } else if (!value.compare_nocase("cpp") || !value.compare_nocase("c++")) {
             options->programming_language = JiksPgOption::CPP;
         }
-        else if (!value.compare("rt_cpp")) {
+        else if (!value.compare_nocase("rt_cpp")) {
             options->programming_language = JiksPgOption::CPP2;
         }
-        else if (!value.compare("c#") || !value.compare("csharp")) {
+        else if (!value.compare_nocase("c#") || !value.compare_nocase("csharp")) {
             options->programming_language = JiksPgOption::CSHARP;
         }
-    	else if (!value.compare("java")) {
+        else if (!value.compare_nocase("typescript")) {
+            options->programming_language = JiksPgOption::CPP2;
+        }
+        
+    	else if (!value.compare_nocase("java")) {
             options->programming_language = JiksPgOption::JAVA;
-        } else if (!value.compare("ml")) {
+        } else if (!value.compare_nocase("ml")) {
             options->programming_language = JiksPgOption::ML;
-        } else if (!value.compare("plx")) {
+        } else if (!value.compare_nocase("plx")) {
             options->programming_language = JiksPgOption::PLX;
-        } else if (!value.compare("plxasm")) {
+        } else if (!value.compare_nocase("plxasm")) {
             options->programming_language = JiksPgOption::PLXASM;
-        } else if (!value.compare("xml")) {
+        } else if (!value.compare_nocase("xml")) {
             options->programming_language = JiksPgOption::XML;
         }
         options->table = true;
