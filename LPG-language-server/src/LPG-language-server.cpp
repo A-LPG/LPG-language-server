@@ -59,9 +59,9 @@ using namespace lsp;
 #include <boost/asio.hpp>
 
 MAKE_REFLECT_STRUCT(GenerationOptions,  template_search_directory,
-	include_search_directory, package,  visitor, trace, quiet, verbose,  additionalParameters);
+	include_search_directory, package,  visitor, language, trace, quiet, verbose,  additionalParameters);
 
-REFLECT_MAP_TO_STRUCT(GenerationOptions,  template_search_directory,
+REFLECT_MAP_TO_STRUCT(GenerationOptions,  template_search_directory, language,
 	include_search_directory,  package,  visitor, trace, quiet, verbose,  additionalParameters);
 
 class DummyLog :public lsp::Log

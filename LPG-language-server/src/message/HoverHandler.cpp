@@ -195,7 +195,7 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
             if (result->def_set.empty())
             {
                 std::wstringex name = result->macro_name;
-                name.trim_left(unit->runtime_unit->_lexer.escape_token);
+                name.trim_left(unit->runtime_unit->getEscapeToken());
                 auto key = IcuUtil::ws2s(name);
                 if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
                     std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;

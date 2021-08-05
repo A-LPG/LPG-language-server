@@ -204,6 +204,13 @@ struct RunTimeUnit
     LPGParser_top_level_ast::LPG* root = nullptr;
     std::vector<lsDiagnostic> diagnostics;
     std::recursive_mutex mutex;
+    wchar_t  escape_token;
+    wchar_t getEscapeToken() const
+    {
+        return  escape_token;
+    }
+
+
 };
 
 

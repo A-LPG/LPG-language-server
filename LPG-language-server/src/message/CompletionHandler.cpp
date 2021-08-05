@@ -500,7 +500,7 @@ CompletionHandler::Data::Data(std::shared_ptr<CompilationUnit>& u, CompletionLis
 		                       ? prefixToken.substr(0, offset - thisLeftToken->getStartOffset() + 1)
 		                       : "";
 	string escape_token;
-	escape_token.push_back(unit->runtime_unit->_lexer.escape_token);
+	escape_token.push_back(unit->runtime_unit->getEscapeToken());
 	if (dynamic_cast<option*>(thisNode->parent))
 	{
 		auto opt = static_cast<option*>(thisNode->parent);

@@ -409,7 +409,7 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
     if (options.additionalParameters) {
         parameters.push_back(options.additionalParameters.value());
     }
-  
+    
 	 for(auto& it : parameters)
     {
         try {

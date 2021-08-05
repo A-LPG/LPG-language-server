@@ -310,7 +310,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
             unit_binding->lpg_data->option->EmitError(position_node->getLeftIToken(), msg.c_str());
         	return false;
         }
-      
+        include_unit->runtime_unit->escape_token = unit->runtime_unit->escape_token;
+
         auto include_binding =  include_unit->GetBinding();
         if (!include_binding)return true;
         if (!include_binding->lpg_data)return true;
@@ -788,8 +789,8 @@ struct LPGBindingVisitor :public AbstractVisitor {
     
      
         MacroSymbol* macro_symbol = lex_stream->GetMacroSymbol(node->getLeftIToken()->getTokenIndex());
-        assert(macro_symbol);
-        macro_symbol->SetBlock(n->getmacro_segment()->getLeftIToken()->getTokenIndex());
+        if(macro_symbol)
+			macro_symbol->SetBlock(n->getmacro_segment()->getLeftIToken()->getTokenIndex());
         return true;
     }
     bool visit(macro_name_symbol1* n)
@@ -798,7 +799,7 @@ struct LPGBindingVisitor :public AbstractVisitor {
         auto index = n->getSYMBOL()->getTokenIndex();
         int length = lex_stream->NameStringLength(index) + 1;
         char* macro_name = new char[length + 1];
-        macro_name[0] = static_cast<char>(unit->runtime_unit->_lexer.escape_token);
+        macro_name[0] = static_cast<char>(unit->runtime_unit->getEscapeToken());
         strcpy(macro_name + 1, lex_stream->NameString(index));
 
         MacroSymbol* macro_symbol = unit_binding->macro_table.FindName(macro_name, length);
@@ -1060,11 +1061,12 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      pg_option.SetMessageHandler(handler);
      std::stack<option*> option_set;
      unit->parent.collect_options(option_set, unit, nullptr);
-  
-     pg_option.process_workspace_option(unit->parent.GetSetting());
-     pg_option.process_option(option_set);
 
+     pg_option.process_option(option_set);
+     pg_option.process_workspace_option(unit->parent.GetSetting());
      pg_option.CompleteOptionProcessing();
+     unit->runtime_unit->escape_token = pg_option.escape;
+
      unit_binding->lpg_data = std::make_shared<ParseData>(&pg_option);
 
      unit->removeDependency();

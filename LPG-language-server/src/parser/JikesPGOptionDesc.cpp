@@ -28,8 +28,7 @@ bool OptionDescriptor::IsIncludeOption(const std::string& name)
 {
     std::stringex optName = name;
     optName.tolower();
-    if (optName == ("import_terminals")
-        || optName == ("import-terminals")
+    if ((optName.find("import") != std::string::npos && optName.find("terminals") != std::string::npos)
         || optName == ("template")
         || optName == ("filter"))
     {

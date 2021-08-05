@@ -125,7 +125,7 @@ struct LPGModelVisitor :public AbstractVisitor {
         auto symbol = pushSubItem(n);
         symbol->name = "Export ";
         std::wstring prefix;
-        prefix.push_back(unit->runtime_unit->_lexer.escape_token);
+        prefix.push_back(unit->runtime_unit->getEscapeToken());
         prefix.push_back('_');
         for (auto& it : n->lpg_export_segment->list)
         {
@@ -507,7 +507,7 @@ namespace
                     {
                         fileName = optValue->to_utf8_string();
                     }
-                    if (optName == ("import_terminals")|| optName == ("import-terminals"))
+                    if (optName.find("import") != std::string::npos && optName.find("terminals") != std::string::npos)
                     {
                         infos_info.import_terminals_files.push_back({ fileName,_opt });
                     }

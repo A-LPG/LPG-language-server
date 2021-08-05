@@ -302,9 +302,8 @@
     }
 
     //#line 12 "LPGLexer.gi
-
-   wchar_t escape_token='$';
  
+
     //#line 5 "LexerBasicMapF.gi
 
     //
@@ -655,9 +654,9 @@
             }
 
             //
-            // Rule 859:  OptionLines ::= OptionLineList
+            // Rule 858:  OptionLines ::= OptionLineList
             //
-            case 859: { 
+            case 858: { 
             
                   // What ever needs to happen after the options have been 
                   // scanned must happen here.
@@ -665,32 +664,32 @@
             }
       
             //
-            // Rule 868:  options ::= % oO pP tT iI oO nN sS
+            // Rule 867:  options ::= % oO pP tT iI oO nN sS
             //
-            case 868: { 
+            case 867: { 
             
                   makeToken(getLeftSpan(), getRightSpan(), LPGParsersym::TK_OPTIONS_KEY);
                     break;
             }
       
             //
-            // Rule 869:  OptionComment ::= singleLineComment
+            // Rule 868:  OptionComment ::= singleLineComment
             //
-            case 869: { 
+            case 868: { 
              makeComment(LPGParsersym::TK_SINGLE_LINE_COMMENT);             break;
             }
 
             //
-            // Rule 893:  separator ::= ,$comma
+            // Rule 891:  separator ::= ,$comma
             //
-            case 893: { 
+            case 891: { 
               makeToken(getLeftSpan(), getRightSpan(), LPGParsersym::TK_COMMA);             break;
             }
 
             //
-            // Rule 894:  option ::= action_block$ab optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
+            // Rule 892:  option ::= action_block$ab optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
             //
-            case 894: { 
+            case 892: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -705,9 +704,9 @@
             }
       
             //
-            // Rule 897:  option ::= ast_block$ab optionWhite =$eq optionWhite ($lp optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
+            // Rule 895:  option ::= ast_block$ab optionWhite =$eq optionWhite ($lp optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
             //
-            case 897: { 
+            case 895: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -721,9 +720,9 @@
             }
       
             //
-            // Rule 902:  option ::= ast_directory$ad optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 900:  option ::= ast_directory$ad optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 902: { 
+            case 900: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -732,9 +731,9 @@
             }
       
             //
-            // Rule 905:  option ::= ast_type$at optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 903:  option ::= ast_type$at optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 905: { 
+            case 903: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -743,37 +742,37 @@
             }
       
             //
-            // Rule 908:  option ::= attributes$a optionWhite
+            // Rule 906:  option ::= attributes$a optionWhite
             //
-            case 908: { 
+            case 906: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 909:  option ::= no attributes$a optionWhite
+            // Rule 907:  option ::= no attributes$a optionWhite
+            //
+            case 907: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 909:  option ::= automatic_ast$a optionWhite
             //
             case 909: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 910:  option ::= no automatic_ast$a optionWhite
+            //
+            case 910: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 911:  option ::= automatic_ast$a optionWhite
+            // Rule 911:  option ::= automatic_ast$aa optionWhite =$eq optionWhite automatic_ast_value$val optionWhite
             //
             case 911: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 912:  option ::= no automatic_ast$a optionWhite
-            //
-            case 912: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 913:  option ::= automatic_ast$aa optionWhite =$eq optionWhite automatic_ast_value$val optionWhite
-            //
-            case 913: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -782,51 +781,51 @@
             }
       
             //
-            // Rule 919:  option ::= backtrack$b optionWhite
+            // Rule 915:  option ::= backtrack$b optionWhite
+            //
+            case 915: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 916:  option ::= no backtrack$b optionWhite
+            //
+            case 916: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 918:  option ::= byte$b optionWhite
+            //
+            case 918: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 919:  option ::= no byte$b optionWhite
             //
             case 919: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 920:  option ::= no backtrack$b optionWhite
-            //
-            case 920: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 922:  option ::= byte$b optionWhite
+            // Rule 921:  option ::= conflicts$c optionWhite
+            //
+            case 921: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 922:  option ::= no conflicts$c optionWhite
             //
             case 922: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 923:  option ::= no byte$b optionWhite
-            //
-            case 923: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 925:  option ::= conflicts$c optionWhite
+            // Rule 924:  option ::= dat_directory$dd optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 925: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 926:  option ::= no conflicts$c optionWhite
-            //
-            case 926: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 928:  option ::= dat_directory$dd optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 928: { 
+            case 924: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -835,7 +834,29 @@
             }
       
             //
-            // Rule 931:  option ::= dat_file$df optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 927:  option ::= dat_file$df optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 927: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 929:  option ::= dcl_file$df optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 929: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 931:  option ::= def_file$df optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 931: { 
             
@@ -846,85 +867,63 @@
             }
       
             //
-            // Rule 933:  option ::= dcl_file$df optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 933:  option ::= debug$d optionWhite
             //
             case 933: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
-      
+
             //
-            // Rule 935:  option ::= def_file$df optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 934:  option ::= no debug$d optionWhite
             //
-            case 935: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
+            case 934: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
-      
+
             //
-            // Rule 937:  option ::= debug$d optionWhite
+            // Rule 936:  option ::= edit$e optionWhite
+            //
+            case 936: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 937:  option ::= no edit$e optionWhite
             //
             case 937: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 938:  option ::= no debug$d optionWhite
-            //
-            case 938: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 940:  option ::= edit$e optionWhite
+            // Rule 939:  option ::= error_maps$e optionWhite
+            //
+            case 939: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 940:  option ::= no error_maps$e optionWhite
             //
             case 940: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 941:  option ::= no edit$e optionWhite
-            //
-            case 941: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 943:  option ::= error_maps$e optionWhite
+            // Rule 943:  option ::= escape$e optionWhite =$eq optionWhite anyNonWhiteChar$val optionWhite
             //
             case 943: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 944:  option ::= no error_maps$e optionWhite
-            //
-            case 944: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 947:  option ::= escape$e optionWhite =$eq optionWhite anyNonWhiteChar$val optionWhite
-            //
-            case 947: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
                   makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                  escape_token = *(lexStream->getInputChars().data() + getRhsFirstTokenIndex(5));
+                  
                     break;
             }
       
             //
-            // Rule 949:  option ::= export_terminals$et optionWhite =$eq optionWhite filename$fn optionWhite
+            // Rule 945:  option ::= export_terminals$et optionWhite =$eq optionWhite filename$fn optionWhite
             //
-            case 949: { 
+            case 945: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -933,9 +932,9 @@
             }
       
             //
-            // Rule 950:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite )$rp optionWhite
+            // Rule 946:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite )$rp optionWhite
             //
-            case 950: { 
+            case 946: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -946,9 +945,9 @@
             }
       
             //
-            // Rule 951:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma optionWhite export_prefix$ep optionWhite )$rp optionWhite
+            // Rule 947:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma optionWhite export_prefix$ep optionWhite )$rp optionWhite
             //
-            case 951: { 
+            case 947: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -961,9 +960,9 @@
             }
       
             //
-            // Rule 952:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite export_prefix$ep optionWhite ,$comma2 optionWhite export_suffix$es optionWhite )$rp optionWhite
+            // Rule 948:  option ::= export_terminals$et optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite export_prefix$ep optionWhite ,$comma2 optionWhite export_suffix$es optionWhite )$rp optionWhite
             //
-            case 952: { 
+            case 948: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -978,109 +977,109 @@
             }
       
             //
-            // Rule 957:  option ::= extends_parsetable$e optionWhite
+            // Rule 953:  option ::= extends_parsetable$e optionWhite
             //
-            case 957: { 
+            case 953: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 958:  option ::= no extends_parsetable$e optionWhite
+            // Rule 954:  option ::= no extends_parsetable$e optionWhite
+            //
+            case 954: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 955:  option ::= extends_parsetable$ep optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 955: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 958:  option ::= factory$f optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 958: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 960:  option ::= file_prefix$fp optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 960: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 963:  option ::= filter$f optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 963: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 965:  option ::= first$f optionWhite
+            //
+            case 965: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 966:  option ::= no first$f optionWhite
+            //
+            case 966: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 959:  option ::= extends_parsetable$ep optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 968:  option ::= follow$f optionWhite
             //
-            case 959: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
+            case 968: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
-      
+
             //
-            // Rule 962:  option ::= factory$f optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 962: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 964:  option ::= file_prefix$fp optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 964: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 967:  option ::= filter$f optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 967: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 969:  option ::= first$f optionWhite
+            // Rule 969:  option ::= no follow$f optionWhite
             //
             case 969: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 970:  option ::= no first$f optionWhite
-            //
-            case 970: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 972:  option ::= follow$f optionWhite
+            // Rule 971:  option ::= goto_default$g optionWhite
+            //
+            case 971: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 972:  option ::= no goto_default$g optionWhite
             //
             case 972: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 973:  option ::= no follow$f optionWhite
-            //
-            case 973: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 975:  option ::= goto_default$g optionWhite
+            // Rule 975:  option ::= headers$h optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
             //
             case 975: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 976:  option ::= no goto_default$g optionWhite
-            //
-            case 976: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 979:  option ::= headers$h optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
-            //
-            case 979: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1095,9 +1094,9 @@
             }
       
             //
-            // Rule 981:  option ::= imp_file$if optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 977:  option ::= imp_file$if optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 981: { 
+            case 977: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1106,9 +1105,9 @@
             }
       
             //
-            // Rule 984:  option ::= import_terminals$it optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 980:  option ::= import_terminals$it optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 984: { 
+            case 980: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1117,34 +1116,34 @@
             }
       
             //
-            // Rule 987:  option ::= include_directory$id optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 983:  option ::= include_directory$id optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 983: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 987:  option ::= lalr_level$l optionWhite
             //
             case 987: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 991:  option ::= lalr_level$l optionWhite
-            //
-            case 991: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 992:  option ::= no lalr_level$l optionWhite
+            // Rule 988:  option ::= no lalr_level$l optionWhite
             //
-            case 992: { 
+            case 988: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 993:  option ::= lalr_level$l optionWhite =$eq optionWhite number$val optionWhite
+            // Rule 989:  option ::= lalr_level$l optionWhite =$eq optionWhite number$val optionWhite
             //
-            case 993: { 
+            case 989: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1153,23 +1152,34 @@
             }
       
             //
-            // Rule 998:  option ::= list$l optionWhite
+            // Rule 994:  option ::= list$l optionWhite
             //
-            case 998: { 
+            case 994: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 999:  option ::= no list$l optionWhite
+            // Rule 995:  option ::= no list$l optionWhite
+            //
+            case 995: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 997:  option ::= margin$m optionWhite =$eq optionWhite number$val optionWhite
+            //
+            case 997: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 999:  option ::= max_cases$mc optionWhite =$eq optionWhite number$val optionWhite
             //
             case 999: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 1001:  option ::= margin$m optionWhite =$eq optionWhite number$val optionWhite
-            //
-            case 1001: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1178,9 +1188,23 @@
             }
       
             //
-            // Rule 1003:  option ::= max_cases$mc optionWhite =$eq optionWhite number$val optionWhite
+            // Rule 1002:  option ::= names$n optionWhite
+            //
+            case 1002: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1003:  option ::= no names$n optionWhite
             //
             case 1003: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1004:  option ::= names$n optionWhite =$eq optionWhite names_value$val optionWhite
+            //
+            case 1004: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1189,23 +1213,23 @@
             }
       
             //
-            // Rule 1006:  option ::= names$n optionWhite
-            //
-            case 1006: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 1007:  option ::= no names$n optionWhite
+            // Rule 1007:  option ::= nt_check$n optionWhite
             //
             case 1007: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 1008:  option ::= names$n optionWhite =$eq optionWhite names_value$val optionWhite
+            // Rule 1008:  option ::= no nt_check$n optionWhite
             //
             case 1008: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1011:  option ::= or_marker$om optionWhite =$eq optionWhite anyNonWhiteChar$val optionWhite
+            //
+            case 1011: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1214,57 +1238,54 @@
             }
       
             //
-            // Rule 1013:  option ::= nt_check$n optionWhite
-            //
-            case 1013: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 1014:  option ::= no nt_check$n optionWhite
+            // Rule 1014:  option ::= out_directory$dd optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1014: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
             }
-
+      
             //
-            // Rule 1017:  option ::= or_marker$om optionWhite =$eq optionWhite anyNonWhiteChar$val optionWhite
+            // Rule 1017:  option ::= parent_saved$ps optionWhite
             //
             case 1017: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1020:  option ::= out_directory$dd optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 1020: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1023:  option ::= parent_saved$ps optionWhite
-            //
-            case 1023: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1024:  option ::= no parent_saved$ps optionWhite
+            // Rule 1018:  option ::= no parent_saved$ps optionWhite
             //
-            case 1024: { 
+            case 1018: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1027:  option ::= package$p optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 1021:  option ::= package$p optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 1021: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1023:  option ::= parsetable_interfaces$pi optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 1023: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1027:  option ::= prefix$p optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1027: { 
             
@@ -1275,45 +1296,34 @@
             }
       
             //
-            // Rule 1029:  option ::= parsetable_interfaces$pi optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 1029:  option ::= priority$p optionWhite
             //
             case 1029: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1033:  option ::= prefix$p optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 1033: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1035:  option ::= priority$p optionWhite
-            //
-            case 1035: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 1036:  option ::= no priority$p optionWhite
+            // Rule 1030:  option ::= no priority$p optionWhite
+            //
+            case 1030: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1032:  option ::= programming_language$pl optionWhite =$eq optionWhite programming_language_value$val optionWhite
+            //
+            case 1032: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1036:  option ::= prs_file$pf optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1036: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 1038:  option ::= programming_language$pl optionWhite =$eq optionWhite programming_language_value$val optionWhite
-            //
-            case 1038: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1322,160 +1332,149 @@
             }
       
             //
-            // Rule 1042:  option ::= prs_file$pf optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 1039:  option ::= quiet$q optionWhite
+            //
+            case 1039: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1040:  option ::= no quiet$q optionWhite
+            //
+            case 1040: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1042:  option ::= read_reduce$r optionWhite
             //
             case 1042: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1045:  option ::= quiet$q optionWhite
-            //
-            case 1045: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 1046:  option ::= no quiet$q optionWhite
+            // Rule 1043:  option ::= no read_reduce$r optionWhite
+            //
+            case 1043: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            }
+
+            //
+            // Rule 1046:  option ::= remap_terminals$r optionWhite
             //
             case 1046: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
-
-            //
-            // Rule 1048:  option ::= read_reduce$r optionWhite
-            //
-            case 1048: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 1049:  option ::= no read_reduce$r optionWhite
+            // Rule 1047:  option ::= no remap_terminals$r optionWhite
             //
-            case 1049: { 
+            case 1047: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             }
 
             //
-            // Rule 1052:  option ::= remap_terminals$r optionWhite
+            // Rule 1050:  option ::= scopes$s optionWhite
             //
-            case 1052: { 
+            case 1050: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            }
+            } 
 
             //
-            // Rule 1053:  option ::= no remap_terminals$r optionWhite
+            // Rule 1051:  option ::= no scopes$s optionWhite
+            //
+            case 1051: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1053:  option ::= serialize$s optionWhite
             //
             case 1053: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            }
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
 
             //
-            // Rule 1056:  option ::= scopes$s optionWhite
+            // Rule 1054:  option ::= no serialize$s optionWhite
+            //
+            case 1054: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1056:  option ::= shift_default$s optionWhite
             //
             case 1056: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1057:  option ::= no scopes$s optionWhite
+            // Rule 1057:  option ::= no shift_default$s optionWhite
             //
             case 1057: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1059:  option ::= serialize$s optionWhite
-            //
-            case 1059: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1060:  option ::= no serialize$s optionWhite
+            // Rule 1060:  option ::= single_productions$s optionWhite
             //
             case 1060: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1062:  option ::= shift_default$s optionWhite
-            //
-            case 1062: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1063:  option ::= no shift_default$s optionWhite
+            // Rule 1061:  option ::= no single_productions$s optionWhite
             //
-            case 1063: { 
+            case 1061: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1066:  option ::= single_productions$s optionWhite
+            // Rule 1064:  option ::= slr$s optionWhite
             //
-            case 1066: { 
+            case 1064: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1067:  option ::= no single_productions$s optionWhite
+            // Rule 1065:  option ::= no slr$s optionWhite
+            //
+            case 1065: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1067:  option ::= soft_keywords$s optionWhite
             //
             case 1067: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1070:  option ::= slr$s optionWhite
-            //
-            case 1070: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1071:  option ::= no slr$s optionWhite
+            // Rule 1068:  option ::= no soft_keywords$s optionWhite
             //
-            case 1071: { 
+            case 1068: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1073:  option ::= soft_keywords$s optionWhite
+            // Rule 1072:  option ::= states$s optionWhite
+            //
+            case 1072: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1073:  option ::= no states$s optionWhite
             //
             case 1073: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1074:  option ::= no soft_keywords$s optionWhite
-            //
-            case 1074: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1078:  option ::= states$s optionWhite
+            // Rule 1075:  option ::= suffix$s optionWhite =$eq optionWhite Value$val optionWhite
             //
-            case 1078: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1079:  option ::= no states$s optionWhite
-            //
-            case 1079: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1081:  option ::= suffix$s optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 1081: { 
+            case 1075: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1484,7 +1483,29 @@
             }
       
             //
-            // Rule 1083:  option ::= sym_file$sf optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 1077:  option ::= sym_file$sf optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 1077: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1080:  option ::= tab_file$tf optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 1080: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1083:  option ::= template$t optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1083: { 
             
@@ -1495,31 +1516,9 @@
             }
       
             //
-            // Rule 1086:  option ::= tab_file$tf optionWhite =$eq optionWhite Value$val optionWhite
+            // Rule 1085:  option ::= trailers$t optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
             //
-            case 1086: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1089:  option ::= template$t optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 1089: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1091:  option ::= trailers$t optionWhite =$eq optionWhite ($lp optionWhite filename$fn optionWhite ,$comma1 optionWhite block_begin$bb optionWhite ,$comma2 optionWhite block_end$be optionWhite )$rp optionWhite
-            //
-            case 1091: { 
+            case 1085: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1534,48 +1533,73 @@
             }
       
             //
-            // Rule 1093:  option ::= table$t optionWhite
+            // Rule 1087:  option ::= table$t optionWhite
+            //
+            case 1087: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1088:  option ::= no table$t optionWhite
+            //
+            case 1088: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1089:  option ::= table$t optionWhite =$eq optionWhite programming_language_value$val optionWhite
+            //
+            case 1089: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1091:  option ::= trace$t optionWhite
+            //
+            case 1091: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1092:  option ::= no trace$t optionWhite
+            //
+            case 1092: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1093:  option ::= trace$t optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1093: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
             //
-            // Rule 1094:  option ::= no table$t optionWhite
-            //
-            case 1094: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1095:  option ::= table$t optionWhite =$eq optionWhite programming_language_value$val optionWhite
+            // Rule 1095:  option ::= variables$v optionWhite
             //
             case 1095: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
             //
-            // Rule 1097:  option ::= trace$t optionWhite
+            // Rule 1096:  option ::= no variables$v optionWhite
+            //
+            case 1096: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1097:  option ::= variables$v optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1097: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1098:  option ::= no trace$t optionWhite
-            //
-            case 1098: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1099:  option ::= trace$t optionWhite =$eq optionWhite trace_value$val optionWhite
-            //
-            case 1099: { 
             
                   makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
                   makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
@@ -1584,21 +1608,46 @@
             }
       
             //
-            // Rule 1104:  option ::= variables$v optionWhite
+            // Rule 1099:  option ::= verbose$v optionWhite
             //
-            case 1104: { 
+            case 1099: { 
               makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1105:  option ::= no variables$v optionWhite
+            // Rule 1100:  option ::= no verbose$v optionWhite
             //
-            case 1105: { 
+            case 1100: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 
             //
-            // Rule 1106:  option ::= variables$v optionWhite =$eq optionWhite variables_value$val optionWhite
+            // Rule 1102:  option ::= visitor$v optionWhite
+            //
+            case 1102: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1103:  option ::= no visitor$v optionWhite
+            //
+            case 1103: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1104:  option ::= visitor$v optionWhite =$eq optionWhite Value$val optionWhite
+            //
+            case 1104: { 
+            
+                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
+                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
+                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
+                    break;
+            }
+      
+            //
+            // Rule 1106:  option ::= visitor_type$vt optionWhite =$eq optionWhite Value$val optionWhite
             //
             case 1106: { 
             
@@ -1609,80 +1658,30 @@
             }
       
             //
-            // Rule 1113:  option ::= verbose$v optionWhite
+            // Rule 1109:  option ::= warnings$w optionWhite
+            //
+            case 1109: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1110:  option ::= no warnings$w optionWhite
+            //
+            case 1110: { 
+              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1112:  option ::= xreference$x optionWhite
+            //
+            case 1112: { 
+              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
+            } 
+
+            //
+            // Rule 1113:  option ::= no xreference$x optionWhite
             //
             case 1113: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1114:  option ::= no verbose$v optionWhite
-            //
-            case 1114: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1116:  option ::= visitor$v optionWhite
-            //
-            case 1116: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1117:  option ::= no visitor$v optionWhite
-            //
-            case 1117: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1118:  option ::= visitor$v optionWhite =$eq optionWhite visitor_value$val optionWhite
-            //
-            case 1118: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1123:  option ::= visitor_type$vt optionWhite =$eq optionWhite Value$val optionWhite
-            //
-            case 1123: { 
-            
-                  makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);
-                  makeToken(getRhsFirstTokenIndex(3), getRhsLastTokenIndex(3), LPGParsersym::TK_EQUAL);
-                  makeToken(getRhsFirstTokenIndex(5), getRhsLastTokenIndex(5), LPGParsersym::TK_SYMBOL);
-                    break;
-            }
-      
-            //
-            // Rule 1126:  option ::= warnings$w optionWhite
-            //
-            case 1126: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1127:  option ::= no warnings$w optionWhite
-            //
-            case 1127: { 
-              makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1129:  option ::= xreference$x optionWhite
-            //
-            case 1129: { 
-              makeToken(getRhsFirstTokenIndex(1), getRhsLastTokenIndex(1), LPGParsersym::TK_SYMBOL);             break;
-            } 
-
-            //
-            // Rule 1130:  option ::= no xreference$x optionWhite
-            //
-            case 1130: { 
               makeToken(getRhsFirstTokenIndex(2), getRhsLastTokenIndex(2), LPGParsersym::TK_SYMBOL);             break;
             } 
 

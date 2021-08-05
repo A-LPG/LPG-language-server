@@ -50,7 +50,7 @@ struct GenerationOptions {
 	// Package or namespace name for generated files (default: none).
 	boost::optional< std::string >package ;
 
-	
+	boost::optional< std::string >language;
 
 	boost::optional< std::string >visitor ;
 

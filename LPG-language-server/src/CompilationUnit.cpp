@@ -130,8 +130,8 @@ void CompilationUnit::insert_local_macro(const char* name)
 }
 void CompilationUnit::parser(Monitor* monitor)
 {
-	runtime_unit->
-	_lexer.lexer(monitor, runtime_unit->_parser.getIPrsStream());
+
+	runtime_unit->_lexer.lexer(monitor, runtime_unit->_parser.getIPrsStream());
 	runtime_unit->root = reinterpret_cast<LPGParser_top_level_ast::LPG*>(runtime_unit->_parser.parser(monitor,1000));
 
 }
@@ -169,7 +169,7 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
         auto line = ASTUtils::getLine(lex, position.line + 1);
         if (line.size() <= position.character)break;
         auto temp = line.substr(0, position.character);
-        auto escape = runtime_unit->_lexer.escape_token;
+        auto escape = runtime_unit->getEscapeToken();
         auto index = temp.rfind(escape);
         if (std::wstring::npos == index) break;
         temp = line.substr(index);
@@ -183,12 +183,13 @@ CompilationUnit::FindMacroInBlock(Object* target, const lsPosition& position, Mo
 
         std::wstring macro_name(cursor, end_cursor);
         if (macro_name.empty()) break;
+		macro_name[0] = '$';
 		std::unique_ptr< FindMacroInBlockResult> result = std::make_unique<FindMacroInBlockResult>();
 	
 		SearchPolicy policy;
 		policy.macro = SearchPolicy::getMacroInstance(true);
 		result->def_set= parent.findDefOf(policy,macro_name, shared_from_this(), monitor);
-	
+		macro_name[0] = escape;
     	
 		result->macro_name .swap(macro_name) ;
 		return  result;
