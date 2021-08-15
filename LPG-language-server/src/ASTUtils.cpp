@@ -6,6 +6,8 @@
 #include "code.h"
 #include <LibLsp/lsp/utils.h>
 
+#include "parser/JikesPGUtil.h"
+
 namespace 
 {
 	struct findRefsOf_AbstractVisitor :public AbstractVisitor
@@ -102,7 +104,7 @@ std::string ASTUtils::getWord(LexStream* lex,  int offset)
     while (offset)
     {
         auto c = buffer[offset];
-    	if(isspace(c))
+    	if(Code::IsSpace(c))
             break;
         word.push_back(c);
         offset -= 1;
