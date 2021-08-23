@@ -480,6 +480,8 @@ void JiksPgOption::CompleteOptionProcessing()
     if (escape == ' ')
     {
         escape = (programming_language == JAVA ||
+            programming_language == PYTHON3 ||
+            programming_language == PYTHON2 ||
             programming_language == C ||
             programming_language == CPP2 ||
             programming_language == CPP

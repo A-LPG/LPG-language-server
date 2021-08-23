@@ -284,14 +284,16 @@ OptionDescriptor *programmingLang = new EnumOptionDescriptor("programming", "lan
 															 new EnumValue("rt_cpp", JiksPgOption::CPP2),
                                                              new EnumValue("cpp", JiksPgOption::CPP),
                                                              new EnumValue("c++", JiksPgOption::CPP),
-															    new EnumValue("csharp", JiksPgOption::CSHARP),
-															    new EnumValue("c#", JiksPgOption::CSHARP),
+                                                             new EnumValue("csharp", JiksPgOption::CSHARP),
+                                                             new EnumValue("c#", JiksPgOption::CSHARP),
                                                              new EnumValue("java", JiksPgOption::JAVA),
                                                              new EnumValue("ml", JiksPgOption::ML),
                                                              new EnumValue("plx", JiksPgOption::PLX),
                                                              new EnumValue("plxasm", JiksPgOption::PLXASM),
                                                              new EnumValue("xml", JiksPgOption::XML),
-														new EnumValue("typescript", JiksPgOption::TSC),
+															 new EnumValue("python3", JiksPgOption::PYTHON3),
+    new EnumValue("python2", JiksPgOption::PYTHON2),
+															 new EnumValue("typescript", JiksPgOption::TSC),
     NULL);
 
 OptionDescriptor *prsFile = new StringOptionDescriptor("prs", "file", "???", NULL,
@@ -368,7 +370,10 @@ OptionDescriptor *table = new EnumOptionDescriptor("table", "???",
                                                    new EnumValue("plx", JiksPgOption::PLX),
                                                    new EnumValue("plxasm", JiksPgOption::PLXASM),
                                                    new EnumValue("xml", JiksPgOption::XML),
-												   new EnumValue("typescript", JiksPgOption::TSC), NULL);
+												   new EnumValue("typescript", JiksPgOption::TSC),
+    new EnumValue("python3", JiksPgOption::PYTHON3),
+    new EnumValue("python2", JiksPgOption::PYTHON2),
+    NULL);
 void
 OptionProcessor::processTable(OptionValue *v)
 {
@@ -393,7 +398,12 @@ OptionProcessor::processTable(OptionValue *v)
         else if (!value.compare_nocase("typescript")) {
             options->programming_language = JiksPgOption::TSC;
         }
-        
+        else if (!value.compare_nocase("python3")) {
+            options->programming_language = JiksPgOption::PYTHON3;
+        }
+        else if (!value.compare_nocase("python2")) {
+            options->programming_language = JiksPgOption::PYTHON2;
+        }
     	else if (!value.compare_nocase("java")) {
             options->programming_language = JiksPgOption::JAVA;
         } else if (!value.compare_nocase("ml")) {
