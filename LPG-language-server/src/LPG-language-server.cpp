@@ -862,7 +862,7 @@ public:
 
 };
 
-const char VERSION[] = "LPG-language-server 0.1.0 (" __DATE__ ")";
+const char VERSION[] = "LPG-language-server 0.1.1 (" __DATE__ ")";
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])

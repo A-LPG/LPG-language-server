@@ -1064,8 +1064,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
 
      pg_option.process_option(option_set);
      pg_option.process_workspace_option(unit->parent.GetSetting());
-     pg_option.CompleteOptionProcessing();
-     unit->runtime_unit->escape_token = pg_option.escape;
+
 
      unit_binding->lpg_data = std::make_shared<ParseData>(&pg_option);
 
@@ -1105,6 +1104,8 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
              token->setKind(LPGParsersym::TK_SYMBOL);
          }
      }
+     pg_option.CompleteOptionProcessing();
+     unit->runtime_unit->escape_token = pg_option.escape;
 
     LPGBindingVisitor visitor(unit, unit_binding);
     unit->runtime_unit->root->accept(&visitor);

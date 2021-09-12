@@ -14,19 +14,19 @@ static constexpr  bool NEW_OPTIONS_CODE = true;
 
 char* JiksPgOption::NewString(const char* in)
 {
-	char* out = new char[strlen(in) + 1];
-	temp_string.Next() = out;
-	strcpy(out, in);
-	return out;
+    char* out = new char[strlen(in) + 1];
+    temp_string.Next() = out;
+    strcpy(out, in);
+    return out;
 }
 
 char* JiksPgOption::NewString(const char* in, int length)
 {
-	char* out = new char[length + 1];
-	temp_string.Next() = out;
-	strncpy(out, in, length);
-	out[length] = NULL_CHAR;
-	return out;
+    char* out = new char[length + 1];
+    temp_string.Next() = out;
+    strncpy(out, in, length);
+    out[length] = NULL_CHAR;
+    return out;
 }
 
 const char* JiksPgOption::GetPrefix(const char* filename)
@@ -84,113 +84,113 @@ void JiksPgOption::ProcessPath(Tuple<const char*>& list, const char* path, const
     return;
 }
 
-JiksPgOption::JiksPgOption(JikesPGLexStream* lex,const std::string& file_path)
-: home_directory(nullptr), template_directory(nullptr), ast_directory_prefix(nullptr),lex_stream(lex)
+JiksPgOption::JiksPgOption(JikesPGLexStream* lex, const std::string& file_path)
+    : home_directory(nullptr), template_directory(nullptr), ast_directory_prefix(nullptr), lex_stream(lex)
 {
 
     return_code = 0;
     optionParser = new OptionParser(OptionDescriptor::getAllDescriptors());
     optionProcessor = new OptionProcessor(this);
     OptionDescriptor::initializeAll(optionProcessor);
-	for_parser = true;
+    for_parser = true;
     for_lsp = true;
 
-	return_code = 0;
+    return_code = 0;
 
 
-	// All of the initializations below are to fields that have cmd-line options
-	// >>>
-	if (!NEW_OPTIONS_CODE)
-	{
-		quiet = false;
-		automatic_ast = NONE;
-		attributes = false;
-		backtrack = false;
-		legacy = true;
-		list = false;
-		glr = false;
-		slr = false;
-		verbose = false;
-		first = false;
-		follow = false;
-		priority = true;
-		edit = false;
-		states = false;
-		xref = false;
-		nt_check = false;
-		conflicts = true;
-		read_reduce = true;
-		remap_terminals = true;
-		goto_default = false;
-		shift_default = false;
-		byte = true;
-		warnings = true;
-		single_productions = false;
-		error_maps = false;
-		debug = false;
-		parent_saved = false;
-		precedence = false;
-		scopes = false;
-		serialize = false;
-		soft_keywords = false;
-		table = false;
-		variables = NONE;
-		visitor = NONE;
-		lalr_level = 1;
-		margin = 0;
-		max_cases = 1024;
-		names = OPTIMIZED;
-		rule_classnames = SEQUENTIAL;
-		trace = CONFLICTS;
-		programming_language = XML;
-		escape = ' ';
-		or_marker = '|';
-		factory = NULL;
-		file_prefix = NULL;
-		dat_directory = NULL;
-		dat_file = NULL;
-		dcl_file = NULL;
-		def_file = NULL;
-		directory_prefix = NULL;
-		imp_file = NULL;
-		out_directory = NULL;
-		ast_directory = NULL;
-		ast_type = NULL;
-		visitor_type = NULL;
-		include_directory = NULL;
-		template_name = NULL;
-		extends_parsetable = NULL;
-		parsetable_interfaces = NULL;
-		package = NULL;
-		prefix = NULL;
-		suffix = NULL;
-	}
-	// <<<
+    // All of the initializations below are to fields that have cmd-line options
+    // >>>
+    if (!NEW_OPTIONS_CODE)
+    {
+        quiet = false;
+        automatic_ast = NONE;
+        attributes = false;
+        backtrack = false;
+        legacy = true;
+        list = false;
+        glr = false;
+        slr = false;
+        verbose = false;
+        first = false;
+        follow = false;
+        priority = true;
+        edit = false;
+        states = false;
+        xref = false;
+        nt_check = false;
+        conflicts = true;
+        read_reduce = true;
+        remap_terminals = true;
+        goto_default = false;
+        shift_default = false;
+        byte = true;
+        warnings = true;
+        single_productions = false;
+        error_maps = false;
+        debug = false;
+        parent_saved = false;
+        precedence = false;
+        scopes = false;
+        serialize = false;
+        soft_keywords = false;
+        table = false;
+        variables = NONE;
+        visitor = NONE;
+        lalr_level = 1;
+        margin = 0;
+        max_cases = 1024;
+        names = OPTIMIZED;
+        rule_classnames = SEQUENTIAL;
+        trace = CONFLICTS;
+        programming_language = XML;
+        escape = ' ';
+        or_marker = '|';
+        factory = NULL;
+        file_prefix = NULL;
+        dat_directory = NULL;
+        dat_file = NULL;
+        dcl_file = NULL;
+        def_file = NULL;
+        directory_prefix = NULL;
+        imp_file = NULL;
+        out_directory = NULL;
+        ast_directory = NULL;
+        ast_type = NULL;
+        visitor_type = NULL;
+        include_directory = NULL;
+        template_name = NULL;
+        extends_parsetable = NULL;
+        parsetable_interfaces = NULL;
+        package = NULL;
+        prefix = NULL;
+        suffix = NULL;
+    }
+    // <<<
 
-	// The following fields have option descriptors, but use a "handler" rather
-	// than a direct field member ptr, and so don't get auto initialization.
-	filter = NULL;
-	import_terminals = NULL;
+    // The following fields have option descriptors, but use a "handler" rather
+    // than a direct field member ptr, and so don't get auto initialization.
+    filter = NULL;
+    import_terminals = NULL;
 
-	// The remaining fields have no associated cmd-line options
-	ast_package = NULL;
-	grm_file = NULL;
-	lis_file = NULL;
-	tab_file = NULL;
-	prs_file = NULL;
-	sym_file = NULL;
-	top_level_ast_file = NULL;
-	top_level_ast_file_prefix = NULL;
-	exp_file = NULL;
-	exp_prefix = NULL;
-	exp_suffix = NULL;
-	exp_type = NULL;
-	prs_type = NULL;
-	sym_type = NULL;
-	dcl_type = NULL;
-	imp_type = NULL;
-	def_type = NULL;
-	action_type = NULL;
+    // The remaining fields have no associated cmd-line options
+    ast_package = NULL;
+    grm_file = NULL;
+    lis_file = NULL;
+    tab_file = NULL;
+    prs_file = NULL;
+    sym_file = NULL;
+    top_level_ast_file = NULL;
+    top_level_ast_file_prefix = NULL;
+    exp_file = NULL;
+    exp_prefix = NULL;
+    exp_suffix = NULL;
+    exp_type = NULL;
+    prs_type = NULL;
+    sym_type = NULL;
+    dcl_type = NULL;
+    imp_type = NULL;
+    def_type = NULL;
+    action_type = NULL;
 
 
     const char* main_input_file = file_path.c_str(),
@@ -310,9 +310,9 @@ const char* JiksPgOption::GetType(const char* filespec)
     int length = (dot == NULL ? strlen(start) : dot - start);
     return NewString(start, length);
 }
-void JiksPgOption::ReportAmbiguousOption(const std::string& desc, const std::string&  choice_msg, IToken* startToken, IToken* endToken)
+void JiksPgOption::ReportAmbiguousOption(const std::string& desc, const std::string& choice_msg, IToken* startToken, IToken* endToken)
 {
-   
+
     char* str = NewString(desc.data(), desc.size());
 
     Tuple<const char*> msg;
@@ -323,7 +323,7 @@ void JiksPgOption::ReportAmbiguousOption(const std::string& desc, const std::str
     EmitError(startToken, endToken, msg);
 }
 
-void JiksPgOption::ReportValueNotRequired( const std::string& option, IToken* startToken, IToken* endToken)
+void JiksPgOption::ReportValueNotRequired(const std::string& option, IToken* startToken, IToken* endToken)
 {
     char* str = NewString(option.c_str(), option.size());
     Tuple<const char*> msg;
@@ -334,7 +334,7 @@ void JiksPgOption::ReportValueNotRequired( const std::string& option, IToken* st
 }
 void JiksPgOption::ReportMissingValue(const std::string& option, IToken* startToken, IToken* endToken)
 {
-   
+
     char* str = NewString(option.c_str(), option.size());
 
     Tuple<const char*> msg;
@@ -345,7 +345,7 @@ void JiksPgOption::ReportMissingValue(const std::string& option, IToken* startTo
 }
 void JiksPgOption::InvalidTripletValueError(const std::string& str, const std::string& type, const std::string& format, IToken* startToken, IToken* endToken)
 {
-    
+
     Tuple<const char*> msg;
     msg.Next() = "Illegal ";
     msg.Next() = NewString(type.c_str(), type.size());
@@ -356,7 +356,7 @@ void JiksPgOption::InvalidTripletValueError(const std::string& str, const std::s
     msg.Next() = "\" was expected.";
     EmitError(startToken, endToken, msg);
 }
-void JiksPgOption::InvalidValueError(const std::string& value, const std::string& desc,IToken* startToken, IToken* endToken)
+void JiksPgOption::InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken)
 {
     char* str = NewString(desc.c_str(), desc.size());
 
@@ -366,25 +366,75 @@ void JiksPgOption::InvalidValueError(const std::string& value, const std::string
     msg.Next() = "\" is an invalid value for option \"";
     msg.Next() = str;
     msg.Next() = "\"";
-    EmitError(startToken,endToken, msg);
+    EmitError(startToken, endToken, msg);
 }
+
+void JiksPgOption::CheckGlobalOptionsConsistency()
+{
+    Tuple<const char*> msg;
+    or_marker_location = or_marker_location == NULL ? lex_stream->GetTokenReference(0) : or_marker_location;
+    escape_location = escape_location == NULL ? lex_stream->GetTokenReference(0) : escape_location;
+
+    if (or_marker == escape)
+    {
+        const char str[2] = { escape, '\0' };
+        msg.reset();
+        msg.Next() = "The escape symbol, \"";
+        msg.Next() = str;
+        msg.Next() = "\", cannot be used as the OR_MARKER";
+        EmitError(or_marker_location, msg);
+    }
+    else if (or_marker == ':')
+        EmitError(or_marker_location, "\":\" cannot be used as the OR_MARKER");
+    else if (or_marker == '<')
+        EmitError(or_marker_location, "\"<\" cannot be used as the OR_MARKER");
+    else if (or_marker == '-')
+        EmitError(or_marker_location, "\"-\" cannot be used as the OR_MARKER");
+    else if (or_marker == '\'')
+        EmitError(or_marker_location, "\"'\" cannot be used as the OR_MARKER");
+    else if (or_marker == '\"')
+        EmitError(or_marker_location, "\" cannot be used as the OR_MARKER");
+
+    if (escape == or_marker)
+    {
+        const char str[2] = { or_marker, '\0' };
+        msg.reset();
+        msg.Next() = "The OR_MARKER symbol, \"";
+        msg.Next() = str;
+        msg.Next() = "\", cannot be used as the OR_MARKER";
+        EmitError(escape_location, msg);
+    }
+    else if (escape == ':')
+        EmitError(escape_location, "\":\" cannot be used as ESCAPE");
+    else if (escape == '<')
+        EmitError(escape_location, "\"<\" cannot be used as ESCAPE");
+    else if (escape == '-')
+        EmitError(escape_location, "\"-\" cannot be used as ESCAPE");
+    else if (escape == '\'')
+        EmitError(escape_location, "\"'\" cannot be used as ESCAPE");
+    else if (escape == '\"')
+        EmitError(escape_location, "\" cannot be used as ESCAPE");
+
+    return;
+}
+
 using namespace LPGParser_top_level_ast;
 
-void JiksPgOption::process_workspace_option( const GenerationOptions& options)
+void JiksPgOption::process_workspace_option(const GenerationOptions& options)
 {
     std::vector<std::string> parameters;
-   
+
     if (options.quiet) {
         if (options.quiet.value())
-			parameters.push_back("quiet");
+            parameters.push_back("quiet");
     }
     if (options.package) {
         parameters.push_back("package=" + options.package.value());
     }
     if (options.verbose) {
-       
-        if(options.verbose.value())
-			parameters.push_back("verbose");
+
+        if (options.verbose.value())
+            parameters.push_back("verbose");
     }if (options.visitor) {
         parameters.push_back("visitor=" + options.visitor.value());
     }
@@ -395,10 +445,10 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
 
     if (options.include_search_directory || options.template_search_directory) {
         std::string arg = "include-directory=";
-    	if(options.include_search_directory)
-    	{
+        if (options.include_search_directory)
+        {
             arg += options.include_search_directory.value() + ";";
-    	}
+        }
         if (options.template_search_directory)
         {
             arg += options.template_search_directory.value() + ";";
@@ -409,8 +459,8 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
     if (options.additionalParameters) {
         parameters.push_back(options.additionalParameters.value());
     }
-    
-	 for(auto& it : parameters)
+
+    for (auto& it : parameters)
     {
         try {
             it.push_back('\0');
@@ -423,53 +473,62 @@ void JiksPgOption::process_workspace_option( const GenerationOptions& options)
         catch (ValueFormatException&) {
         }
     }
-  
+
 }
+extern OptionDescriptor* orMarker;
 
 void JiksPgOption::process_option(std::stack<LPGParser_top_level_ast::option*>& lpg_optionList)
 {
     std::set<OptionDescriptor*> exclude;
- 
-	while (!lpg_optionList.empty())
-	{
-		option* _opt = lpg_optionList.top();
-        lpg_optionList.pop();
-		if (!_opt)
-			continue;
-	
-		auto sym = _opt->getSYMBOL();
-		std::stringex optName = sym->to_utf8_string();
-		optName.tolower();
 
+    while (!lpg_optionList.empty())
+    {
+        option* _opt = lpg_optionList.top();
+        lpg_optionList.pop();
+        if (!_opt)
+            continue;
+
+        auto sym = _opt->getSYMBOL();
+        std::stringex optName = sym->to_utf8_string();
+        optName.tolower();
+        if (optName == "or-marker")
+        {
+            or_marker_location = _opt->getLeftIToken();
+        }
+        else if (optName == "escape")
+        {
+            escape_location = _opt->getLeftIToken();
+        }
         try {
-            if(OptionDescriptor::IsIncludeOption(optName))
+            if (OptionDescriptor::IsIncludeOption(optName))
             {
-	            continue;
+                continue;
             }
             auto opt_string = _opt->to_utf8_string();
             opt_string.push_back('\0');
-        	
+
             const char* param = opt_string.c_str();
             auto value = optionParser->parse(param);
             if (value) {
                 value->processSetting(optionProcessor);
+
             }
             else {
-              // ±¨´í
-              std::string info;
-              info = "\""+ opt_string + "\" is an invalid option";
-              EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
+                // ±¨´í
+                std::string info;
+                info = "\"" + opt_string + "\" is an invalid option";
+                EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
             }
         }
         catch (ValueFormatException& vfe) {
-            std::string info ;
-            info = "Improper value '" +  vfe.value() + "' for option '" + vfe.optionDescriptor()->getName() + "': " + vfe.message() + "\n";
+            std::string info;
+            info = "Improper value '" + vfe.value() + "' for option '" + vfe.optionDescriptor()->getName() + "': " + vfe.message() + "\n";
             std::cerr << info;
             EmitError(sym->getRightIToken(), _opt->getRightIToken(), info.c_str());
         }
-		
-	}
-	
+
+    }
+
 }
 
 void JiksPgOption::CompleteOptionProcessing()
@@ -479,14 +538,23 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (escape == ' ')
     {
-        escape = (programming_language == JAVA ||
-            programming_language == PYTHON3 ||
-            programming_language == PYTHON2 ||
+        if (programming_language == JAVA ||
             programming_language == C ||
+            programming_language == PYTHON2 ||
+            programming_language == PYTHON3 ||
+            programming_language == CSHARP ||
             programming_language == CPP2 ||
-            programming_language == CPP
-            ? '$'
-            : '%');
+            programming_language == RUST ||
+            programming_language == GO ||
+            programming_language == CPP)
+        {
+            escape = '$';
+        }
+        else
+        {
+            escape = '%';
+        }
+
     }
 
     //
@@ -522,13 +590,15 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (out_directory == NULL)
         out_directory = NewString(home_directory, strlen(home_directory));
-  
 
-    
-    //
-    //
-    //
 
+
+
+
+    //
+    //
+    //
+    CheckGlobalOptionsConsistency();
 
     //
     //
@@ -570,21 +640,49 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     //
 
+    auto help_get_file = [&](const char* file_suffix)
+    {
+
+        const char* file_type = "";
+        switch (programming_language)
+        {
+        case  C:
+
+        case  CPP:
+
+        case  CPP2:
+            file_type = "h"; break;
+        case  JAVA:
+            file_type = "java"; break;
+        case  TSC:
+            file_type = "ts"; break;
+        case  DART:
+            file_type = "dart"; break;
+        case  PYTHON2:
+        case  PYTHON3:
+            file_type = "py"; break;
+        case  RUST:
+            file_type = "rs"; break;
+        case  GO:
+            file_type = "go"; break;
+        case  CSHARP:
+            file_type = "cs"; break;
+        case  PLX:
+            file_type = "copy"; break;
+        case  PLXASM:
+            file_type = "copy"; break;
+        case  ML:
+            file_type = "ml"; break;
+        default:
+            file_type = "xml";
+        }
+        return GetFile(out_directory, file_suffix, file_type);
+    };
+
+
     if (prs_file == NULL)
     {
-        prs_file = GetFile(out_directory,
-            "prs.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == PLX || programming_language == PLXASM
-                        ? "copy"
-                        : (programming_language == C
-                            || programming_language == CPP
-                            || programming_language == CPP2
-                            ? "h"
-                            : "xml")))));
+        prs_file = help_get_file("prs.");
     }
     prs_type = GetType(prs_file);
 
@@ -593,37 +691,13 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (sym_file == NULL)
     {
-        sym_file = GetFile(out_directory,
-            "sym.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == PLX || programming_language == PLXASM
-                        ? "copy"
-                        : (programming_language == C
-                            || programming_language == CPP
-                            || programming_language == CPP2
-                            ? "h"
-                            : "xml")))));
+        sym_file = help_get_file("sym.");
     }
     sym_type = GetType(sym_file);
 
     if (NULL == top_level_ast_file)
     {
-        top_level_ast_file = GetFile(out_directory,
-            "_top_level_ast.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == PLX || programming_language == PLXASM
-                        ? "copy"
-                        : (programming_language == C
-                            || programming_language == CPP
-                            || programming_language == CPP2
-                            ? "h"
-                            : "xml")))));
+        top_level_ast_file = help_get_file("_top_level_ast.");
     }
     top_level_ast_file_prefix = GetType(top_level_ast_file);
 
@@ -634,30 +708,55 @@ void JiksPgOption::CompleteOptionProcessing()
     if (dat_directory == NULL)
         dat_directory = NewString(home_directory, strlen(home_directory));
 
-
     if (dat_file == NULL)
         dat_file = GetFile(dat_directory, "dcl.", "data");
 
     //
     //
     //
+    auto help_get_def_or_del_file = [&](const char* file_suffix, bool def)
+    {
+
+        const char* file_type = "";
+        switch (programming_language)
+        {
+        case  C:
+            file_type = "c"; break;
+        case  CPP:
+
+        case  CPP2:
+            file_type = "cpp"; break;
+        case  JAVA:
+            file_type = "java"; break;
+        case  RUST:
+            file_type = "rs"; break;
+        case  GO:
+            file_type = "go"; break;
+        case  CSHARP:
+            file_type = "cs"; break;
+        case  TSC:
+            file_type = "ts"; break;
+        case  DART:
+            file_type = "dart"; break;
+        case  PLX:
+            file_type = "copy"; break;
+        case  PLXASM:
+        {
+            if (def) file_type = "copy";
+            else file_type = "assemble";
+        }
+        break;
+        case  ML:
+            file_type = "ml"; break;
+        default:
+            file_type = "xml";
+        }
+        return GetFile(out_directory, file_suffix, file_type);
+    };
+
     if (dcl_file == NULL)
     {
-        dcl_file = GetFile(out_directory,
-            (programming_language == C || programming_language == CPP || programming_language == CPP2) ? "prs." : "dcl.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == CPP
-                        ? "cpp"
-                        : (programming_language == PLX
-                            ? "copy"
-                            : (programming_language == PLXASM
-                                ? "assemble"
-                                : (programming_language == C
-                                    ? "c"
-                                    : "xml")))))));
+        dcl_file = help_get_def_or_del_file((programming_language == C || programming_language == CPP || programming_language == CPP2) ? "prs." : "dcl.", false);
     }
     dcl_type = GetType(dcl_file);
 
@@ -666,19 +765,7 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (def_file == NULL)
     {
-        def_file = GetFile(out_directory,
-            "def.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == CPP
-                        ? "cpp"
-                        : (programming_language == PLX || programming_language == PLXASM
-                            ? "copy"
-                            : (programming_language == C
-                                ? "c"
-                                : "xml"))))));
+        def_file = help_get_def_or_del_file("def.", true);
     }
     def_type = GetType(def_file);
 
@@ -710,19 +797,7 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (exp_file == NULL)
     {
-        exp_file = GetFile(out_directory,
-            "exp.",
-            (programming_language == JAVA
-                ? "java"
-                : (programming_language == ML
-                    ? "ml"
-                    : (programming_language == PLX || programming_language == PLXASM
-                        ? "copy"
-                        : (programming_language == C
-                            || programming_language == CPP
-                            || programming_language == CPP2
-                            ? "h"
-                            : "xml")))));
+        exp_file = help_get_file("exp.");
     }
     else exp_file = ExpandFilename(exp_file);
 
@@ -742,19 +817,7 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     if (imp_file == NULL)
     {
-        imp_file = GetFile(out_directory,
-            "imp",
-            (programming_language == XML
-                ? ".xml"
-                : (programming_language == C
-                    || programming_language == CPP
-                    || programming_language == CPP2
-                    ? ".h"
-                    : (programming_language == PLX || programming_language == PLXASM
-                        ? ".copy"
-                        : (programming_language == JAVA
-                            ? ".java"
-                            : ".ml")))));
+        imp_file = help_get_file("imp.");
     }
     imp_type = GetType(imp_file);
 
@@ -781,7 +844,7 @@ void JiksPgOption::CompleteOptionProcessing()
     //
     //
     //
-    //if (verbose)
+    if (verbose)
     {
         first = true;
         follow = true;
@@ -805,8 +868,8 @@ void JiksPgOption::EmitHeader(IToken* startToken, IToken* endToken, const char* 
 {
     startToken = (startToken != NULL ? startToken : lex_stream->GetTokenReference(0));
     endToken = (endToken != NULL ? endToken : lex_stream->GetTokenReference(0));
-    
-    report.Put(IcuUtil::ws2s( startToken->getIPrsStream()->getFileName()).c_str());
+
+    report.Put(IcuUtil::ws2s(startToken->getIPrsStream()->getFileName()).c_str());
     report.Put(":");
     report.Put(startToken->getLine());
     report.Put(":");
@@ -859,7 +922,7 @@ void JiksPgOption::EmitInformative(int index, Tuple<const char*>& msg)
 
 void JiksPgOption::Emit(IToken* token, lsDiagnosticSeverity severity, const char* msg)
 {
-  
+
     Emit(token, token, severity, msg);
 
     return;
@@ -869,7 +932,7 @@ void JiksPgOption::FlushReport()
 {
     report.Flush(stdout);
 }
-void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnosticSeverity severity, const char* msg)
+void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const  lsDiagnosticSeverity severity, const char* msg)
 {
 
     if (message_handler_)
@@ -884,11 +947,11 @@ void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnostic
     {
         header = "Error: ";
     }
-	else if(severity == lsDiagnosticSeverity::Warning)
-	{
+    else if (severity == lsDiagnosticSeverity::Warning)
+    {
         header = "Warning: ";
-	}
-    else 
+    }
+    else
     {
         header = "Informative: ";
     }
@@ -902,7 +965,7 @@ void JiksPgOption::Emit(IToken* startToken, IToken* endToken,const  lsDiagnostic
 }
 
 
-void JiksPgOption::Emit(IToken* token,const lsDiagnosticSeverity severity,  Tuple<const char*>& msg)
+void JiksPgOption::Emit(IToken* token, const lsDiagnosticSeverity severity, Tuple<const char*>& msg)
 {
     Emit(token, token, severity, msg);
 
@@ -911,11 +974,11 @@ void JiksPgOption::Emit(IToken* token,const lsDiagnosticSeverity severity,  Tupl
 
 void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const lsDiagnosticSeverity severity, Tuple<const char*>& msg)
 {
-	if(message_handler_)
-	{
+    if (message_handler_)
+    {
         message_handler_->handleMessage(severity, startToken, endToken, msg);
-		return;
-	}
+        return;
+    }
     const char* header;
     if (severity == lsDiagnosticSeverity::Error)
     {
@@ -929,12 +992,12 @@ void JiksPgOption::Emit(IToken* startToken, IToken* endToken, const lsDiagnostic
     {
         header = "Informative: ";
     }
-     EmitHeader(startToken, endToken, header);
-     for (int i = 0; i < msg.Length(); i++)
-         report.Put(msg[i]);
-     report.PutChar('\n');
+    EmitHeader(startToken, endToken, header);
+    for (int i = 0; i < msg.Length(); i++)
+        report.Put(msg[i]);
+    report.PutChar('\n');
 
-     FlushReport();
+    FlushReport();
 
     return;
 }

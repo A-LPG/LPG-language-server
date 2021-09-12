@@ -36,7 +36,9 @@ namespace
     std::map<std::stringex, std::vector<std::stringex>> OPTION_VALUE = {
     	
         {"automatic_ast" , {"none","nested","toplevel"}},
-        { "programming_language" ,  {"xml","c","cpp","java","plx","plxasm","ml","rt_cpp","csharp","typescript"} },
+        { "programming_language" ,
+        	{"xml","c","cpp","java","plx","plxasm","ml","rt_cpp","csharp","typescript","python2","python3","rust","go","dart"}},
+
     	{"names" , {"optimized","maximum","minimum"}},
     	{"trace",  {"conflicts","full"}},
     	{"variables" , {"none","both","terminals","nt","nonterminals"}},
@@ -60,7 +62,7 @@ namespace
         "names={optimized,maximum,minimum}", "nt-check", "or-marker=<character>",
         "out_directory=<directory_name>",
         "package=org.my.package", "parent_saved", "parsetable-interfaces=<string>", "prefix=<string>",
-        "priority", "programming_language={xml,c,cpp,java,plx,plxasm,ml,rt_cpp, csharp,typescript}", "prs-file=<file_name>",
+        "priority", "programming_language={xml,c,cpp,java,plx,plxasm,ml,rt_cpp, csharp,typescript ,python2,python3,rust,go,dart}", "prs-file=<file_name>",
         "quiet",
         "read-reduce", "remap-terminals", "scopes", "serialize",
         "shift-default", "single-productions", "slr", "soft-keywords",

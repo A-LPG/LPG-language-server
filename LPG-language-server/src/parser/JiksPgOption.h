@@ -10,6 +10,7 @@
 #include "lpgErrorCode.h"
 #include "../code.h"
 
+struct IToken;
 struct GenerationOptions;
 class OptionDescriptor;
 class OptionParser;
@@ -57,6 +58,9 @@ public:
             TSC = 10,
             PYTHON3 = 11,
             PYTHON2 = 12,
+            DART = 13,
+			RUST=14,
+			GO=15,
             //
             // Possible values for option "trace"
             //
@@ -149,6 +153,11 @@ public:
         char escape,
             or_marker;
 
+        IToken
+            * escape_location = nullptr,
+            * or_marker_location = nullptr;
+
+
         const char* factory,
             * file_prefix,
 
@@ -219,7 +228,7 @@ public:
             IToken* startToken, IToken* endToken);
         void InvalidValueError(const std::string& value, const std::string& desc, IToken* startToken, IToken* endToken);
         void CheckGlobalOptionsConsistency();
-        void process_workspace_option(const  GenerationOptions&);
+    void process_workspace_option(const  GenerationOptions&);
         void process_option(std::stack<LPGParser_top_level_ast::option*>&);
        
         void EmitHeader(IToken*, const char*);
