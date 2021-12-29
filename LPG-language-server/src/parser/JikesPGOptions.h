@@ -18,6 +18,10 @@
 
 #include "JikesPGUtil.h"
 
+#ifndef WIN32
+#define _strdup strdup
+#endif
+
 enum OptionType {
     BOOLEAN_TYPE,
     CHAR_TYPE,

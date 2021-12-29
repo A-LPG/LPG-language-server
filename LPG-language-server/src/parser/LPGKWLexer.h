@@ -19,13 +19,13 @@
 
 #pragma once
 #include "LPGLexerprs.h"
-#include "tuple.h"
+#include "lpg2/tuple.h"
 #include "LPGKWLexerprs.h"
 #include "LPGParsersym.h"
 
     //#line 63 "KeywordTemplateF.gi
 
-#include "tuple.h"
+#include "lpg2/tuple.h"
  struct  LPGKWLexer :public LPGKWLexerprs
 {
 	 shared_ptr_wstring inputChars;

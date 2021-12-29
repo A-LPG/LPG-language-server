@@ -6,7 +6,7 @@
 #include "node.h"
 #include "set.h"
 
-#include "tuple.h"
+#include "lpg2/tuple.h"
 
 
 class Base : public Util

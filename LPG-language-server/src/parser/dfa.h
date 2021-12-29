@@ -3,7 +3,7 @@
 
 #include "JikesPGUtil.h"
 #include "node.h"
-#include "tuple.h"
+#include "lpg2/tuple.h"
 
 
 class Grammar;

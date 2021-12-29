@@ -1,4 +1,4 @@
-#include <LPGSourcePositionLocator.h>
+#include <lpg2/LPGSourcePositionLocator.h>
 #include "../SearchPolicy.h"
 #include "../ASTUtils.h"
 #include "MessageHandler.h"

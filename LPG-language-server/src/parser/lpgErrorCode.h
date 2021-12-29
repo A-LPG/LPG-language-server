@@ -1,10 +1,10 @@
 #pragma once
 
-#include <IcuUtil.h>
-#include <ILexStream.h>
-#include <ParseErrorCodes.h>
+#include <lpg2/IcuUtil.h>
+#include <lpg2/ILexStream.h>
+#include <lpg2/ParseErrorCodes.h>
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
-#include "IMessageHandler.h"
+#include "lpg2/IMessageHandler.h"
 enum
 {
     MACRO_EXPECTED_INSTEAD_OF_SYMBOL = ParseErrorCodes::MANUAL_CODE + 1,

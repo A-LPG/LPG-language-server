@@ -1,6 +1,6 @@
 #include "JiksPgOption.h"
-#include "IcuUtil.h"
-#include <IPrsStream.h>
+#include "lpg2/IcuUtil.h"
+#include <lpg2/IPrsStream.h>
 
 #include "JikesPGOptions.h"
 #include "JiksPGControl.h"

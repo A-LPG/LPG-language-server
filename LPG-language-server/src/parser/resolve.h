@@ -5,7 +5,7 @@
 #include "node.h"
 #include "pda.h"
 #include "set.h"
-#include "tuple.h"
+#include "lpg2/tuple.h"
 
 
 class Resolve : public Util

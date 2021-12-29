@@ -6,9 +6,9 @@
 #include <stack>
 #include <LibLsp/lsp/lsFormattingOptions.h>
 
-#include "LPGSourcePositionLocator.h"
+#include "lpg2/LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
-#include "CharOperation.h"
+#include "lpg2/CharOperation.h"
 using namespace LPGParser_top_level_ast;
 
 

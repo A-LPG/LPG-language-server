@@ -1,5 +1,5 @@
 #pragma once
-#include <IAst.h>
+#include <lpg2/IAst.h>
 #include <unordered_map>
 #include "LibLsp/lsp/lsPosition.h"
 #include "parser/LPGParser.h"

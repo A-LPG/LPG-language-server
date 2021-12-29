@@ -11,7 +11,7 @@
 #include <iostream>
 #include <limits>
 #include <cstdarg>
-#include <stringex.h>
+#include <lpg2/stringex.h>
 
 #include "JikesPGOptions.h"
 

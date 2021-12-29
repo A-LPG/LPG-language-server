@@ -1,9 +1,8 @@
 #include "base.h"
 
-#include "control.h"
 #include <string.h>
 #include <iostream>
-#include <stringex.h>
+#include <lpg2/stringex.h>
 using namespace std;
 
 int Base::MAX_LENGTH = PRINT_LINE_SIZE - 4;

@@ -1,6 +1,6 @@
 #pragma once
-#include <ParseErrorCodes.h>
-#include <tuple.h>
+#include <lpg2/ParseErrorCodes.h>
+#include <lpg2/tuple.h>
 
 #include "JikesPGUtil.h"
 #include "lpgErrorCode.h"

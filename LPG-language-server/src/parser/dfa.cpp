@@ -1,7 +1,7 @@
 #include "dfa.h"
 
 #include "base.h"
-#include "control.h"
+
 
 
 Dfa::Dfa(Control *control_, Base *base_) : control(control_),

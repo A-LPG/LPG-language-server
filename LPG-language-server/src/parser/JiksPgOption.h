@@ -1,8 +1,8 @@
 #pragma once
-#include <IToken.h>
+#include <lpg2/IToken.h>
 #include <stack>
-#include <stringex.h>
-#include <tuple.h>
+#include <lpg2/stringex.h>
+#include <lpg2/tuple.h>
 #include <LibLsp/lsp/lsp_diagnostic.h>
 
 #include "buffer.h"

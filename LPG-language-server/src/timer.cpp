@@ -38,8 +38,8 @@ void Timer::ResetAndPrint(const std::string& message) {
   long long elapsed = ElapsedMicroseconds();
   long long milliseconds = elapsed / 1000;
   long long remaining = elapsed - milliseconds;
-  LOG_S(INFO) << message << " took " << milliseconds << "." << remaining
-              << "ms";
+ // LOG_S(INFO) << message << " took " << milliseconds << "." << remaining
+  //            << "ms";
   Reset();
 }
 

@@ -8,9 +8,10 @@
 #include "../parser/LPGParser.h"
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
-#include "LPGSourcePositionLocator.h"
+#include "lpg2/LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
 #include "../parser/JikesPGOptions.h"
+#include "lpg2/stringex.h"
 namespace 
 {
     std::vector<std::stringex> OPTION_KEYS = {

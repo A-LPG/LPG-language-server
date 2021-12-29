@@ -6,7 +6,7 @@
  *  Copyright 2011 IBM.
  */
 
-#include <stringex.h>
+#include <lpg2/stringex.h>
 
 #include "JikesPGOptions.h"
 

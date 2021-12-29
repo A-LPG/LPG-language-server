@@ -23,17 +23,17 @@
 
 #pragma once  
 #include <iostream>
-#include "IPrsStream.h"
-#include "Object.h"
-#include "ParseTable.h"
-#include "RuleAction.h"
-#include "stringex.h"
-#include "Token.h"
+#include "lpg2/IPrsStream.h"
+#include "lpg2/Object.h"
+#include "lpg2/ParseTable.h"
+#include "lpg2/RuleAction.h"
+#include "lpg2/stringex.h"
+#include "lpg2/Token.h"
 #include "LPGLexersym.h"
 #include "LPGLexerprs.h"
 #include "LPGKWLexer.h"
-#include "LexParser.h"
-#include "LpgLexStream.h"
+#include "lpg2/LexParser.h"
+#include "lpg2/LpgLexStream.h"
  struct LPGLexer :public Object ,public RuleAction
 {
      struct  LPGLexerLpgLexStream;
@@ -112,7 +112,7 @@
      void initializeLexer(IPrsStream *prsStream, int start_offset, int end_offset)
     {
         if (!lexStream->getInputChars())
-            throw  std::exception("LexStream was not initialized");
+            throw  std::runtime_error("LexStream was not initialized");
         lexStream->setPrsStream(prsStream);
         prsStream->makeToken(start_offset, end_offset, 0); // Token list must start with a bad token
     }

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <LibLsp/lsp/AbsolutePath.h>
-#include <boost/thread/win32/shared_mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/lock_types.hpp>
 #include <LibLsp/lsp/textDocument/did_change.h>
 #include <LibLsp/lsp/workspace/didChangeWorkspaceFolders.h>
@@ -19,7 +19,7 @@
 #include <boost/filesystem.hpp>
 #include <LibLsp/JsonRpc/RemoteEndPoint.h>
 
-#include "IMessageHandler.h"
+#include "lpg2/IMessageHandler.h"
 #include "message/MessageHandler.h"
 #include <LibLsp/lsp/textDocument/publishDiagnostics.h>
 #include <LibLsp/JsonRpc/ScopeExit.h>
@@ -28,8 +28,11 @@
 #include "SearchPolicy.h"
 #include "parser/JikesPGOptions.h"
 #include <boost/algorithm/string.hpp>
+#include "lpg2/Monitor.h"
+#include "lpg2/IcuUtil.h"
 using namespace LPGParser_top_level_ast;
 using namespace lsp;
+using std::string;
 extern void  process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler* handler);
 void process_symbol(std::shared_ptr<CompilationUnit>& unit);
 struct WorkSpaceManagerData

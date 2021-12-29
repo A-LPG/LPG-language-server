@@ -1,8 +1,7 @@
 #include <sys/stat.h>
-#include "control.h"
 #include "grammar.h"
 #include <iostream>
-#include <stringex.h>
+#include <lpg2/stringex.h>
 
 
 int HashPrimes::primes[] = { DEFAULT_HASH_SIZE, 8191, 16411, MAX_HASH_SIZE };

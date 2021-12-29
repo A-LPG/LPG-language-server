@@ -4,10 +4,10 @@
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
 #include <stack>
-#include "LPGSourcePositionLocator.h"
+#include "lpg2/LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
-#include "CharOperation.h"
-#include "Adjunct.h"
+#include "lpg2/CharOperation.h"
+#include "lpg2/Adjunct.h"
 using namespace LPGParser_top_level_ast;
 
 

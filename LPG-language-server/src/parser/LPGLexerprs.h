@@ -14,7 +14,7 @@
 #pragma once
  #include <string>
   #include "LPGLexersym.h"
- #include "ParseTable.h"
+ #include "lpg2/ParseTable.h"
  struct LPGLexerprs :public ParseTable,public LPGLexersym {
              typedef  unsigned char byte;
      constexpr   static int ERROR_SYMBOL = 0;

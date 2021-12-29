@@ -7,7 +7,7 @@
 #include "ParseData.h"
 #include "LPGParsersym.h"
 
-#include "tuple.h"
+#include "lpg2/tuple.h"
 
 
 #include "set.h"

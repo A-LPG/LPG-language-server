@@ -4,7 +4,7 @@
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
 #include <stack>
-#include "LPGSourcePositionLocator.h"
+#include "lpg2/LPGSourcePositionLocator.h"
 #include "../WorkSpaceManager.h"
 #include "../parser/ParseData.h"
 #include "../parser/JiksPGControl.h"

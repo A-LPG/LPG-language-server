@@ -1,6 +1,5 @@
 #include "pda.h"
 
-#include "control.h"
 #include "resolve.h"
 #include "sp.h"
 

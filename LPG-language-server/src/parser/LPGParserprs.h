@@ -1,7 +1,7 @@
 #pragma once
  #include <string>
   #include "LPGParsersym.h"
- #include "ParseTable.h"
+ #include "lpg2/ParseTable.h"
  struct LPGParserprs :public ParseTable,public LPGParsersym {
              typedef  unsigned char byte;
      constexpr   static int ERROR_SYMBOL = 47;

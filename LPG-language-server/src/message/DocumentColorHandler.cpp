@@ -257,9 +257,11 @@ namespace
 		{
 			TextDocument::Color _color;
 			_color.alpha = alpha / 255.0;
+#if _WIN32
 			_color.red =  GetRValue(handle)/255.0;
 			_color.green = GetGValue(handle) / 255.0;
 			_color.blue = GetBValue(handle) / 255.0;
+#endif
 			return  _color;
 		}
 		static Color win32_new(int handle, int alpha) {
@@ -276,6 +278,7 @@ namespace
 		static Color getSystemColor(int id) {
 			
 			int pixel = 0x00000000;
+#if _WIN32
 			switch (id) {
 			case SWT::COLOR_WIDGET_DARK_SHADOW:		pixel = ::GetSysColor(COLOR_3DDKSHADOW);	break;
 			case SWT::COLOR_WIDGET_DISABLED_FOREGROUND: pixel = ::GetSysColor(COLOR_GRAYTEXT); break;
@@ -308,6 +311,8 @@ namespace
 			default:
 				return getSystemColorInternal(id);
 			}
+#endif
+
 			return win32_new( pixel);
 		}
 	private:

@@ -1,6 +1,6 @@
 #include "ASTUtils.h"
 
-#include <LexStream.h>
+#include <lpg2/LexStream.h>
 #include <stdio.h>
 #include <ctype.h>
 #include "code.h"

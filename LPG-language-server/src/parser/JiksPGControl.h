@@ -1,6 +1,6 @@
 #pragma once
 
-#include <IToken.h>
+#include <lpg2/IToken.h>
 #include <unordered_map>
 #include <unordered_set>
 

@@ -1,5 +1,4 @@
 #include  "JiksPGControl.h"
-#include "control.h"
 #include "grammar.h"
 #include "LPGParser_top_level_ast.h"
 

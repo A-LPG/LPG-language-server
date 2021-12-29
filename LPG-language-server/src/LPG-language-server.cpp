@@ -29,7 +29,7 @@
 #include "LibLsp/lsp/utils.h"
 #include "LibLsp/lsp/working_files.h"
 #include "LibLsp/lsp/SimpleTimer.h"
-#include "IcuUtil.h"
+#include "lpg2/IcuUtil.h"
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
 #include "Monitor.h"
@@ -48,6 +48,8 @@
 #include "LibLsp/lsp/client/registerCapability.h"
 #include "LibLsp/lsp/workspace/symbol.h"
 #include "LibLsp/lsp/textDocument/code_action.h"
+#include "lpg2/Monitor.h"
+#include "lpg2/stringex.h"
 using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;

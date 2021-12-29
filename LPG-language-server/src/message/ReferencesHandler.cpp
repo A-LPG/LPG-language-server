@@ -5,7 +5,7 @@
 #include "../CompilationUnit.h"
 #include "../parser/LPGParser_top_level_ast.h"
 #include "../ASTUtils.h"
-#include "LPGSourcePositionLocator.h"
+#include "lpg2/LPGSourcePositionLocator.h"
 #include "../SearchPolicy.h"
 #include "../WorkSpaceManager.h"
 #include "LibLsp/lsp/textDocument/hover.h"
