@@ -54,26 +54,6 @@ set(LSP_SEVER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LPG-language-server/src)
 set(LSP_SEVER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LPG-language-server/src)
 
 
-macro(lspcpp_set_target_options_with_nuget_pkg target id version)
-    if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-        target_link_libraries(${target}  ${CMAKE_BINARY_DIR}/packages/${id}.${version}/build/${id}.targets)
-    else()
-        message(FATAL_ERROR "NUGET package only use in Visual Studio")
-    endif()
-
-endmacro()
-
-macro(INSTALL_NUGET id version)
-    if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-        unset(nuget_cmd)
-        list(APPEND nuget_cmd install ${id} -Prerelease -Version ${version} -OutputDirectory ${CMAKE_BINARY_DIR}/packages)
-        message("excute nuget install:${nuget_cmd}")
-        execute_process(COMMAND nuget ${nuget_cmd} ENCODING AUTO)
-    else()
-        message(FATAL_ERROR "INSTALL_NUGET only use in Visual Studio")
-    endif()
-
-endmacro()
 ###########################################################
 # Functions
 ###########################################################
@@ -86,15 +66,6 @@ function(lsp_sever_set_target_options target)
 
     set_property(TARGET ${target} PROPERTY CXX_EXTENSIONS OFF)
 
-    if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_chrono-vc141 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_date_time-vc141 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_filesystem-vc141 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_program_options-vc141 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_system-vc141 1.76.0.0)
-        lspcpp_set_target_options_with_nuget_pkg(${target} boost_thread-vc141 1.76.0.0)
-    endif()
 
     # Enable all warnings
     if(MSVC)
@@ -130,13 +101,13 @@ function(lsp_sever_set_target_options target)
 
     if(LSP_SEVER_ASAN)
         target_compile_options(${target} PUBLIC "-fsanitize=address")
-        target_link_libraries(${target} "-fsanitize=address")
+        target_link_libraries(${target} PUBLIC "-fsanitize=address")
     elseif(LSP_SEVER_MSAN)
         target_compile_options(${target} PUBLIC "-fsanitize=memory")
-        target_link_libraries(${target} "-fsanitize=memory")
+        target_link_libraries(${target} PUBLIC "-fsanitize=memory")
     elseif(LSP_SEVER_TSAN)
         target_compile_options(${target} PUBLIC "-fsanitize=thread")
-        target_link_libraries(${target} "-fsanitize=thread")
+        target_link_libraries(${target} PUBLIC "-fsanitize=thread")
     endif()
 
     # Error on undefined symbols
@@ -146,56 +117,6 @@ function(lsp_sever_set_target_options target)
 
 endfunction()
 
-
-# Libraries
-
-###########################################################
-# boost library
-###########################################################
-if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-    INSTALL_NUGET(boost 1.76.0.0)
-    INSTALL_NUGET(boost_chrono-vc141 1.76.0.0)
-    INSTALL_NUGET(boost_date_time-vc141 1.76.0.0)
-    INSTALL_NUGET(boost_filesystem-vc141 1.76.0.0)
-    INSTALL_NUGET(boost_program_options-vc141 1.76.0.0)
-    INSTALL_NUGET(boost_system-vc141 1.76.0.0)
-    INSTALL_NUGET(boost_thread-vc141 1.76.0.0)
-else()
-    if(LSP_SEVER_BUILD_EXAMPLES)
-        find_package(Boost COMPONENTS date_time  chrono filesystem system thread program_options)
-    else()
-        find_package(Boost)
-    endif()
-    if(NOT Boost_FOUND)
-        if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-            message(FATAL_ERROR "Can't find boost,lease build boost and install it or install boost with : brew install boost")
-        elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-            message(FATAL_ERROR "Can't find boost,please build boost and install it. or install boost with : sudo apt-get install libboost-dev")
-        endif()
-    endif()
-endif()
-
-
-###########################################################
-# JSON library
-###########################################################
-if(USE_SYSTEM_RAPIDJSON)
-    set(RapidJSON_MIN_VERSION "1.1.0")
-    find_package(RapidJSON ${RapidJSON_MIN_VERSION} QUIET)
-    if(NOT DEFINED RapidJSON_INCLUDE_DIRS AND DEFINED RAPIDJSON_INCLUDE_DIRS)
-        set(RapidJSON_INCLUDE_DIRS "${RAPIDJSON_INCLUDE_DIRS}")
-    endif()
-endif()
-if(NOT RapidJSON_FOUND)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/rapidjson/include")
-        message(STATUS "Using local RapidJSON")
-        set(RapidJSON_INCLUDE_DIRS third_party/rapidjson/include)
-    else()
-        message(STATUS "Please initialize rapidJSON git submodule as currently installed version is to old:")
-        message(STATUS "git submodule init && git submodule update")
-        message(FATAL_ERROR "RapidJSON version is likely too old.")
-    endif()
-endif()
 
 
 ###########################################################
@@ -207,7 +128,7 @@ add_executable(lpg-language-server)
 
 ### Includes
 target_include_directories(lpg-language-server
-        PUBLIC ${LSP_SEVER_INCLUDE_DIR}  ${Boost_INCLUDE_DIRS})
+        PUBLIC ${LSP_SEVER_INCLUDE_DIR})
 
 set(LSP_SEVER_THIRD_PARTY_DIR
         ${RapidJSON_INCLUDE_DIRS}
@@ -223,30 +144,11 @@ foreach(include_dir  ${LSP_SEVER_THIRD_PARTY_DIR})
     endif()
 endforeach()
 
+add_subdirectory(third_party/LspCpp)
+add_subdirectory(third_party/LPG-cpp-runtime)
+target_include_directories(lpg-language-server PRIVATE cpplpg2 lspcpp)
+target_link_libraries(lpg-language-server PRIVATE cpplpg2 lspcpp)
 
-target_include_directories(lpg-language-server  PRIVATE network-uri)
-
-if (CMAKE_GENERATOR MATCHES "Visual Studio.*")
-
-    target_include_directories(lpg-language-server PRIVATE
-
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/LspCpp/include
-
-            ${CMAKE_CURRENT_SOURCE_DIR}/third_party/LPG-cpp-runtime/include
-            )
-
-    target_link_libraries(lpg-language-server PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/lib/liblspcpp.lib
-            ${CMAKE_CURRENT_SOURCE_DIR}/lib/libcpplpg2.lib
-            ${CMAKE_CURRENT_SOURCE_DIR}/lib/libnetwork-uri.lib
-            )
-
-else()
-    add_subdirectory(third_party/LspCpp)
-    add_subdirectory(third_party/LPG-cpp-runtime)
-    target_include_directories(lpg-language-server PRIVATE cpplpg2 lspcpp)
-    target_link_libraries(lpg-language-server PRIVATE cpplpg2 lspcpp)
-endif()
 ### Sources
 set(LSP_SEVER_LIST
         LPG-language-server/src/ASTUtils.cpp
@@ -303,7 +205,7 @@ lsp_sever_set_target_options(lpg-language-server)
 # install
 if(LSP_SEVER_INSTALL)
     include(GNUInstallDirs)
-    
+
     install(TARGETS lpg-language-server
             EXPORT lpg-language-server-targets
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -311,6 +213,6 @@ if(LSP_SEVER_INSTALL)
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
             )
-    
+
 endif()
 

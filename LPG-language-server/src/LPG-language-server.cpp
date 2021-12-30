@@ -32,7 +32,7 @@
 #include "lpg2/IcuUtil.h"
 #include "message/MessageHandler.h"
 #include "LibLsp/lsp/textDocument/foldingRange.h"
-#include "Monitor.h"
+#include "lpg2/Monitor.h"
 #include "LibLsp/lsp/ParentProcessWatcher.h"
 #include "LibLsp/lsp/textDocument/resolveCompletionItem.h"
 #include "LibLsp/lsp/textDocument/formatting.h"
