@@ -25,7 +25,7 @@
 #include "LibLsp/lsp/textDocument/hover.h"
 #include "LibLsp/lsp/textDocument/completion.h"
 #include "WorkSpaceManager.h"
-#include "timer.h"
+
 #include "LibLsp/lsp/utils.h"
 #include "LibLsp/lsp/working_files.h"
 #include "LibLsp/lsp/SimpleTimer.h"

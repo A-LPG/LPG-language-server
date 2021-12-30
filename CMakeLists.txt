@@ -155,7 +155,7 @@ set(LSP_SEVER_LIST
         LPG-language-server/src/code.cpp
         LPG-language-server/src/CompilationUnit.cpp
         LPG-language-server/src/LPG-language-server.cpp
-        LPG-language-server/src/timer.cpp
+
         LPG-language-server/src/WorkSpaceManager.cpp
 
         LPG-language-server/src/message/Analysis.cpp
