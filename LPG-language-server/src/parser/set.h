@@ -81,15 +81,16 @@ public:
     //
     BitSet& operator=(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0;
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0;
+        }
         assert(rhs.set_size == set_size);
-
-        for (int i = (set_size - 1) / cell_size; i >= 0; i--)
-            s[i] = rhs.s[i];
+        if(s != nullptr){
+            for (int i = (set_size - 1) / cell_size; i >= 0; i--)
+                s[i] = rhs.s[i];
+        }
 
         return *this;
     }
@@ -101,6 +102,7 @@ if (rhs.set_size != set_size)
     {
         set_size = 0;
         s = NULL;
+
     }
 
     void SetSize(int size)
@@ -193,11 +195,11 @@ if (rhs.set_size != set_size)
     //
     bool operator[](const int i)
     {
-if (! (i >= 0 && i < set_size))
-{
-    BitSet *b = NULL;
-    b -> set_size = 0;
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0;
+        }
         assert(! OutOfRange(i));
 
         return (s[i / cell_size] &
@@ -211,11 +213,11 @@ if (! (i >= 0 && i < set_size))
     //
     void AddElement(int i)
     {
-if (! (i >= 0 && i < set_size))
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(! OutOfRange(i));
 
         s[i / cell_size] |= ((i + cell_size) % cell_size
@@ -228,11 +230,11 @@ if (! (i >= 0 && i < set_size))
     //
     void RemoveElement(int i)
     {
-if (! (i >= 0 && i < set_size))
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(! OutOfRange(i));
 
         s[i / cell_size] &= ~((i + cell_size) % cell_size
@@ -246,11 +248,11 @@ if (! (i >= 0 && i < set_size))
     //
     bool operator==(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
 
         for (int i = (set_size - 1) / cell_size; i >= 0; i--)
@@ -276,11 +278,11 @@ if (rhs.set_size != set_size)
     //
     BitSet operator+(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         BitSet result(set_size);
 
@@ -295,11 +297,11 @@ if (rhs.set_size != set_size)
     //
     BitSet& operator+=(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         for (int i = (set_size - 1) / cell_size; i >= 0; i--)
             s[i] |= rhs.s[i];
@@ -312,11 +314,11 @@ if (rhs.set_size != set_size)
     //
     BitSet operator*(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         BitSet result(set_size);
 
@@ -331,11 +333,11 @@ if (rhs.set_size != set_size)
     //
     BitSet& operator*=(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         for (int i = (set_size - 1) / cell_size; i >= 0; i--)
             s[i] &= rhs.s[i];
@@ -348,11 +350,11 @@ if (rhs.set_size != set_size)
     //
     BitSet operator-(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         BitSet result(set_size);
 
@@ -367,11 +369,11 @@ if (rhs.set_size != set_size)
     //
     BitSet& operator-=(const BitSet& rhs)
     {
-if (rhs.set_size != set_size)
-{
-    BitSet *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (rhs.set_size != set_size)
+        {
+            BitSet *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(rhs.set_size == set_size);
         for (int i = (set_size - 1) / cell_size; i >= 0; i--)
             s[i] &= (~ rhs.s[i]);
@@ -412,11 +414,11 @@ public:
     bool operator[](const int k)
     {
         int i = k - offset;
-if (! (i >= 0 && i < set_size))
-{
-    BitSetWithOffset *b = NULL;
-    b -> offset = 0;
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSetWithOffset *b = NULL;
+            b -> offset = 0;// force a crash !!!
+        }
         assert(! OutOfRange(i));
 
         return (s[i / cell_size] &
@@ -432,11 +434,11 @@ if (! (i >= 0 && i < set_size))
     {
         int i = k - offset;
 
-if (! (i >= 0 && i < set_size))
-{
-    BitSetWithOffset *b = NULL;
-    b -> offset = 0;
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSetWithOffset *b = NULL;
+            b -> offset = 0;// force a crash !!!
+        }
         assert(! OutOfRange(i));
 
         s[i / cell_size] |= ((i + cell_size) % cell_size
@@ -451,11 +453,11 @@ if (! (i >= 0 && i < set_size))
     {
         int i = k - offset;
 
-if (! (i >= 0 && i < set_size))
-{
-    BitSetWithOffset *b = NULL;
-    b -> set_size = 0; // force a crash !!!
-}
+        if (! (i >= 0 && i < set_size))
+        {
+            BitSetWithOffset *b = NULL;
+            b -> set_size = 0; // force a crash !!!
+        }
         assert(! OutOfRange(i));
 
         s[i / cell_size] &= ~((i + cell_size) % cell_size
