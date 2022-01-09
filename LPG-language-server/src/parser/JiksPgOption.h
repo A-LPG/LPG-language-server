@@ -91,8 +91,8 @@ public:
             //
             // NONE = 0,
             //
-            DEFAULT = 1,
-            PREORDER = 2
+            DEFAULT = 0b01,
+            PREORDER =0b10
         };
 
  

@@ -7,7 +7,7 @@
 #include "../CompilationUnit.h"
 using namespace LPGParser_top_level_ast;
 
-struct CallGraphHandlerVisitor :public AbstractVisitor
+struct CallGraphHandlerVisitor :public AbstractPreOrderVisitor
 {
     std::vector<CallGraphNodeInfo>& out;
     std::string fileName;
@@ -25,7 +25,7 @@ struct CallGraphHandlerVisitor :public AbstractVisitor
         lhsStr = fileName + "." + lhsStr;
         info.name = lhsStr;
         out.emplace_back(info);
-        return AbstractVisitor::visit(n);
+        return AbstractPreOrderVisitor::visit(n);
     }
 
    
@@ -47,7 +47,7 @@ struct CallGraphHandlerVisitor :public AbstractVisitor
     }
 };
 
-struct RailRoadHandlerVisitor :public AbstractVisitor
+struct RailRoadHandlerVisitor :public AbstractPreOrderVisitor
 {
     std::vector<RailRoadScriptInfo>& out;
     std::string lhsStr;
@@ -64,7 +64,7 @@ struct RailRoadHandlerVisitor :public AbstractVisitor
         lhsStr = n->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
     
         rightStr = "ComplexDiagram(Choice(0,";
-        return AbstractVisitor::visit(n);
+        return AbstractPreOrderVisitor::visit(n);
     }
     virtual  void endVisit(nonTerm* n)
     {
@@ -108,7 +108,7 @@ struct RailRoadHandlerVisitor :public AbstractVisitor
     }
 };
 
-struct SetHandlerVisitor :public AbstractVisitor
+struct SetHandlerVisitor :public AbstractPreOrderVisitor
 {
     std::shared_ptr<JikesPG2>& binding;
     std::vector<RailRoadScriptInfo>& out;

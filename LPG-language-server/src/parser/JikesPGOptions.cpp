@@ -481,7 +481,8 @@ OptionDescriptor *visitor = new EnumOptionDescriptor("visitor", "???",
                                                      "none", "default", "none",
                                                      new EnumValue("none", JiksPgOption::NONE),
                                                      new EnumValue("default", JiksPgOption::DEFAULT),
-                                                     new EnumValue("preorder", JiksPgOption::PREORDER), NULL);
+                                                     new EnumValue("preorder", JiksPgOption::PREORDER),
+                                                     new EnumValue("all", JiksPgOption::PREORDER|JiksPgOption::PREORDER),NULL);
 
 OptionDescriptor *visitorType = new StringOptionDescriptor("visitor", "type", "???", NULL,
                                                            &JiksPgOption::visitor_type, false);

@@ -11,7 +11,7 @@
 using namespace LPGParser_top_level_ast;
 
 
-struct FoldingVisitor :public AbstractVisitor {
+struct FoldingVisitor :public AbstractPreOrderVisitor {
    
     FoldingRangeHandler* handler= nullptr;
     ILexStream* lex = nullptr;

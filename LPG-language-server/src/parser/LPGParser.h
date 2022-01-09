@@ -7,7 +7,7 @@
 #include "lpg2/AstPoolHolder.h"
 #include "lpg2/BacktrackingParser.h"
 #include "lpg2/DeterministicParser.h"
-#include "lpg2/diagnose.h"
+#include "lpg2/Diagnose.h"
 #include "lpg2/ErrorToken.h"
 #include "lpg2/Exception.h"
 #include "lpg2/IAbstractArrayList.h"
@@ -27,18 +27,17 @@
     //#line 7 "LPGParser.g
 
     #include <unordered_map>
-namespace LPGParser_top_level_ast {
-    struct ASTNodeToken;
-    struct defineSpec;
-    struct terminal_symbol0;
-    struct recover_symbol;
-    struct terminal;
-    struct nonTerm;
-}
 
  
     //#line 190 "btParserTemplateF.gi
-
+    namespace LPGParser_top_level_ast {
+        struct ASTNodeToken;
+        struct defineSpec;
+        struct terminal_symbol0;
+        struct recover_symbol;
+        struct terminal;
+        struct nonTerm;
+    }
  struct LPGParser :public Object ,public RuleAction
 {
    

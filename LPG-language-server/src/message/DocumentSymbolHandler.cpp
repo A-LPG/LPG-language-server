@@ -9,7 +9,7 @@
 #include "../parser/JikesPGOptions.h"
 using namespace LPGParser_top_level_ast;
 
-struct LPGModelVisitor :public AbstractVisitor {
+struct LPGModelVisitor :public AbstractPreOrderVisitor {
     std::string fRHSLabel;
 
     ILexStream* lex = nullptr;

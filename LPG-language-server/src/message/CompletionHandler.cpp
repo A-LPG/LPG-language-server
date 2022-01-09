@@ -43,7 +43,7 @@ namespace
     	{"names" , {"optimized","maximum","minimum"}},
     	{"trace",  {"conflicts","full"}},
     	{"variables" , {"none","both","terminals","nt","nonterminals"}},
-    	{"visitor", {"none","default","preorder"}}
+    	{"visitor", {"none","default","preorder","all"}}
     };
     std::vector<std::stringex> OPTION_KEYS_LOWER = OPTION_KEYS;
 	

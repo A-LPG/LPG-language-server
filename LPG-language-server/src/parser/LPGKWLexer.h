@@ -102,7 +102,7 @@
          initialize(identifierKind);
     }
 
-    //#line 9 "KWLexerFoldedCaseMapF.gi
+    //#line 10 "KWLexerFoldedCaseMapF.gi
 
     //
     // Each upper case letter is mapped into its corresponding
@@ -117,6 +117,17 @@
         tokenKind['$'] = LPGKWLexersym::Char_DollarSign;
         tokenKind['%'] = LPGKWLexersym::Char_Percent;
         tokenKind['_'] = LPGKWLexersym::Char__;
+
+        tokenKind['0'] = LPGKWLexersym::Char_0;
+        tokenKind['1'] = LPGKWLexersym::Char_1;
+        tokenKind['2'] = LPGKWLexersym::Char_2;
+        tokenKind['3'] = LPGKWLexersym::Char_3;
+        tokenKind['4'] = LPGKWLexersym::Char_4;
+        tokenKind['5'] = LPGKWLexersym::Char_5;
+        tokenKind['6'] = LPGKWLexersym::Char_6;
+        tokenKind['7'] = LPGKWLexersym::Char_7;
+        tokenKind['8'] = LPGKWLexersym::Char_8;
+        tokenKind['9'] = LPGKWLexersym::Char_9;
 
         tokenKind['a'] = LPGKWLexersym::Char_a;
         tokenKind['b'] = LPGKWLexersym::Char_b;

@@ -60,7 +60,7 @@ void ProblemHandler::handleMessage(lsDiagnostic&& diagnostic)
 }
 
 
-struct LPGBindingVisitor :public AbstractVisitor {
+struct LPGBindingVisitor :public AbstractPreOrderVisitor {
    
     ParseData& jikspg_data;
     std::set<int> macroToVariableIndex;

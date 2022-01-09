@@ -5,7 +5,7 @@
 #include "lpg2/AstPoolHolder.h"
 #include "lpg2/BacktrackingParser.h"
 #include "lpg2/DeterministicParser.h"
-#include "lpg2/diagnose.h"
+#include "lpg2/Diagnose.h"
 #include "lpg2/ErrorToken.h"
 #include "lpg2/Exception.h"
 #include "lpg2/IAbstractArrayList.h"
@@ -25,12 +25,19 @@
 
     #include <unordered_map>
 
-struct LPGParser;
+ 
 #pragma once
 #include "lpg2/IAbstractArrayList.h"
+#include "lpg2/Any.h"
 #include "lpg2/IAst.h"
+#include "LPGParser.h"
+
 namespace LPGParser_top_level_ast{
   struct Visitor;
+  struct ArgumentVisitor;
+  struct ResultVisitor;
+  struct ResultArgumentVisitor;
+  struct PreOrderVisitor;
   struct ASTNode;
   struct AbstractASTNodeList;
   struct ASTNodeToken;
@@ -136,7 +143,437 @@ namespace LPGParser_top_level_ast{
   struct terminal_symbol0;
   struct terminal_symbol1;
   struct AbstractVisitor;
-struct Visitor :public IAstVisitor
+  struct AbstractResultVisitor;
+  struct AbstractPreOrderVisitor;
+struct Visitor
+{
+    virtual void visit(ASTNodeToken *n)=0;
+    virtual void visit(LPG *n)=0;
+    virtual void visit(LPG_itemList *n)=0;
+    virtual void visit(AliasSeg *n)=0;
+    virtual void visit(AstSeg *n)=0;
+    virtual void visit(DefineSeg *n)=0;
+    virtual void visit(EofSeg *n)=0;
+    virtual void visit(EolSeg *n)=0;
+    virtual void visit(ErrorSeg *n)=0;
+    virtual void visit(ExportSeg *n)=0;
+    virtual void visit(GlobalsSeg *n)=0;
+    virtual void visit(HeadersSeg *n)=0;
+    virtual void visit(IdentifierSeg *n)=0;
+    virtual void visit(ImportSeg *n)=0;
+    virtual void visit(IncludeSeg *n)=0;
+    virtual void visit(KeywordsSeg *n)=0;
+    virtual void visit(NamesSeg *n)=0;
+    virtual void visit(NoticeSeg *n)=0;
+    virtual void visit(RulesSeg *n)=0;
+    virtual void visit(SoftKeywordsSeg *n)=0;
+    virtual void visit(StartSeg *n)=0;
+    virtual void visit(TerminalsSeg *n)=0;
+    virtual void visit(TrailersSeg *n)=0;
+    virtual void visit(TypesSeg *n)=0;
+    virtual void visit(RecoverSeg *n)=0;
+    virtual void visit(PredecessorSeg *n)=0;
+    virtual void visit(option_specList *n)=0;
+    virtual void visit(option_spec *n)=0;
+    virtual void visit(optionList *n)=0;
+    virtual void visit(option *n)=0;
+    virtual void visit(SYMBOLList *n)=0;
+    virtual void visit(aliasSpecList *n)=0;
+    virtual void visit(alias_lhs_macro_name *n)=0;
+    virtual void visit(defineSpecList *n)=0;
+    virtual void visit(defineSpec *n)=0;
+    virtual void visit(macro_segment *n)=0;
+    virtual void visit(terminal_symbolList *n)=0;
+    virtual void visit(action_segmentList *n)=0;
+    virtual void visit(import_segment *n)=0;
+    virtual void visit(drop_commandList *n)=0;
+    virtual void visit(drop_ruleList *n)=0;
+    virtual void visit(drop_rule *n)=0;
+    virtual void visit(optMacroName *n)=0;
+    virtual void visit(include_segment *n)=0;
+    virtual void visit(keywordSpecList *n)=0;
+    virtual void visit(keywordSpec *n)=0;
+    virtual void visit(nameSpecList *n)=0;
+    virtual void visit(nameSpec *n)=0;
+    virtual void visit(rules_segment *n)=0;
+    virtual void visit(nonTermList *n)=0;
+    virtual void visit(nonTerm *n)=0;
+    virtual void visit(RuleName *n)=0;
+    virtual void visit(ruleList *n)=0;
+    virtual void visit(rule *n)=0;
+    virtual void visit(symWithAttrsList *n)=0;
+    virtual void visit(symAttrs *n)=0;
+    virtual void visit(action_segment *n)=0;
+    virtual void visit(start_symbolList *n)=0;
+    virtual void visit(terminalList *n)=0;
+    virtual void visit(terminal *n)=0;
+    virtual void visit(optTerminalAlias *n)=0;
+    virtual void visit(type_declarationsList *n)=0;
+    virtual void visit(type_declarations *n)=0;
+    virtual void visit(symbol_pairList *n)=0;
+    virtual void visit(symbol_pair *n)=0;
+    virtual void visit(recover_symbol *n)=0;
+    virtual void visit(END_KEY_OPT *n)=0;
+    virtual void visit(option_value0 *n)=0;
+    virtual void visit(option_value1 *n)=0;
+    virtual void visit(aliasSpec0 *n)=0;
+    virtual void visit(aliasSpec1 *n)=0;
+    virtual void visit(aliasSpec2 *n)=0;
+    virtual void visit(aliasSpec3 *n)=0;
+    virtual void visit(aliasSpec4 *n)=0;
+    virtual void visit(aliasSpec5 *n)=0;
+    virtual void visit(alias_rhs0 *n)=0;
+    virtual void visit(alias_rhs1 *n)=0;
+    virtual void visit(alias_rhs2 *n)=0;
+    virtual void visit(alias_rhs3 *n)=0;
+    virtual void visit(alias_rhs4 *n)=0;
+    virtual void visit(alias_rhs5 *n)=0;
+    virtual void visit(alias_rhs6 *n)=0;
+    virtual void visit(macro_name_symbol0 *n)=0;
+    virtual void visit(macro_name_symbol1 *n)=0;
+    virtual void visit(drop_command0 *n)=0;
+    virtual void visit(drop_command1 *n)=0;
+    virtual void visit(name0 *n)=0;
+    virtual void visit(name1 *n)=0;
+    virtual void visit(name2 *n)=0;
+    virtual void visit(name3 *n)=0;
+    virtual void visit(name4 *n)=0;
+    virtual void visit(name5 *n)=0;
+    virtual void visit(produces0 *n)=0;
+    virtual void visit(produces1 *n)=0;
+    virtual void visit(produces2 *n)=0;
+    virtual void visit(produces3 *n)=0;
+    virtual void visit(symWithAttrs0 *n)=0;
+    virtual void visit(symWithAttrs1 *n)=0;
+    virtual void visit(start_symbol0 *n)=0;
+    virtual void visit(start_symbol1 *n)=0;
+    virtual void visit(terminal_symbol0 *n)=0;
+    virtual void visit(terminal_symbol1 *n)=0;
+
+    virtual void visit(ASTNode *n)=0;
+};
+struct ArgumentVisitor
+{
+    virtual void visit(ASTNodeToken *n, Object* o)=0;
+    virtual void visit(LPG *n, Object* o)=0;
+    virtual void visit(LPG_itemList *n, Object* o)=0;
+    virtual void visit(AliasSeg *n, Object* o)=0;
+    virtual void visit(AstSeg *n, Object* o)=0;
+    virtual void visit(DefineSeg *n, Object* o)=0;
+    virtual void visit(EofSeg *n, Object* o)=0;
+    virtual void visit(EolSeg *n, Object* o)=0;
+    virtual void visit(ErrorSeg *n, Object* o)=0;
+    virtual void visit(ExportSeg *n, Object* o)=0;
+    virtual void visit(GlobalsSeg *n, Object* o)=0;
+    virtual void visit(HeadersSeg *n, Object* o)=0;
+    virtual void visit(IdentifierSeg *n, Object* o)=0;
+    virtual void visit(ImportSeg *n, Object* o)=0;
+    virtual void visit(IncludeSeg *n, Object* o)=0;
+    virtual void visit(KeywordsSeg *n, Object* o)=0;
+    virtual void visit(NamesSeg *n, Object* o)=0;
+    virtual void visit(NoticeSeg *n, Object* o)=0;
+    virtual void visit(RulesSeg *n, Object* o)=0;
+    virtual void visit(SoftKeywordsSeg *n, Object* o)=0;
+    virtual void visit(StartSeg *n, Object* o)=0;
+    virtual void visit(TerminalsSeg *n, Object* o)=0;
+    virtual void visit(TrailersSeg *n, Object* o)=0;
+    virtual void visit(TypesSeg *n, Object* o)=0;
+    virtual void visit(RecoverSeg *n, Object* o)=0;
+    virtual void visit(PredecessorSeg *n, Object* o)=0;
+    virtual void visit(option_specList *n, Object* o)=0;
+    virtual void visit(option_spec *n, Object* o)=0;
+    virtual void visit(optionList *n, Object* o)=0;
+    virtual void visit(option *n, Object* o)=0;
+    virtual void visit(SYMBOLList *n, Object* o)=0;
+    virtual void visit(aliasSpecList *n, Object* o)=0;
+    virtual void visit(alias_lhs_macro_name *n, Object* o)=0;
+    virtual void visit(defineSpecList *n, Object* o)=0;
+    virtual void visit(defineSpec *n, Object* o)=0;
+    virtual void visit(macro_segment *n, Object* o)=0;
+    virtual void visit(terminal_symbolList *n, Object* o)=0;
+    virtual void visit(action_segmentList *n, Object* o)=0;
+    virtual void visit(import_segment *n, Object* o)=0;
+    virtual void visit(drop_commandList *n, Object* o)=0;
+    virtual void visit(drop_ruleList *n, Object* o)=0;
+    virtual void visit(drop_rule *n, Object* o)=0;
+    virtual void visit(optMacroName *n, Object* o)=0;
+    virtual void visit(include_segment *n, Object* o)=0;
+    virtual void visit(keywordSpecList *n, Object* o)=0;
+    virtual void visit(keywordSpec *n, Object* o)=0;
+    virtual void visit(nameSpecList *n, Object* o)=0;
+    virtual void visit(nameSpec *n, Object* o)=0;
+    virtual void visit(rules_segment *n, Object* o)=0;
+    virtual void visit(nonTermList *n, Object* o)=0;
+    virtual void visit(nonTerm *n, Object* o)=0;
+    virtual void visit(RuleName *n, Object* o)=0;
+    virtual void visit(ruleList *n, Object* o)=0;
+    virtual void visit(rule *n, Object* o)=0;
+    virtual void visit(symWithAttrsList *n, Object* o)=0;
+    virtual void visit(symAttrs *n, Object* o)=0;
+    virtual void visit(action_segment *n, Object* o)=0;
+    virtual void visit(start_symbolList *n, Object* o)=0;
+    virtual void visit(terminalList *n, Object* o)=0;
+    virtual void visit(terminal *n, Object* o)=0;
+    virtual void visit(optTerminalAlias *n, Object* o)=0;
+    virtual void visit(type_declarationsList *n, Object* o)=0;
+    virtual void visit(type_declarations *n, Object* o)=0;
+    virtual void visit(symbol_pairList *n, Object* o)=0;
+    virtual void visit(symbol_pair *n, Object* o)=0;
+    virtual void visit(recover_symbol *n, Object* o)=0;
+    virtual void visit(END_KEY_OPT *n, Object* o)=0;
+    virtual void visit(option_value0 *n, Object* o)=0;
+    virtual void visit(option_value1 *n, Object* o)=0;
+    virtual void visit(aliasSpec0 *n, Object* o)=0;
+    virtual void visit(aliasSpec1 *n, Object* o)=0;
+    virtual void visit(aliasSpec2 *n, Object* o)=0;
+    virtual void visit(aliasSpec3 *n, Object* o)=0;
+    virtual void visit(aliasSpec4 *n, Object* o)=0;
+    virtual void visit(aliasSpec5 *n, Object* o)=0;
+    virtual void visit(alias_rhs0 *n, Object* o)=0;
+    virtual void visit(alias_rhs1 *n, Object* o)=0;
+    virtual void visit(alias_rhs2 *n, Object* o)=0;
+    virtual void visit(alias_rhs3 *n, Object* o)=0;
+    virtual void visit(alias_rhs4 *n, Object* o)=0;
+    virtual void visit(alias_rhs5 *n, Object* o)=0;
+    virtual void visit(alias_rhs6 *n, Object* o)=0;
+    virtual void visit(macro_name_symbol0 *n, Object* o)=0;
+    virtual void visit(macro_name_symbol1 *n, Object* o)=0;
+    virtual void visit(drop_command0 *n, Object* o)=0;
+    virtual void visit(drop_command1 *n, Object* o)=0;
+    virtual void visit(name0 *n, Object* o)=0;
+    virtual void visit(name1 *n, Object* o)=0;
+    virtual void visit(name2 *n, Object* o)=0;
+    virtual void visit(name3 *n, Object* o)=0;
+    virtual void visit(name4 *n, Object* o)=0;
+    virtual void visit(name5 *n, Object* o)=0;
+    virtual void visit(produces0 *n, Object* o)=0;
+    virtual void visit(produces1 *n, Object* o)=0;
+    virtual void visit(produces2 *n, Object* o)=0;
+    virtual void visit(produces3 *n, Object* o)=0;
+    virtual void visit(symWithAttrs0 *n, Object* o)=0;
+    virtual void visit(symWithAttrs1 *n, Object* o)=0;
+    virtual void visit(start_symbol0 *n, Object* o)=0;
+    virtual void visit(start_symbol1 *n, Object* o)=0;
+    virtual void visit(terminal_symbol0 *n, Object* o)=0;
+    virtual void visit(terminal_symbol1 *n, Object* o)=0;
+
+  virtual  void visit(ASTNode *n, Object* o)=0;
+};
+struct ResultVisitor
+{
+  virtual  lpg::Any visit(ASTNodeToken *n)=0;
+  virtual  lpg::Any visit(LPG *n)=0;
+  virtual  lpg::Any visit(LPG_itemList *n)=0;
+  virtual  lpg::Any visit(AliasSeg *n)=0;
+  virtual  lpg::Any visit(AstSeg *n)=0;
+  virtual  lpg::Any visit(DefineSeg *n)=0;
+  virtual  lpg::Any visit(EofSeg *n)=0;
+  virtual  lpg::Any visit(EolSeg *n)=0;
+  virtual  lpg::Any visit(ErrorSeg *n)=0;
+  virtual  lpg::Any visit(ExportSeg *n)=0;
+  virtual  lpg::Any visit(GlobalsSeg *n)=0;
+  virtual  lpg::Any visit(HeadersSeg *n)=0;
+  virtual  lpg::Any visit(IdentifierSeg *n)=0;
+  virtual  lpg::Any visit(ImportSeg *n)=0;
+  virtual  lpg::Any visit(IncludeSeg *n)=0;
+  virtual  lpg::Any visit(KeywordsSeg *n)=0;
+  virtual  lpg::Any visit(NamesSeg *n)=0;
+  virtual  lpg::Any visit(NoticeSeg *n)=0;
+  virtual  lpg::Any visit(RulesSeg *n)=0;
+  virtual  lpg::Any visit(SoftKeywordsSeg *n)=0;
+  virtual  lpg::Any visit(StartSeg *n)=0;
+  virtual  lpg::Any visit(TerminalsSeg *n)=0;
+  virtual  lpg::Any visit(TrailersSeg *n)=0;
+  virtual  lpg::Any visit(TypesSeg *n)=0;
+  virtual  lpg::Any visit(RecoverSeg *n)=0;
+  virtual  lpg::Any visit(PredecessorSeg *n)=0;
+  virtual  lpg::Any visit(option_specList *n)=0;
+  virtual  lpg::Any visit(option_spec *n)=0;
+  virtual  lpg::Any visit(optionList *n)=0;
+  virtual  lpg::Any visit(option *n)=0;
+  virtual  lpg::Any visit(SYMBOLList *n)=0;
+  virtual  lpg::Any visit(aliasSpecList *n)=0;
+  virtual  lpg::Any visit(alias_lhs_macro_name *n)=0;
+  virtual  lpg::Any visit(defineSpecList *n)=0;
+  virtual  lpg::Any visit(defineSpec *n)=0;
+  virtual  lpg::Any visit(macro_segment *n)=0;
+  virtual  lpg::Any visit(terminal_symbolList *n)=0;
+  virtual  lpg::Any visit(action_segmentList *n)=0;
+  virtual  lpg::Any visit(import_segment *n)=0;
+  virtual  lpg::Any visit(drop_commandList *n)=0;
+  virtual  lpg::Any visit(drop_ruleList *n)=0;
+  virtual  lpg::Any visit(drop_rule *n)=0;
+  virtual  lpg::Any visit(optMacroName *n)=0;
+  virtual  lpg::Any visit(include_segment *n)=0;
+  virtual  lpg::Any visit(keywordSpecList *n)=0;
+  virtual  lpg::Any visit(keywordSpec *n)=0;
+  virtual  lpg::Any visit(nameSpecList *n)=0;
+  virtual  lpg::Any visit(nameSpec *n)=0;
+  virtual  lpg::Any visit(rules_segment *n)=0;
+  virtual  lpg::Any visit(nonTermList *n)=0;
+  virtual  lpg::Any visit(nonTerm *n)=0;
+  virtual  lpg::Any visit(RuleName *n)=0;
+  virtual  lpg::Any visit(ruleList *n)=0;
+  virtual  lpg::Any visit(rule *n)=0;
+  virtual  lpg::Any visit(symWithAttrsList *n)=0;
+  virtual  lpg::Any visit(symAttrs *n)=0;
+  virtual  lpg::Any visit(action_segment *n)=0;
+  virtual  lpg::Any visit(start_symbolList *n)=0;
+  virtual  lpg::Any visit(terminalList *n)=0;
+  virtual  lpg::Any visit(terminal *n)=0;
+  virtual  lpg::Any visit(optTerminalAlias *n)=0;
+  virtual  lpg::Any visit(type_declarationsList *n)=0;
+  virtual  lpg::Any visit(type_declarations *n)=0;
+  virtual  lpg::Any visit(symbol_pairList *n)=0;
+  virtual  lpg::Any visit(symbol_pair *n)=0;
+  virtual  lpg::Any visit(recover_symbol *n)=0;
+  virtual  lpg::Any visit(END_KEY_OPT *n)=0;
+  virtual  lpg::Any visit(option_value0 *n)=0;
+  virtual  lpg::Any visit(option_value1 *n)=0;
+  virtual  lpg::Any visit(aliasSpec0 *n)=0;
+  virtual  lpg::Any visit(aliasSpec1 *n)=0;
+  virtual  lpg::Any visit(aliasSpec2 *n)=0;
+  virtual  lpg::Any visit(aliasSpec3 *n)=0;
+  virtual  lpg::Any visit(aliasSpec4 *n)=0;
+  virtual  lpg::Any visit(aliasSpec5 *n)=0;
+  virtual  lpg::Any visit(alias_rhs0 *n)=0;
+  virtual  lpg::Any visit(alias_rhs1 *n)=0;
+  virtual  lpg::Any visit(alias_rhs2 *n)=0;
+  virtual  lpg::Any visit(alias_rhs3 *n)=0;
+  virtual  lpg::Any visit(alias_rhs4 *n)=0;
+  virtual  lpg::Any visit(alias_rhs5 *n)=0;
+  virtual  lpg::Any visit(alias_rhs6 *n)=0;
+  virtual  lpg::Any visit(macro_name_symbol0 *n)=0;
+  virtual  lpg::Any visit(macro_name_symbol1 *n)=0;
+  virtual  lpg::Any visit(drop_command0 *n)=0;
+  virtual  lpg::Any visit(drop_command1 *n)=0;
+  virtual  lpg::Any visit(name0 *n)=0;
+  virtual  lpg::Any visit(name1 *n)=0;
+  virtual  lpg::Any visit(name2 *n)=0;
+  virtual  lpg::Any visit(name3 *n)=0;
+  virtual  lpg::Any visit(name4 *n)=0;
+  virtual  lpg::Any visit(name5 *n)=0;
+  virtual  lpg::Any visit(produces0 *n)=0;
+  virtual  lpg::Any visit(produces1 *n)=0;
+  virtual  lpg::Any visit(produces2 *n)=0;
+  virtual  lpg::Any visit(produces3 *n)=0;
+  virtual  lpg::Any visit(symWithAttrs0 *n)=0;
+  virtual  lpg::Any visit(symWithAttrs1 *n)=0;
+  virtual  lpg::Any visit(start_symbol0 *n)=0;
+  virtual  lpg::Any visit(start_symbol1 *n)=0;
+  virtual  lpg::Any visit(terminal_symbol0 *n)=0;
+  virtual  lpg::Any visit(terminal_symbol1 *n)=0;
+
+  virtual  lpg::Any visit(ASTNode *n)=0;
+};
+struct ResultArgumentVisitor
+{
+  virtual  lpg::Any visit(ASTNodeToken *n, Object* o)=0;
+  virtual  lpg::Any visit(LPG *n, Object* o)=0;
+  virtual  lpg::Any visit(LPG_itemList *n, Object* o)=0;
+  virtual  lpg::Any visit(AliasSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(AstSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(DefineSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(EofSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(EolSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(ErrorSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(ExportSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(GlobalsSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(HeadersSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(IdentifierSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(ImportSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(IncludeSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(KeywordsSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(NamesSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(NoticeSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(RulesSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(SoftKeywordsSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(StartSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(TerminalsSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(TrailersSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(TypesSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(RecoverSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(PredecessorSeg *n, Object* o)=0;
+  virtual  lpg::Any visit(option_specList *n, Object* o)=0;
+  virtual  lpg::Any visit(option_spec *n, Object* o)=0;
+  virtual  lpg::Any visit(optionList *n, Object* o)=0;
+  virtual  lpg::Any visit(option *n, Object* o)=0;
+  virtual  lpg::Any visit(SYMBOLList *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpecList *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_lhs_macro_name *n, Object* o)=0;
+  virtual  lpg::Any visit(defineSpecList *n, Object* o)=0;
+  virtual  lpg::Any visit(defineSpec *n, Object* o)=0;
+  virtual  lpg::Any visit(macro_segment *n, Object* o)=0;
+  virtual  lpg::Any visit(terminal_symbolList *n, Object* o)=0;
+  virtual  lpg::Any visit(action_segmentList *n, Object* o)=0;
+  virtual  lpg::Any visit(import_segment *n, Object* o)=0;
+  virtual  lpg::Any visit(drop_commandList *n, Object* o)=0;
+  virtual  lpg::Any visit(drop_ruleList *n, Object* o)=0;
+  virtual  lpg::Any visit(drop_rule *n, Object* o)=0;
+  virtual  lpg::Any visit(optMacroName *n, Object* o)=0;
+  virtual  lpg::Any visit(include_segment *n, Object* o)=0;
+  virtual  lpg::Any visit(keywordSpecList *n, Object* o)=0;
+  virtual  lpg::Any visit(keywordSpec *n, Object* o)=0;
+  virtual  lpg::Any visit(nameSpecList *n, Object* o)=0;
+  virtual  lpg::Any visit(nameSpec *n, Object* o)=0;
+  virtual  lpg::Any visit(rules_segment *n, Object* o)=0;
+  virtual  lpg::Any visit(nonTermList *n, Object* o)=0;
+  virtual  lpg::Any visit(nonTerm *n, Object* o)=0;
+  virtual  lpg::Any visit(RuleName *n, Object* o)=0;
+  virtual  lpg::Any visit(ruleList *n, Object* o)=0;
+  virtual  lpg::Any visit(rule *n, Object* o)=0;
+  virtual  lpg::Any visit(symWithAttrsList *n, Object* o)=0;
+  virtual  lpg::Any visit(symAttrs *n, Object* o)=0;
+  virtual  lpg::Any visit(action_segment *n, Object* o)=0;
+  virtual  lpg::Any visit(start_symbolList *n, Object* o)=0;
+  virtual  lpg::Any visit(terminalList *n, Object* o)=0;
+  virtual  lpg::Any visit(terminal *n, Object* o)=0;
+  virtual  lpg::Any visit(optTerminalAlias *n, Object* o)=0;
+  virtual  lpg::Any visit(type_declarationsList *n, Object* o)=0;
+  virtual  lpg::Any visit(type_declarations *n, Object* o)=0;
+  virtual  lpg::Any visit(symbol_pairList *n, Object* o)=0;
+  virtual  lpg::Any visit(symbol_pair *n, Object* o)=0;
+  virtual  lpg::Any visit(recover_symbol *n, Object* o)=0;
+  virtual  lpg::Any visit(END_KEY_OPT *n, Object* o)=0;
+  virtual  lpg::Any visit(option_value0 *n, Object* o)=0;
+  virtual  lpg::Any visit(option_value1 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec0 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec1 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec2 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec3 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec4 *n, Object* o)=0;
+  virtual  lpg::Any visit(aliasSpec5 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs0 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs1 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs2 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs3 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs4 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs5 *n, Object* o)=0;
+  virtual  lpg::Any visit(alias_rhs6 *n, Object* o)=0;
+  virtual  lpg::Any visit(macro_name_symbol0 *n, Object* o)=0;
+  virtual  lpg::Any visit(macro_name_symbol1 *n, Object* o)=0;
+  virtual  lpg::Any visit(drop_command0 *n, Object* o)=0;
+  virtual  lpg::Any visit(drop_command1 *n, Object* o)=0;
+  virtual  lpg::Any visit(name0 *n, Object* o)=0;
+  virtual  lpg::Any visit(name1 *n, Object* o)=0;
+  virtual  lpg::Any visit(name2 *n, Object* o)=0;
+  virtual  lpg::Any visit(name3 *n, Object* o)=0;
+  virtual  lpg::Any visit(name4 *n, Object* o)=0;
+  virtual  lpg::Any visit(name5 *n, Object* o)=0;
+  virtual  lpg::Any visit(produces0 *n, Object* o)=0;
+  virtual  lpg::Any visit(produces1 *n, Object* o)=0;
+  virtual  lpg::Any visit(produces2 *n, Object* o)=0;
+  virtual  lpg::Any visit(produces3 *n, Object* o)=0;
+  virtual  lpg::Any visit(symWithAttrs0 *n, Object* o)=0;
+  virtual  lpg::Any visit(symWithAttrs1 *n, Object* o)=0;
+  virtual  lpg::Any visit(start_symbol0 *n, Object* o)=0;
+  virtual  lpg::Any visit(start_symbol1 *n, Object* o)=0;
+  virtual  lpg::Any visit(terminal_symbol0 *n, Object* o)=0;
+  virtual  lpg::Any visit(terminal_symbol1 *n, Object* o)=0;
+
+  virtual  lpg::Any visit(ASTNode *n, Object* o)=0;
+};
+struct PreOrderVisitor :public IAstVisitor
 {
   virtual  bool visit(ASTNode *n)=0;
  virtual   void endVisit(ASTNode *n)=0;
@@ -457,6 +894,7 @@ struct ASTNode :public IAst
      IAst* parent = nullptr;
      void setParent(IAst* parent) { this->parent = parent; }
     IAst* getParent() { return parent; }
+    virtual int getRuleIndex(){ return 0; }
 
     IToken* getLeftIToken() { return leftIToken; }
     IToken* getRightIToken() { return rightIToken; }
@@ -504,6 +942,10 @@ struct ASTNode :public IAst
     virtual std::vector<IAst*> getAllChildren()=0;
 
      virtual void accept(IAstVisitor* v)=0;
+     virtual void accept(Visitor* v)=0;
+     virtual void accept(ArgumentVisitor *v, Object* o)=0;
+     virtual lpg::Any accept(ResultVisitor *v)=0;
+     virtual lpg::Any accept(ResultArgumentVisitor *v, Object* o)=0;
 };
 
 struct AbstractASTNodeList :public ASTNode ,public IAbstractArrayList<ASTNode*>
@@ -580,14 +1022,19 @@ struct ASTNodeToken :public  ASTNode
    std::vector<IAst*> getAllChildren() { return {}; }
 
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
@@ -596,7 +1043,7 @@ struct ASTNodeToken :public  ASTNode
 
 /**
  *<b>
- *<li>Rule 1:  LPG ::= options_segment LPG_INPUT
+*<li>Rule 1:  LPG ::= options_segment LPG_INPUT
  *</b>
  */
 struct LPG :public ASTNode
@@ -624,24 +1071,29 @@ struct LPG :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_options_segment);
-        list.push_back((IAst*)lpg_LPG_INPUT);
+        if(lpg_options_segment)  list.push_back((IAst*)lpg_options_segment);
+        if(lpg_LPG_INPUT)  list.push_back((IAst*)lpg_LPG_INPUT);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -651,6 +1103,7 @@ struct LPG :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 1 ;}
 
     //#line 52 "LPGParser.g
 
@@ -662,8 +1115,8 @@ struct LPG :public ASTNode
 
 /**
  *<b>
- *<li>Rule 2:  LPG_INPUT ::= $Empty
- *<li>Rule 3:  LPG_INPUT ::= LPG_INPUT LPG_item
+*<li>Rule 2:  LPG_INPUT ::= $Empty
+*<li>Rule 3:  LPG_INPUT ::= LPG_INPUT LPG_item
  *</b>
  */
 struct LPG_itemList :public AbstractASTNodeList{
@@ -685,13 +1138,30 @@ struct LPG_itemList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getLPG_itemAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getLPG_itemAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getLPG_itemAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getLPG_itemAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -704,11 +1174,12 @@ struct LPG_itemList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 3 ;}
 };
 
 /**
  *<b>
- *<li>Rule 4:  LPG_item ::= ALIAS_KEY$ alias_segment END_KEY_OPT$
+*<li>Rule 4:  LPG_item ::= ALIAS_KEY$ alias_segment END_KEY_OPT$
  *</b>
  */
 struct AliasSeg :public ASTNode
@@ -726,34 +1197,40 @@ struct AliasSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_alias_segment);
+        if(lpg_alias_segment)  list.push_back((IAst*)lpg_alias_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_alias_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 4 ;}
 };
 
 /**
  *<b>
- *<li>Rule 5:  LPG_item ::= AST_KEY$ ast_segment END_KEY_OPT$
+*<li>Rule 5:  LPG_item ::= AST_KEY$ ast_segment END_KEY_OPT$
  *</b>
  */
 struct AstSeg :public ASTNode
@@ -771,34 +1248,40 @@ struct AstSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_ast_segment);
+        if(lpg_ast_segment)  list.push_back((IAst*)lpg_ast_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_ast_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 5 ;}
 };
 
 /**
  *<b>
- *<li>Rule 6:  LPG_item ::= DEFINE_KEY$ define_segment END_KEY_OPT$
+*<li>Rule 6:  LPG_item ::= DEFINE_KEY$ define_segment END_KEY_OPT$
  *</b>
  */
 struct DefineSeg :public ASTNode
@@ -816,34 +1299,40 @@ struct DefineSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_define_segment);
+        if(lpg_define_segment)  list.push_back((IAst*)lpg_define_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_define_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 6 ;}
 };
 
 /**
  *<b>
- *<li>Rule 7:  LPG_item ::= EOF_KEY$ eof_segment END_KEY_OPT$
+*<li>Rule 7:  LPG_item ::= EOF_KEY$ eof_segment END_KEY_OPT$
  *</b>
  */
 struct EofSeg :public ASTNode
@@ -861,34 +1350,40 @@ struct EofSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_eof_segment);
+        if(lpg_eof_segment)  list.push_back((IAst*)lpg_eof_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_eof_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 7 ;}
 };
 
 /**
  *<b>
- *<li>Rule 8:  LPG_item ::= EOL_KEY$ eol_segment END_KEY_OPT$
+*<li>Rule 8:  LPG_item ::= EOL_KEY$ eol_segment END_KEY_OPT$
  *</b>
  */
 struct EolSeg :public ASTNode
@@ -906,34 +1401,40 @@ struct EolSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_eol_segment);
+        if(lpg_eol_segment)  list.push_back((IAst*)lpg_eol_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_eol_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 8 ;}
 };
 
 /**
  *<b>
- *<li>Rule 9:  LPG_item ::= ERROR_KEY$ error_segment END_KEY_OPT$
+*<li>Rule 9:  LPG_item ::= ERROR_KEY$ error_segment END_KEY_OPT$
  *</b>
  */
 struct ErrorSeg :public ASTNode
@@ -951,34 +1452,40 @@ struct ErrorSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_error_segment);
+        if(lpg_error_segment)  list.push_back((IAst*)lpg_error_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_error_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 9 ;}
 };
 
 /**
  *<b>
- *<li>Rule 10:  LPG_item ::= EXPORT_KEY$ export_segment END_KEY_OPT$
+*<li>Rule 10:  LPG_item ::= EXPORT_KEY$ export_segment END_KEY_OPT$
  *</b>
  */
 struct ExportSeg :public ASTNode
@@ -996,34 +1503,40 @@ struct ExportSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_export_segment);
+        if(lpg_export_segment)  list.push_back((IAst*)lpg_export_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_export_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 10 ;}
 };
 
 /**
  *<b>
- *<li>Rule 11:  LPG_item ::= GLOBALS_KEY$ globals_segment END_KEY_OPT$
+*<li>Rule 11:  LPG_item ::= GLOBALS_KEY$ globals_segment END_KEY_OPT$
  *</b>
  */
 struct GlobalsSeg :public ASTNode
@@ -1041,34 +1554,40 @@ struct GlobalsSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_globals_segment);
+        if(lpg_globals_segment)  list.push_back((IAst*)lpg_globals_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_globals_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 11 ;}
 };
 
 /**
  *<b>
- *<li>Rule 12:  LPG_item ::= HEADERS_KEY$ headers_segment END_KEY_OPT$
+*<li>Rule 12:  LPG_item ::= HEADERS_KEY$ headers_segment END_KEY_OPT$
  *</b>
  */
 struct HeadersSeg :public ASTNode
@@ -1086,34 +1605,40 @@ struct HeadersSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_headers_segment);
+        if(lpg_headers_segment)  list.push_back((IAst*)lpg_headers_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_headers_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 12 ;}
 };
 
 /**
  *<b>
- *<li>Rule 13:  LPG_item ::= IDENTIFIER_KEY$ identifier_segment END_KEY_OPT$
+*<li>Rule 13:  LPG_item ::= IDENTIFIER_KEY$ identifier_segment END_KEY_OPT$
  *</b>
  */
 struct IdentifierSeg :public ASTNode
@@ -1131,34 +1656,40 @@ struct IdentifierSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_identifier_segment);
+        if(lpg_identifier_segment)  list.push_back((IAst*)lpg_identifier_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_identifier_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 13 ;}
 };
 
 /**
  *<b>
- *<li>Rule 14:  LPG_item ::= IMPORT_KEY$ import_segment END_KEY_OPT$
+*<li>Rule 14:  LPG_item ::= IMPORT_KEY$ import_segment END_KEY_OPT$
  *</b>
  */
 struct ImportSeg :public ASTNode
@@ -1176,34 +1707,40 @@ struct ImportSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_import_segment);
+        if(lpg_import_segment)  list.push_back((IAst*)lpg_import_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_import_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 14 ;}
 };
 
 /**
  *<b>
- *<li>Rule 15:  LPG_item ::= INCLUDE_KEY$ include_segment END_KEY_OPT$
+*<li>Rule 15:  LPG_item ::= INCLUDE_KEY$ include_segment END_KEY_OPT$
  *</b>
  */
 struct IncludeSeg :public ASTNode
@@ -1221,34 +1758,40 @@ struct IncludeSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_include_segment);
+        if(lpg_include_segment)  list.push_back((IAst*)lpg_include_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_include_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 15 ;}
 };
 
 /**
  *<b>
- *<li>Rule 16:  LPG_item ::= KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
+*<li>Rule 16:  LPG_item ::= KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
  *</b>
  */
 struct KeywordsSeg :public ASTNode
@@ -1266,34 +1809,40 @@ struct KeywordsSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_keywords_segment);
+        if(lpg_keywords_segment)  list.push_back((IAst*)lpg_keywords_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_keywords_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 16 ;}
 };
 
 /**
  *<b>
- *<li>Rule 17:  LPG_item ::= NAMES_KEY$ names_segment END_KEY_OPT$
+*<li>Rule 17:  LPG_item ::= NAMES_KEY$ names_segment END_KEY_OPT$
  *</b>
  */
 struct NamesSeg :public ASTNode
@@ -1311,34 +1860,40 @@ struct NamesSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_names_segment);
+        if(lpg_names_segment)  list.push_back((IAst*)lpg_names_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_names_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 17 ;}
 };
 
 /**
  *<b>
- *<li>Rule 18:  LPG_item ::= NOTICE_KEY$ notice_segment END_KEY_OPT$
+*<li>Rule 18:  LPG_item ::= NOTICE_KEY$ notice_segment END_KEY_OPT$
  *</b>
  */
 struct NoticeSeg :public ASTNode
@@ -1356,34 +1911,40 @@ struct NoticeSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_notice_segment);
+        if(lpg_notice_segment)  list.push_back((IAst*)lpg_notice_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_notice_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 18 ;}
 };
 
 /**
  *<b>
- *<li>Rule 19:  LPG_item ::= RULES_KEY$ rules_segment END_KEY_OPT$
+*<li>Rule 19:  LPG_item ::= RULES_KEY$ rules_segment END_KEY_OPT$
  *</b>
  */
 struct RulesSeg :public ASTNode
@@ -1401,34 +1962,40 @@ struct RulesSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_rules_segment);
+        if(lpg_rules_segment)  list.push_back((IAst*)lpg_rules_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_rules_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 19 ;}
 };
 
 /**
  *<b>
- *<li>Rule 20:  LPG_item ::= SOFT_KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
+*<li>Rule 20:  LPG_item ::= SOFT_KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
  *</b>
  */
 struct SoftKeywordsSeg :public ASTNode
@@ -1446,34 +2013,40 @@ struct SoftKeywordsSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_keywords_segment);
+        if(lpg_keywords_segment)  list.push_back((IAst*)lpg_keywords_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_keywords_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 20 ;}
 };
 
 /**
  *<b>
- *<li>Rule 21:  LPG_item ::= START_KEY$ start_segment END_KEY_OPT$
+*<li>Rule 21:  LPG_item ::= START_KEY$ start_segment END_KEY_OPT$
  *</b>
  */
 struct StartSeg :public ASTNode
@@ -1491,34 +2064,40 @@ struct StartSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_start_segment);
+        if(lpg_start_segment)  list.push_back((IAst*)lpg_start_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_start_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 21 ;}
 };
 
 /**
  *<b>
- *<li>Rule 22:  LPG_item ::= TERMINALS_KEY$ terminals_segment END_KEY_OPT$
+*<li>Rule 22:  LPG_item ::= TERMINALS_KEY$ terminals_segment END_KEY_OPT$
  *</b>
  */
 struct TerminalsSeg :public ASTNode
@@ -1536,34 +2115,40 @@ struct TerminalsSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_terminals_segment);
+        if(lpg_terminals_segment)  list.push_back((IAst*)lpg_terminals_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_terminals_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 22 ;}
 };
 
 /**
  *<b>
- *<li>Rule 23:  LPG_item ::= TRAILERS_KEY$ trailers_segment END_KEY_OPT$
+*<li>Rule 23:  LPG_item ::= TRAILERS_KEY$ trailers_segment END_KEY_OPT$
  *</b>
  */
 struct TrailersSeg :public ASTNode
@@ -1581,34 +2166,40 @@ struct TrailersSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_trailers_segment);
+        if(lpg_trailers_segment)  list.push_back((IAst*)lpg_trailers_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_trailers_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 23 ;}
 };
 
 /**
  *<b>
- *<li>Rule 24:  LPG_item ::= TYPES_KEY$ types_segment END_KEY_OPT$
+*<li>Rule 24:  LPG_item ::= TYPES_KEY$ types_segment END_KEY_OPT$
  *</b>
  */
 struct TypesSeg :public ASTNode
@@ -1626,34 +2217,40 @@ struct TypesSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_types_segment);
+        if(lpg_types_segment)  list.push_back((IAst*)lpg_types_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_types_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 24 ;}
 };
 
 /**
  *<b>
- *<li>Rule 25:  LPG_item ::= RECOVER_KEY$ recover_segment END_KEY_OPT$
+*<li>Rule 25:  LPG_item ::= RECOVER_KEY$ recover_segment END_KEY_OPT$
  *</b>
  */
 struct RecoverSeg :public ASTNode
@@ -1671,34 +2268,40 @@ struct RecoverSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_recover_segment);
+        if(lpg_recover_segment)  list.push_back((IAst*)lpg_recover_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_recover_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 25 ;}
 };
 
 /**
  *<b>
- *<li>Rule 26:  LPG_item ::= DISJOINTPREDECESSORSETS_KEY$ predecessor_segment END_KEY_OPT$
+*<li>Rule 26:  LPG_item ::= DISJOINTPREDECESSORSETS_KEY$ predecessor_segment END_KEY_OPT$
  *</b>
  */
 struct PredecessorSeg :public ASTNode
@@ -1716,35 +2319,41 @@ struct PredecessorSeg :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_predecessor_segment);
+        if(lpg_predecessor_segment)  list.push_back((IAst*)lpg_predecessor_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_predecessor_segment)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 26 ;}
 };
 
 /**
  *<b>
- *<li>Rule 27:  options_segment ::= $Empty
- *<li>Rule 28:  options_segment ::= options_segment option_spec
+*<li>Rule 27:  options_segment ::= $Empty
+*<li>Rule 28:  options_segment ::= options_segment option_spec
  *</b>
  */
 struct option_specList :public AbstractASTNodeList{
@@ -1766,19 +2375,36 @@ struct option_specList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getoption_specAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getoption_specAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getoption_specAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getoption_specAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 28 ;}
 };
 
 /**
  *<b>
- *<li>Rule 29:  option_spec ::= OPTIONS_KEY$ option_list
+*<li>Rule 29:  option_spec ::= OPTIONS_KEY$ option_list
  *</b>
  */
 struct option_spec :public ASTNode
@@ -1796,35 +2422,41 @@ struct option_spec :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_option_list);
+        if(lpg_option_list)  list.push_back((IAst*)lpg_option_list);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_option_list)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 29 ;}
 };
 
 /**
  *<b>
- *<li>Rule 30:  option_list ::= option
- *<li>Rule 31:  option_list ::= option_list ,$ option
+*<li>Rule 30:  option_list ::= option
+*<li>Rule 31:  option_list ::= option_list ,$ option
  *</b>
  */
 struct optionList :public AbstractASTNodeList{
@@ -1846,19 +2478,36 @@ struct optionList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getoptionAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getoptionAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getoptionAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getoptionAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 31 ;}
 };
 
 /**
  *<b>
- *<li>Rule 32:  option ::= SYMBOL option_value
+*<li>Rule 32:  option ::= SYMBOL option_value
  *</b>
  */
 struct option :public ASTNode
@@ -1885,24 +2534,29 @@ struct option :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_option_value);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_option_value)  list.push_back((IAst*)lpg_option_value);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -1912,18 +2566,19 @@ struct option :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 32 ;}
 };
 
 /**
  *<b>
- *<li>Rule 36:  symbol_list ::= SYMBOL
- *<li>Rule 37:  symbol_list ::= symbol_list ,$ SYMBOL
- *<li>Rule 75:  drop_symbols ::= SYMBOL
- *<li>Rule 76:  drop_symbols ::= drop_symbols SYMBOL
- *<li>Rule 136:  barSymbolList ::= SYMBOL
- *<li>Rule 137:  barSymbolList ::= barSymbolList |$ SYMBOL
- *<li>Rule 141:  recover_segment ::= $Empty
- *<li>Rule 142:  recover_segment ::= recover_segment recover_symbol
+*<li>Rule 36:  symbol_list ::= SYMBOL
+*<li>Rule 37:  symbol_list ::= symbol_list ,$ SYMBOL
+*<li>Rule 75:  drop_symbols ::= SYMBOL
+*<li>Rule 76:  drop_symbols ::= drop_symbols SYMBOL
+*<li>Rule 136:  barSymbolList ::= SYMBOL
+*<li>Rule 137:  barSymbolList ::= barSymbolList |$ SYMBOL
+*<li>Rule 141:  recover_segment ::= $Empty
+*<li>Rule 142:  recover_segment ::= recover_segment recover_symbol
  *</b>
  */
 struct SYMBOLList :public AbstractASTNodeList{
@@ -1945,13 +2600,30 @@ struct SYMBOLList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getSYMBOLAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getSYMBOLAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getSYMBOLAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getSYMBOLAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -1966,12 +2638,13 @@ struct SYMBOLList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 142 ;}
 };
 
 /**
  *<b>
- *<li>Rule 38:  alias_segment ::= aliasSpec
- *<li>Rule 39:  alias_segment ::= alias_segment aliasSpec
+*<li>Rule 38:  alias_segment ::= aliasSpec
+*<li>Rule 39:  alias_segment ::= alias_segment aliasSpec
  *</b>
  */
 struct aliasSpecList :public AbstractASTNodeList{
@@ -1993,13 +2666,30 @@ struct aliasSpecList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getaliasSpecAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getaliasSpecAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getaliasSpecAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getaliasSpecAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2012,11 +2702,12 @@ struct aliasSpecList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 39 ;}
 };
 
 /**
  *<b>
- *<li>Rule 46:  alias_lhs_macro_name ::= MACRO_NAME
+*<li>Rule 46:  alias_lhs_macro_name ::= MACRO_NAME
  *</b>
  */
 struct alias_lhs_macro_name :public ASTNodeToken
@@ -2027,24 +2718,30 @@ struct alias_lhs_macro_name :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 46 ;}
 };
 
 /**
  *<b>
- *<li>Rule 55:  define_segment ::= defineSpec
- *<li>Rule 56:  define_segment ::= define_segment defineSpec
+*<li>Rule 55:  define_segment ::= defineSpec
+*<li>Rule 56:  define_segment ::= define_segment defineSpec
  *</b>
  */
 struct defineSpecList :public AbstractASTNodeList{
@@ -2066,19 +2763,36 @@ struct defineSpecList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getdefineSpecAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getdefineSpecAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getdefineSpecAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getdefineSpecAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 56 ;}
 };
 
 /**
  *<b>
- *<li>Rule 57:  defineSpec ::= macro_name_symbol macro_segment
+*<li>Rule 57:  defineSpec ::= macro_name_symbol macro_segment
  *</b>
  */
 struct defineSpec :public ASTNode
@@ -2106,24 +2820,29 @@ struct defineSpec :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_macro_name_symbol);
-        list.push_back((IAst*)lpg_macro_segment);
+        if(lpg_macro_name_symbol)  list.push_back((IAst*)lpg_macro_name_symbol);
+        if(lpg_macro_segment)  list.push_back((IAst*)lpg_macro_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2133,15 +2852,19 @@ struct defineSpec :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 57 ;}
 
     //#line 123 "LPGParser.g
 
-    void initialize();
+    void initialize() {
+environment->_define_specs.insert({getmacro_name_symbol()->toString(), this});
+environment->_macro_name_symbo.push_back(static_cast<ASTNodeToken*>(getmacro_name_symbol()));
+    }
  };
 
 /**
  *<b>
- *<li>Rule 60:  macro_segment ::= BLOCK
+*<li>Rule 60:  macro_segment ::= BLOCK
  *</b>
  */
 struct macro_segment :public ASTNodeToken
@@ -2152,24 +2875,30 @@ struct macro_segment :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 60 ;}
 };
 
 /**
  *<b>
- *<li>Rule 64:  export_segment ::= terminal_symbol
- *<li>Rule 65:  export_segment ::= export_segment terminal_symbol
+*<li>Rule 64:  export_segment ::= terminal_symbol
+*<li>Rule 65:  export_segment ::= export_segment terminal_symbol
  *</b>
  */
 struct terminal_symbolList :public AbstractASTNodeList{
@@ -2191,13 +2920,30 @@ struct terminal_symbolList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getterminal_symbolAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getterminal_symbolAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getterminal_symbolAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getterminal_symbolAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2210,16 +2956,17 @@ struct terminal_symbolList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 65 ;}
 };
 
 /**
  *<b>
- *<li>Rule 66:  globals_segment ::= action_segment
- *<li>Rule 67:  globals_segment ::= globals_segment action_segment
- *<li>Rule 96:  notice_segment ::= action_segment
- *<li>Rule 97:  notice_segment ::= notice_segment action_segment
- *<li>Rule 146:  action_segment_list ::= $Empty
- *<li>Rule 147:  action_segment_list ::= action_segment_list action_segment
+*<li>Rule 66:  globals_segment ::= action_segment
+*<li>Rule 67:  globals_segment ::= globals_segment action_segment
+*<li>Rule 96:  notice_segment ::= action_segment
+*<li>Rule 97:  notice_segment ::= notice_segment action_segment
+*<li>Rule 146:  action_segment_list ::= $Empty
+*<li>Rule 147:  action_segment_list ::= action_segment_list action_segment
  *</b>
  */
 struct action_segmentList :public AbstractASTNodeList{
@@ -2241,19 +2988,36 @@ struct action_segmentList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getaction_segmentAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getaction_segmentAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getaction_segmentAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getaction_segmentAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 147 ;}
 };
 
 /**
  *<b>
- *<li>Rule 70:  import_segment ::= SYMBOL drop_command_list
+*<li>Rule 70:  import_segment ::= SYMBOL drop_command_list
  *</b>
  */
 struct import_segment :public ASTNode
@@ -2277,24 +3041,29 @@ struct import_segment :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_drop_command_list);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_drop_command_list)  list.push_back((IAst*)lpg_drop_command_list);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2304,12 +3073,13 @@ struct import_segment :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 70 ;}
 };
 
 /**
  *<b>
- *<li>Rule 71:  drop_command_list ::= $Empty
- *<li>Rule 72:  drop_command_list ::= drop_command_list drop_command
+*<li>Rule 71:  drop_command_list ::= $Empty
+*<li>Rule 72:  drop_command_list ::= drop_command_list drop_command
  *</b>
  */
 struct drop_commandList :public AbstractASTNodeList{
@@ -2331,13 +3101,30 @@ struct drop_commandList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getdrop_commandAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getdrop_commandAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getdrop_commandAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getdrop_commandAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2350,12 +3137,13 @@ struct drop_commandList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 72 ;}
 };
 
 /**
  *<b>
- *<li>Rule 77:  drop_rules ::= drop_rule
- *<li>Rule 78:  drop_rules ::= drop_rules drop_rule
+*<li>Rule 77:  drop_rules ::= drop_rule
+*<li>Rule 78:  drop_rules ::= drop_rules drop_rule
  *</b>
  */
 struct drop_ruleList :public AbstractASTNodeList{
@@ -2377,19 +3165,36 @@ struct drop_ruleList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getdrop_ruleAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getdrop_ruleAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getdrop_ruleAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getdrop_ruleAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 78 ;}
 };
 
 /**
  *<b>
- *<li>Rule 79:  drop_rule ::= SYMBOL optMacroName produces ruleList
+*<li>Rule 79:  drop_rule ::= SYMBOL optMacroName produces ruleList
  *</b>
  */
 struct drop_rule :public ASTNode
@@ -2428,26 +3233,31 @@ struct drop_rule :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_optMacroName);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_ruleList);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_optMacroName)  list.push_back((IAst*)lpg_optMacroName);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_ruleList)  list.push_back((IAst*)lpg_ruleList);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2459,15 +3269,16 @@ struct drop_rule :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 79 ;}
 };
 
 /**
  *<em>
- *<li>Rule 80:  optMacroName ::= $Empty
+*<li>Rule 80:  optMacroName ::= $Empty
  *</em>
  *<p>
  *<b>
- *<li>Rule 81:  optMacroName ::= MACRO_NAME
+*<li>Rule 81:  optMacroName ::= MACRO_NAME
  *</b>
  */
 struct optMacroName :public ASTNodeToken
@@ -2478,23 +3289,29 @@ struct optMacroName :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 81 ;}
 };
 
 /**
  *<b>
- *<li>Rule 82:  include_segment ::= SYMBOL
+*<li>Rule 82:  include_segment ::= SYMBOL
  *</b>
  */
 struct include_segment :public ASTNodeToken
@@ -2505,24 +3322,30 @@ struct include_segment :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 82 ;}
 };
 
 /**
  *<b>
- *<li>Rule 83:  keywords_segment ::= keywordSpec
- *<li>Rule 84:  keywords_segment ::= keywords_segment keywordSpec
+*<li>Rule 83:  keywords_segment ::= keywordSpec
+*<li>Rule 84:  keywords_segment ::= keywords_segment keywordSpec
  *</b>
  */
 struct keywordSpecList :public AbstractASTNodeList{
@@ -2544,13 +3367,30 @@ struct keywordSpecList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getkeywordSpecAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getkeywordSpecAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getkeywordSpecAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getkeywordSpecAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2563,15 +3403,16 @@ struct keywordSpecList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 84 ;}
 };
 
 /**
  *<em>
- *<li>Rule 85:  keywordSpec ::= terminal_symbol
+*<li>Rule 85:  keywordSpec ::= terminal_symbol
  *</em>
  *<p>
  *<b>
- *<li>Rule 86:  keywordSpec ::= terminal_symbol produces name
+*<li>Rule 86:  keywordSpec ::= terminal_symbol produces name
  *</b>
  */
 struct keywordSpec :public ASTNode
@@ -2601,25 +3442,30 @@ struct keywordSpec :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_terminal_symbol);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_name);
+        if(lpg_terminal_symbol)  list.push_back((IAst*)lpg_terminal_symbol);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_name)  list.push_back((IAst*)lpg_name);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2630,12 +3476,13 @@ struct keywordSpec :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 86 ;}
 };
 
 /**
  *<b>
- *<li>Rule 87:  names_segment ::= nameSpec
- *<li>Rule 88:  names_segment ::= names_segment nameSpec
+*<li>Rule 87:  names_segment ::= nameSpec
+*<li>Rule 88:  names_segment ::= names_segment nameSpec
  *</b>
  */
 struct nameSpecList :public AbstractASTNodeList{
@@ -2657,21 +3504,36 @@ struct nameSpecList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getnameSpecAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getnameSpecAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getnameSpecAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getnameSpecAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 88 ;}
 };
-
-
 
 /**
  *<b>
- *<li>Rule 89:  nameSpec ::= name produces name
+*<li>Rule 89:  nameSpec ::= name produces name
  *</b>
  */
 struct nameSpec :public ASTNode
@@ -2701,25 +3563,30 @@ struct nameSpec :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_name);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_name3);
+        if(lpg_name)  list.push_back((IAst*)lpg_name);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_name3)  list.push_back((IAst*)lpg_name3);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2730,11 +3597,12 @@ struct nameSpec :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 89 ;}
 };
 
 /**
  *<b>
- *<li>Rule 98:  rules_segment ::= action_segment_list nonTermList
+*<li>Rule 98:  rules_segment ::= action_segment_list nonTermList
  *</b>
  */
 struct rules_segment :public ASTNode
@@ -2758,24 +3626,29 @@ struct rules_segment :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_action_segment_list);
-        list.push_back((IAst*)lpg_nonTermList);
+        if(lpg_action_segment_list)  list.push_back((IAst*)lpg_action_segment_list);
+        if(lpg_nonTermList)  list.push_back((IAst*)lpg_nonTermList);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2785,12 +3658,13 @@ struct rules_segment :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 98 ;}
 };
 
 /**
  *<b>
- *<li>Rule 99:  nonTermList ::= $Empty
- *<li>Rule 100:  nonTermList ::= nonTermList nonTerm
+*<li>Rule 99:  nonTermList ::= $Empty
+*<li>Rule 100:  nonTermList ::= nonTermList nonTerm
  *</b>
  */
 struct nonTermList :public AbstractASTNodeList{
@@ -2812,21 +3686,36 @@ struct nonTermList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getnonTermAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getnonTermAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getnonTermAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getnonTermAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 100 ;}
 };
-
-
 
 /**
  *<b>
- *<li>Rule 101:  nonTerm ::= ruleNameWithAttributes produces ruleList
+*<li>Rule 101:  nonTerm ::= ruleNameWithAttributes produces ruleList
  *</b>
  */
 struct nonTerm :public ASTNode
@@ -2860,25 +3749,30 @@ struct nonTerm :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_ruleNameWithAttributes);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_ruleList);
+        if(lpg_ruleNameWithAttributes)  list.push_back((IAst*)lpg_ruleNameWithAttributes);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_ruleList)  list.push_back((IAst*)lpg_ruleList);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2889,6 +3783,7 @@ struct nonTerm :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 101 ;}
 
     //#line 198 "LPGParser.g
 
@@ -2897,9 +3792,9 @@ struct nonTerm :public ASTNode
 
 /**
  *<b>
- *<li>Rule 102:  ruleNameWithAttributes ::= SYMBOL
- *<li>Rule 103:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className
- *<li>Rule 104:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className MACRO_NAME$arrayElement
+*<li>Rule 102:  ruleNameWithAttributes ::= SYMBOL
+*<li>Rule 103:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className
+*<li>Rule 104:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className MACRO_NAME$arrayElement
  *</b>
  */
 struct RuleName :public  ASTNode{
@@ -2933,25 +3828,30 @@ struct RuleName :public  ASTNode{
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_className);
-        list.push_back((IAst*)lpg_arrayElement);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_className)  list.push_back((IAst*)lpg_className);
+        if(lpg_arrayElement)  list.push_back((IAst*)lpg_arrayElement);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -2962,12 +3862,13 @@ struct RuleName :public  ASTNode{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 104 ;}
 };
 
 /**
  *<b>
- *<li>Rule 105:  ruleList ::= rule
- *<li>Rule 106:  ruleList ::= ruleList |$ rule
+*<li>Rule 105:  ruleList ::= rule
+*<li>Rule 106:  ruleList ::= ruleList |$ rule
  *</b>
  */
 struct ruleList :public AbstractASTNodeList{
@@ -2989,19 +3890,36 @@ struct ruleList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getruleAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getruleAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getruleAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getruleAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 106 ;}
 };
 
 /**
  *<b>
- *<li>Rule 111:  rule ::= symWithAttrsList action_segment_list
+*<li>Rule 111:  rule ::= symWithAttrsList action_segment_list
  *</b>
  */
 struct rule :public ASTNode
@@ -3025,24 +3943,29 @@ struct rule :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_symWithAttrsList);
-        list.push_back((IAst*)lpg_action_segment_list);
+        if(lpg_symWithAttrsList)  list.push_back((IAst*)lpg_symWithAttrsList);
+        if(lpg_action_segment_list)  list.push_back((IAst*)lpg_action_segment_list);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3052,12 +3975,13 @@ struct rule :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 111 ;}
 };
 
 /**
  *<b>
- *<li>Rule 112:  symWithAttrsList ::= $Empty
- *<li>Rule 113:  symWithAttrsList ::= symWithAttrsList symWithAttrs
+*<li>Rule 112:  symWithAttrsList ::= $Empty
+*<li>Rule 113:  symWithAttrsList ::= symWithAttrsList symWithAttrs
  *</b>
  */
 struct symWithAttrsList :public AbstractASTNodeList{
@@ -3079,13 +4003,30 @@ struct symWithAttrsList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getsymWithAttrsAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getsymWithAttrsAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getsymWithAttrsAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getsymWithAttrsAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3098,12 +4039,13 @@ struct symWithAttrsList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 113 ;}
 };
 
 /**
  *<b>
- *<li>Rule 116:  optAttrList ::= $Empty
- *<li>Rule 117:  optAttrList ::= MACRO_NAME
+*<li>Rule 116:  optAttrList ::= $Empty
+*<li>Rule 117:  optAttrList ::= MACRO_NAME
  *</b>
  */
 struct symAttrs :public  ASTNode{
@@ -3124,34 +4066,40 @@ struct symAttrs :public  ASTNode{
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_MACRO_NAME);
+        if(lpg_MACRO_NAME)  list.push_back((IAst*)lpg_MACRO_NAME);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             if (lpg_MACRO_NAME != nullptr) ((IAst*)lpg_MACRO_NAME)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 117 ;}
 };
 
 /**
  *<b>
- *<li>Rule 120:  action_segment ::= BLOCK
+*<li>Rule 120:  action_segment ::= BLOCK
  *</b>
  */
 struct action_segment :public ASTNodeToken
@@ -3167,18 +4115,24 @@ struct action_segment :public ASTNodeToken
         initialize();
     }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 120 ;}
 
     //#line 242 "LPGParser.g
 
@@ -3186,8 +4140,8 @@ struct action_segment :public ASTNodeToken
 
 /**
  *<b>
- *<li>Rule 121:  start_segment ::= start_symbol
- *<li>Rule 122:  start_segment ::= start_segment start_symbol
+*<li>Rule 121:  start_segment ::= start_symbol
+*<li>Rule 122:  start_segment ::= start_segment start_symbol
  *</b>
  */
 struct start_symbolList :public AbstractASTNodeList{
@@ -3209,13 +4163,30 @@ struct start_symbolList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getstart_symbolAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getstart_symbolAt(i)->accept(v, o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getstart_symbolAt(i)->accept(v));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object *o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(getstart_symbolAt(i)->accept(v, o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3228,12 +4199,13 @@ struct start_symbolList :public AbstractASTNodeList{
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 122 ;}
 };
 
 /**
  *<b>
- *<li>Rule 125:  terminals_segment ::= terminal
- *<li>Rule 126:  terminals_segment ::= terminals_segment terminal
+*<li>Rule 125:  terminals_segment ::= terminal
+*<li>Rule 126:  terminals_segment ::= terminals_segment terminal
  *</b>
  */
 struct terminalList :public AbstractASTNodeList{
@@ -3255,19 +4227,36 @@ struct terminalList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getterminalAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getterminalAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getterminalAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getterminalAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 126 ;}
 };
 
 /**
  *<b>
- *<li>Rule 127:  terminal ::= terminal_symbol optTerminalAlias
+*<li>Rule 127:  terminal ::= terminal_symbol optTerminalAlias
  *</b>
  */
 struct terminal :public ASTNode
@@ -3298,24 +4287,29 @@ struct terminal :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_terminal_symbol);
-        list.push_back((IAst*)lpg_optTerminalAlias);
+        if(lpg_terminal_symbol)  list.push_back((IAst*)lpg_terminal_symbol);
+        if(lpg_optTerminalAlias)  list.push_back((IAst*)lpg_optTerminalAlias);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3325,19 +4319,22 @@ struct terminal :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 127 ;}
 
     //#line 255 "LPGParser.g
 
-    void initialize();
+    void initialize() {
+     	environment->_terms.insert({getterminal_symbol()->toString(), this});
+    }
  };
 
 /**
  *<em>
- *<li>Rule 128:  optTerminalAlias ::= $Empty
+*<li>Rule 128:  optTerminalAlias ::= $Empty
  *</em>
  *<p>
  *<b>
- *<li>Rule 129:  optTerminalAlias ::= produces name
+*<li>Rule 129:  optTerminalAlias ::= produces name
  *</b>
  */
 struct optTerminalAlias :public ASTNode
@@ -3361,24 +4358,29 @@ struct optTerminalAlias :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_name);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_name)  list.push_back((IAst*)lpg_name);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3388,12 +4390,13 @@ struct optTerminalAlias :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 129 ;}
 };
 
 /**
  *<b>
- *<li>Rule 133:  types_segment ::= type_declarations
- *<li>Rule 134:  types_segment ::= types_segment type_declarations
+*<li>Rule 133:  types_segment ::= type_declarations
+*<li>Rule 134:  types_segment ::= types_segment type_declarations
  *</b>
  */
 struct type_declarationsList :public AbstractASTNodeList{
@@ -3415,19 +4418,36 @@ struct type_declarationsList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(gettype_declarationsAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(gettype_declarationsAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(gettype_declarationsAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(gettype_declarationsAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 134 ;}
 };
 
 /**
  *<b>
- *<li>Rule 135:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
+*<li>Rule 135:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
  *</b>
  */
 struct type_declarations :public ASTNode
@@ -3466,26 +4486,31 @@ struct type_declarations :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_barSymbolList);
-        list.push_back((IAst*)lpg_opt_action_segment);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_barSymbolList)  list.push_back((IAst*)lpg_barSymbolList);
+        if(lpg_opt_action_segment)  list.push_back((IAst*)lpg_opt_action_segment);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3497,12 +4522,13 @@ struct type_declarations :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 135 ;}
 };
 
 /**
  *<b>
- *<li>Rule 138:  predecessor_segment ::= $Empty
- *<li>Rule 139:  predecessor_segment ::= predecessor_segment symbol_pair
+*<li>Rule 138:  predecessor_segment ::= $Empty
+*<li>Rule 139:  predecessor_segment ::= predecessor_segment symbol_pair
  *</b>
  */
 struct symbol_pairList :public AbstractASTNodeList{
@@ -3524,19 +4550,36 @@ struct symbol_pairList :public AbstractASTNodeList{
     }
 
 
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getsymbol_pairAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getsymbol_pairAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getsymbol_pairAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getsymbol_pairAt(i), o));
+        return result;
+    }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-
-    void enter(Visitor* v);
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 139 ;}
 };
 
 /**
  *<b>
- *<li>Rule 140:  symbol_pair ::= SYMBOL SYMBOL
+*<li>Rule 140:  symbol_pair ::= SYMBOL SYMBOL
  *</b>
  */
 struct symbol_pair :public ASTNode
@@ -3560,24 +4603,29 @@ struct symbol_pair :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_SYMBOL2);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_SYMBOL2)  list.push_back((IAst*)lpg_SYMBOL2);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3587,11 +4635,12 @@ struct symbol_pair :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 140 ;}
 };
 
 /**
  *<b>
- *<li>Rule 143:  recover_symbol ::= SYMBOL
+*<li>Rule 143:  recover_symbol ::= SYMBOL
  *</b>
  */
 struct recover_symbol :public ASTNodeToken
@@ -3607,31 +4656,39 @@ struct recover_symbol :public ASTNodeToken
         initialize();
     }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 143 ;}
 
     //#line 288 "LPGParser.g
 
-    void initialize();
+    void initialize() {
+        environment->_recover_symbols.insert({ getSYMBOL()->toString(), this });
+    }
  };
 
 /**
  *<em>
- *<li>Rule 144:  END_KEY_OPT ::= $Empty
+*<li>Rule 144:  END_KEY_OPT ::= $Empty
  *</em>
  *<p>
  *<b>
- *<li>Rule 145:  END_KEY_OPT ::= END_KEY
+*<li>Rule 145:  END_KEY_OPT ::= END_KEY
  *</b>
  */
 struct END_KEY_OPT :public ASTNodeToken
@@ -3642,23 +4699,29 @@ struct END_KEY_OPT :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 145 ;}
 };
 
 /**
  *<b>
- *<li>Rule 34:  option_value ::= =$ SYMBOL
+*<li>Rule 34:  option_value ::= =$ SYMBOL
  *</b>
  */
 struct option_value0 :public ASTNode
@@ -3676,34 +4739,40 @@ struct option_value0 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_SYMBOL)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 34 ;}
 };
 
 /**
  *<b>
- *<li>Rule 35:  option_value ::= =$ ($ symbol_list )$
+*<li>Rule 35:  option_value ::= =$ ($ symbol_list )$
  *</b>
  */
 struct option_value1 :public ASTNode
@@ -3721,34 +4790,40 @@ struct option_value1 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_symbol_list);
+        if(lpg_symbol_list)  list.push_back((IAst*)lpg_symbol_list);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
             ((IAst*)lpg_symbol_list)->accept(v);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 35 ;}
 };
 
 /**
  *<b>
- *<li>Rule 40:  aliasSpec ::= ERROR_KEY produces alias_rhs
+*<li>Rule 40:  aliasSpec ::= ERROR_KEY produces alias_rhs
  *</b>
  */
 struct aliasSpec0 :public ASTNode
@@ -3778,25 +4853,30 @@ struct aliasSpec0 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_ERROR_KEY);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_ERROR_KEY)  list.push_back((IAst*)lpg_ERROR_KEY);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3807,11 +4887,12 @@ struct aliasSpec0 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 40 ;}
 };
 
 /**
  *<b>
- *<li>Rule 41:  aliasSpec ::= EOL_KEY produces alias_rhs
+*<li>Rule 41:  aliasSpec ::= EOL_KEY produces alias_rhs
  *</b>
  */
 struct aliasSpec1 :public ASTNode
@@ -3841,25 +4922,30 @@ struct aliasSpec1 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_EOL_KEY);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_EOL_KEY)  list.push_back((IAst*)lpg_EOL_KEY);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3870,11 +4956,12 @@ struct aliasSpec1 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 41 ;}
 };
 
 /**
  *<b>
- *<li>Rule 42:  aliasSpec ::= EOF_KEY produces alias_rhs
+*<li>Rule 42:  aliasSpec ::= EOF_KEY produces alias_rhs
  *</b>
  */
 struct aliasSpec2 :public ASTNode
@@ -3904,25 +4991,30 @@ struct aliasSpec2 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_EOF_KEY);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_EOF_KEY)  list.push_back((IAst*)lpg_EOF_KEY);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3933,11 +5025,12 @@ struct aliasSpec2 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 42 ;}
 };
 
 /**
  *<b>
- *<li>Rule 43:  aliasSpec ::= IDENTIFIER_KEY produces alias_rhs
+*<li>Rule 43:  aliasSpec ::= IDENTIFIER_KEY produces alias_rhs
  *</b>
  */
 struct aliasSpec3 :public ASTNode
@@ -3967,25 +5060,30 @@ struct aliasSpec3 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_IDENTIFIER_KEY);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_IDENTIFIER_KEY)  list.push_back((IAst*)lpg_IDENTIFIER_KEY);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -3996,11 +5094,12 @@ struct aliasSpec3 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 43 ;}
 };
 
 /**
  *<b>
- *<li>Rule 44:  aliasSpec ::= SYMBOL produces alias_rhs
+*<li>Rule 44:  aliasSpec ::= SYMBOL produces alias_rhs
  *</b>
  */
 struct aliasSpec4 :public ASTNode
@@ -4030,25 +5129,30 @@ struct aliasSpec4 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -4059,11 +5163,12 @@ struct aliasSpec4 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 44 ;}
 };
 
 /**
  *<b>
- *<li>Rule 45:  aliasSpec ::= alias_lhs_macro_name produces alias_rhs
+*<li>Rule 45:  aliasSpec ::= alias_lhs_macro_name produces alias_rhs
  *</b>
  */
 struct aliasSpec5 :public ASTNode
@@ -4093,25 +5198,30 @@ struct aliasSpec5 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_alias_lhs_macro_name);
-        list.push_back((IAst*)lpg_produces);
-        list.push_back((IAst*)lpg_alias_rhs);
+        if(lpg_alias_lhs_macro_name)  list.push_back((IAst*)lpg_alias_lhs_macro_name);
+        if(lpg_produces)  list.push_back((IAst*)lpg_produces);
+        if(lpg_alias_rhs)  list.push_back((IAst*)lpg_alias_rhs);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -4122,11 +5232,12 @@ struct aliasSpec5 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 45 ;}
 };
 
 /**
  *<b>
- *<li>Rule 47:  alias_rhs ::= SYMBOL
+*<li>Rule 47:  alias_rhs ::= SYMBOL
  *</b>
  */
 struct alias_rhs0 :public ASTNodeToken
@@ -4137,23 +5248,29 @@ struct alias_rhs0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 47 ;}
 };
 
 /**
  *<b>
- *<li>Rule 48:  alias_rhs ::= MACRO_NAME
+*<li>Rule 48:  alias_rhs ::= MACRO_NAME
  *</b>
  */
 struct alias_rhs1 :public ASTNodeToken
@@ -4164,23 +5281,29 @@ struct alias_rhs1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 48 ;}
 };
 
 /**
  *<b>
- *<li>Rule 49:  alias_rhs ::= ERROR_KEY
+*<li>Rule 49:  alias_rhs ::= ERROR_KEY
  *</b>
  */
 struct alias_rhs2 :public ASTNodeToken
@@ -4191,23 +5314,29 @@ struct alias_rhs2 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 49 ;}
 };
 
 /**
  *<b>
- *<li>Rule 50:  alias_rhs ::= EOL_KEY
+*<li>Rule 50:  alias_rhs ::= EOL_KEY
  *</b>
  */
 struct alias_rhs3 :public ASTNodeToken
@@ -4218,23 +5347,29 @@ struct alias_rhs3 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 50 ;}
 };
 
 /**
  *<b>
- *<li>Rule 51:  alias_rhs ::= EOF_KEY
+*<li>Rule 51:  alias_rhs ::= EOF_KEY
  *</b>
  */
 struct alias_rhs4 :public ASTNodeToken
@@ -4245,23 +5380,29 @@ struct alias_rhs4 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 51 ;}
 };
 
 /**
  *<b>
- *<li>Rule 52:  alias_rhs ::= EMPTY_KEY
+*<li>Rule 52:  alias_rhs ::= EMPTY_KEY
  *</b>
  */
 struct alias_rhs5 :public ASTNodeToken
@@ -4272,23 +5413,29 @@ struct alias_rhs5 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 52 ;}
 };
 
 /**
  *<b>
- *<li>Rule 53:  alias_rhs ::= IDENTIFIER_KEY
+*<li>Rule 53:  alias_rhs ::= IDENTIFIER_KEY
  *</b>
  */
 struct alias_rhs6 :public ASTNodeToken
@@ -4299,23 +5446,29 @@ struct alias_rhs6 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 53 ;}
 };
 
 /**
  *<b>
- *<li>Rule 58:  macro_name_symbol ::= MACRO_NAME
+*<li>Rule 58:  macro_name_symbol ::= MACRO_NAME
  *</b>
  */
 struct macro_name_symbol0 :public ASTNodeToken
@@ -4326,23 +5479,29 @@ struct macro_name_symbol0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 58 ;}
 };
 
 /**
  *<b>
- *<li>Rule 59:  macro_name_symbol ::= SYMBOL
+*<li>Rule 59:  macro_name_symbol ::= SYMBOL
  *</b>
  */
 struct macro_name_symbol1 :public ASTNodeToken
@@ -4353,23 +5512,29 @@ struct macro_name_symbol1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 59 ;}
 };
 
 /**
  *<b>
- *<li>Rule 73:  drop_command ::= DROPSYMBOLS_KEY drop_symbols
+*<li>Rule 73:  drop_command ::= DROPSYMBOLS_KEY drop_symbols
  *</b>
  */
 struct drop_command0 :public ASTNode
@@ -4393,24 +5558,29 @@ struct drop_command0 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_DROPSYMBOLS_KEY);
-        list.push_back((IAst*)lpg_drop_symbols);
+        if(lpg_DROPSYMBOLS_KEY)  list.push_back((IAst*)lpg_DROPSYMBOLS_KEY);
+        if(lpg_drop_symbols)  list.push_back((IAst*)lpg_drop_symbols);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -4420,11 +5590,12 @@ struct drop_command0 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 73 ;}
 };
 
 /**
  *<b>
- *<li>Rule 74:  drop_command ::= DROPRULES_KEY drop_rules
+*<li>Rule 74:  drop_command ::= DROPRULES_KEY drop_rules
  *</b>
  */
 struct drop_command1 :public ASTNode
@@ -4448,24 +5619,29 @@ struct drop_command1 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_DROPRULES_KEY);
-        list.push_back((IAst*)lpg_drop_rules);
+        if(lpg_DROPRULES_KEY)  list.push_back((IAst*)lpg_DROPRULES_KEY);
+        if(lpg_drop_rules)  list.push_back((IAst*)lpg_drop_rules);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -4475,11 +5651,12 @@ struct drop_command1 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 74 ;}
 };
 
 /**
  *<b>
- *<li>Rule 90:  name ::= SYMBOL
+*<li>Rule 90:  name ::= SYMBOL
  *</b>
  */
 struct name0 :public ASTNodeToken
@@ -4490,23 +5667,29 @@ struct name0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 90 ;}
 };
 
 /**
  *<b>
- *<li>Rule 91:  name ::= MACRO_NAME
+*<li>Rule 91:  name ::= MACRO_NAME
  *</b>
  */
 struct name1 :public ASTNodeToken
@@ -4517,23 +5700,29 @@ struct name1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 91 ;}
 };
 
 /**
  *<b>
- *<li>Rule 92:  name ::= EMPTY_KEY
+*<li>Rule 92:  name ::= EMPTY_KEY
  *</b>
  */
 struct name2 :public ASTNodeToken
@@ -4544,23 +5733,29 @@ struct name2 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 92 ;}
 };
 
 /**
  *<b>
- *<li>Rule 93:  name ::= ERROR_KEY
+*<li>Rule 93:  name ::= ERROR_KEY
  *</b>
  */
 struct name3 :public ASTNodeToken
@@ -4571,23 +5766,29 @@ struct name3 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 93 ;}
 };
 
 /**
  *<b>
- *<li>Rule 94:  name ::= EOL_KEY
+*<li>Rule 94:  name ::= EOL_KEY
  *</b>
  */
 struct name4 :public ASTNodeToken
@@ -4598,23 +5799,29 @@ struct name4 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 94 ;}
 };
 
 /**
  *<b>
- *<li>Rule 95:  name ::= IDENTIFIER_KEY
+*<li>Rule 95:  name ::= IDENTIFIER_KEY
  *</b>
  */
 struct name5 :public ASTNodeToken
@@ -4625,23 +5832,29 @@ struct name5 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 95 ;}
 };
 
 /**
  *<b>
- *<li>Rule 107:  produces ::= ::=
+*<li>Rule 107:  produces ::= ::=
  *</b>
  */
 struct produces0 :public ASTNodeToken
@@ -4652,23 +5865,29 @@ struct produces0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 107 ;}
 };
 
 /**
  *<b>
- *<li>Rule 108:  produces ::= ::=?
+*<li>Rule 108:  produces ::= ::=?
  *</b>
  */
 struct produces1 :public ASTNodeToken
@@ -4679,23 +5898,29 @@ struct produces1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 108 ;}
 };
 
 /**
  *<b>
- *<li>Rule 109:  produces ::= ->
+*<li>Rule 109:  produces ::= ->
  *</b>
  */
 struct produces2 :public ASTNodeToken
@@ -4706,23 +5931,29 @@ struct produces2 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 109 ;}
 };
 
 /**
  *<b>
- *<li>Rule 110:  produces ::= ->?
+*<li>Rule 110:  produces ::= ->?
  *</b>
  */
 struct produces3 :public ASTNodeToken
@@ -4733,23 +5964,29 @@ struct produces3 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 110 ;}
 };
 
 /**
  *<b>
- *<li>Rule 114:  symWithAttrs ::= EMPTY_KEY
+*<li>Rule 114:  symWithAttrs ::= EMPTY_KEY
  *</b>
  */
 struct symWithAttrs0 :public ASTNodeToken
@@ -4760,23 +5997,29 @@ struct symWithAttrs0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 114 ;}
 };
 
 /**
  *<b>
- *<li>Rule 115:  symWithAttrs ::= SYMBOL optAttrList
+*<li>Rule 115:  symWithAttrs ::= SYMBOL optAttrList
  *</b>
  */
 struct symWithAttrs1 :public ASTNode
@@ -4803,24 +6046,29 @@ struct symWithAttrs1 :public ASTNode
     }
 
     /**
-     * A list of all children of this node, including the nullptr ones.
+     * A list of all children of this node,don't including the nullptr ones.
      */
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        list.push_back((IAst*)lpg_SYMBOL);
-        list.push_back((IAst*)lpg_optAttrList);
+        if(lpg_SYMBOL)  list.push_back((IAst*)lpg_SYMBOL);
+        if(lpg_optAttrList)  list.push_back((IAst*)lpg_optAttrList);
         return list;
     }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
 
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
@@ -4830,11 +6078,12 @@ struct symWithAttrs1 :public ASTNode
         }
         v->endVisit(this);
     }
+    int getRuleIndex() { return 115 ;}
 };
 
 /**
  *<b>
- *<li>Rule 123:  start_symbol ::= SYMBOL
+*<li>Rule 123:  start_symbol ::= SYMBOL
  *</b>
  */
 struct start_symbol0 :public ASTNodeToken
@@ -4845,23 +6094,29 @@ struct start_symbol0 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 123 ;}
 };
 
 /**
  *<b>
- *<li>Rule 124:  start_symbol ::= MACRO_NAME
+*<li>Rule 124:  start_symbol ::= MACRO_NAME
  *</b>
  */
 struct start_symbol1 :public ASTNodeToken
@@ -4872,23 +6127,29 @@ struct start_symbol1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 124 ;}
 };
 
 /**
  *<b>
- *<li>Rule 130:  terminal_symbol ::= SYMBOL
+*<li>Rule 130:  terminal_symbol ::= SYMBOL
  *</b>
  */
 struct terminal_symbol0 :public ASTNodeToken
@@ -4904,27 +6165,35 @@ struct terminal_symbol0 :public ASTNodeToken
         initialize();
     }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 130 ;}
 
     //#line 263 "LPGParser.g
 
-    void initialize();
+    void initialize() {
+        environment->terminal_symbol_produce_SYMBOL.insert({getSYMBOL()->toString(), this});
+    }
  };
 
 /**
  *<b>
- *<li>Rule 131:  terminal_symbol ::= MACRO_NAME
+*<li>Rule 131:  terminal_symbol ::= MACRO_NAME
  *</b>
  */
 struct terminal_symbol1 :public ASTNodeToken
@@ -4935,21 +6204,1075 @@ struct terminal_symbol1 :public ASTNodeToken
 {
  initialize(); }
 
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
     void accept(IAstVisitor* v)
     {
         if (! v->preVisit(this)) return;
-        enter((Visitor*) v);
+        enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
 
-    void enter(Visitor *v)
+    void enter(PreOrderVisitor *v)
     {
         v->visit(this);
         v->endVisit(this);
     }
+    int getRuleIndex() { return 131 ;}
 };
 
-struct AbstractVisitor :public Visitor
+struct AbstractVisitor :public Visitor, public ArgumentVisitor
+{
+    virtual void unimplementedVisitor(const std::string &s)=0;
+
+ virtual   void visit(ASTNodeToken *n) { unimplementedVisitor("visit(ASTNodeToken)"); }
+  virtual  void visit(ASTNodeToken *n, Object* o) { unimplementedVisitor("visit(ASTNodeToken, Object)"); }
+
+ virtual   void visit(LPG *n) { unimplementedVisitor("visit(LPG)"); }
+  virtual  void visit(LPG *n, Object* o) { unimplementedVisitor("visit(LPG, Object)"); }
+
+ virtual   void visit(LPG_itemList *n) { unimplementedVisitor("visit(LPG_itemList)"); }
+  virtual  void visit(LPG_itemList *n, Object* o) { unimplementedVisitor("visit(LPG_itemList, Object)"); }
+
+ virtual   void visit(AliasSeg *n) { unimplementedVisitor("visit(AliasSeg)"); }
+  virtual  void visit(AliasSeg *n, Object* o) { unimplementedVisitor("visit(AliasSeg, Object)"); }
+
+ virtual   void visit(AstSeg *n) { unimplementedVisitor("visit(AstSeg)"); }
+  virtual  void visit(AstSeg *n, Object* o) { unimplementedVisitor("visit(AstSeg, Object)"); }
+
+ virtual   void visit(DefineSeg *n) { unimplementedVisitor("visit(DefineSeg)"); }
+  virtual  void visit(DefineSeg *n, Object* o) { unimplementedVisitor("visit(DefineSeg, Object)"); }
+
+ virtual   void visit(EofSeg *n) { unimplementedVisitor("visit(EofSeg)"); }
+  virtual  void visit(EofSeg *n, Object* o) { unimplementedVisitor("visit(EofSeg, Object)"); }
+
+ virtual   void visit(EolSeg *n) { unimplementedVisitor("visit(EolSeg)"); }
+  virtual  void visit(EolSeg *n, Object* o) { unimplementedVisitor("visit(EolSeg, Object)"); }
+
+ virtual   void visit(ErrorSeg *n) { unimplementedVisitor("visit(ErrorSeg)"); }
+  virtual  void visit(ErrorSeg *n, Object* o) { unimplementedVisitor("visit(ErrorSeg, Object)"); }
+
+ virtual   void visit(ExportSeg *n) { unimplementedVisitor("visit(ExportSeg)"); }
+  virtual  void visit(ExportSeg *n, Object* o) { unimplementedVisitor("visit(ExportSeg, Object)"); }
+
+ virtual   void visit(GlobalsSeg *n) { unimplementedVisitor("visit(GlobalsSeg)"); }
+  virtual  void visit(GlobalsSeg *n, Object* o) { unimplementedVisitor("visit(GlobalsSeg, Object)"); }
+
+ virtual   void visit(HeadersSeg *n) { unimplementedVisitor("visit(HeadersSeg)"); }
+  virtual  void visit(HeadersSeg *n, Object* o) { unimplementedVisitor("visit(HeadersSeg, Object)"); }
+
+ virtual   void visit(IdentifierSeg *n) { unimplementedVisitor("visit(IdentifierSeg)"); }
+  virtual  void visit(IdentifierSeg *n, Object* o) { unimplementedVisitor("visit(IdentifierSeg, Object)"); }
+
+ virtual   void visit(ImportSeg *n) { unimplementedVisitor("visit(ImportSeg)"); }
+  virtual  void visit(ImportSeg *n, Object* o) { unimplementedVisitor("visit(ImportSeg, Object)"); }
+
+ virtual   void visit(IncludeSeg *n) { unimplementedVisitor("visit(IncludeSeg)"); }
+  virtual  void visit(IncludeSeg *n, Object* o) { unimplementedVisitor("visit(IncludeSeg, Object)"); }
+
+ virtual   void visit(KeywordsSeg *n) { unimplementedVisitor("visit(KeywordsSeg)"); }
+  virtual  void visit(KeywordsSeg *n, Object* o) { unimplementedVisitor("visit(KeywordsSeg, Object)"); }
+
+ virtual   void visit(NamesSeg *n) { unimplementedVisitor("visit(NamesSeg)"); }
+  virtual  void visit(NamesSeg *n, Object* o) { unimplementedVisitor("visit(NamesSeg, Object)"); }
+
+ virtual   void visit(NoticeSeg *n) { unimplementedVisitor("visit(NoticeSeg)"); }
+  virtual  void visit(NoticeSeg *n, Object* o) { unimplementedVisitor("visit(NoticeSeg, Object)"); }
+
+ virtual   void visit(RulesSeg *n) { unimplementedVisitor("visit(RulesSeg)"); }
+  virtual  void visit(RulesSeg *n, Object* o) { unimplementedVisitor("visit(RulesSeg, Object)"); }
+
+ virtual   void visit(SoftKeywordsSeg *n) { unimplementedVisitor("visit(SoftKeywordsSeg)"); }
+  virtual  void visit(SoftKeywordsSeg *n, Object* o) { unimplementedVisitor("visit(SoftKeywordsSeg, Object)"); }
+
+ virtual   void visit(StartSeg *n) { unimplementedVisitor("visit(StartSeg)"); }
+  virtual  void visit(StartSeg *n, Object* o) { unimplementedVisitor("visit(StartSeg, Object)"); }
+
+ virtual   void visit(TerminalsSeg *n) { unimplementedVisitor("visit(TerminalsSeg)"); }
+  virtual  void visit(TerminalsSeg *n, Object* o) { unimplementedVisitor("visit(TerminalsSeg, Object)"); }
+
+ virtual   void visit(TrailersSeg *n) { unimplementedVisitor("visit(TrailersSeg)"); }
+  virtual  void visit(TrailersSeg *n, Object* o) { unimplementedVisitor("visit(TrailersSeg, Object)"); }
+
+ virtual   void visit(TypesSeg *n) { unimplementedVisitor("visit(TypesSeg)"); }
+  virtual  void visit(TypesSeg *n, Object* o) { unimplementedVisitor("visit(TypesSeg, Object)"); }
+
+ virtual   void visit(RecoverSeg *n) { unimplementedVisitor("visit(RecoverSeg)"); }
+  virtual  void visit(RecoverSeg *n, Object* o) { unimplementedVisitor("visit(RecoverSeg, Object)"); }
+
+ virtual   void visit(PredecessorSeg *n) { unimplementedVisitor("visit(PredecessorSeg)"); }
+  virtual  void visit(PredecessorSeg *n, Object* o) { unimplementedVisitor("visit(PredecessorSeg, Object)"); }
+
+ virtual   void visit(option_specList *n) { unimplementedVisitor("visit(option_specList)"); }
+  virtual  void visit(option_specList *n, Object* o) { unimplementedVisitor("visit(option_specList, Object)"); }
+
+ virtual   void visit(option_spec *n) { unimplementedVisitor("visit(option_spec)"); }
+  virtual  void visit(option_spec *n, Object* o) { unimplementedVisitor("visit(option_spec, Object)"); }
+
+ virtual   void visit(optionList *n) { unimplementedVisitor("visit(optionList)"); }
+  virtual  void visit(optionList *n, Object* o) { unimplementedVisitor("visit(optionList, Object)"); }
+
+ virtual   void visit(option *n) { unimplementedVisitor("visit(option)"); }
+  virtual  void visit(option *n, Object* o) { unimplementedVisitor("visit(option, Object)"); }
+
+ virtual   void visit(SYMBOLList *n) { unimplementedVisitor("visit(SYMBOLList)"); }
+  virtual  void visit(SYMBOLList *n, Object* o) { unimplementedVisitor("visit(SYMBOLList, Object)"); }
+
+ virtual   void visit(aliasSpecList *n) { unimplementedVisitor("visit(aliasSpecList)"); }
+  virtual  void visit(aliasSpecList *n, Object* o) { unimplementedVisitor("visit(aliasSpecList, Object)"); }
+
+ virtual   void visit(alias_lhs_macro_name *n) { unimplementedVisitor("visit(alias_lhs_macro_name)"); }
+  virtual  void visit(alias_lhs_macro_name *n, Object* o) { unimplementedVisitor("visit(alias_lhs_macro_name, Object)"); }
+
+ virtual   void visit(defineSpecList *n) { unimplementedVisitor("visit(defineSpecList)"); }
+  virtual  void visit(defineSpecList *n, Object* o) { unimplementedVisitor("visit(defineSpecList, Object)"); }
+
+ virtual   void visit(defineSpec *n) { unimplementedVisitor("visit(defineSpec)"); }
+  virtual  void visit(defineSpec *n, Object* o) { unimplementedVisitor("visit(defineSpec, Object)"); }
+
+ virtual   void visit(macro_segment *n) { unimplementedVisitor("visit(macro_segment)"); }
+  virtual  void visit(macro_segment *n, Object* o) { unimplementedVisitor("visit(macro_segment, Object)"); }
+
+ virtual   void visit(terminal_symbolList *n) { unimplementedVisitor("visit(terminal_symbolList)"); }
+  virtual  void visit(terminal_symbolList *n, Object* o) { unimplementedVisitor("visit(terminal_symbolList, Object)"); }
+
+ virtual   void visit(action_segmentList *n) { unimplementedVisitor("visit(action_segmentList)"); }
+  virtual  void visit(action_segmentList *n, Object* o) { unimplementedVisitor("visit(action_segmentList, Object)"); }
+
+ virtual   void visit(import_segment *n) { unimplementedVisitor("visit(import_segment)"); }
+  virtual  void visit(import_segment *n, Object* o) { unimplementedVisitor("visit(import_segment, Object)"); }
+
+ virtual   void visit(drop_commandList *n) { unimplementedVisitor("visit(drop_commandList)"); }
+  virtual  void visit(drop_commandList *n, Object* o) { unimplementedVisitor("visit(drop_commandList, Object)"); }
+
+ virtual   void visit(drop_ruleList *n) { unimplementedVisitor("visit(drop_ruleList)"); }
+  virtual  void visit(drop_ruleList *n, Object* o) { unimplementedVisitor("visit(drop_ruleList, Object)"); }
+
+ virtual   void visit(drop_rule *n) { unimplementedVisitor("visit(drop_rule)"); }
+  virtual  void visit(drop_rule *n, Object* o) { unimplementedVisitor("visit(drop_rule, Object)"); }
+
+ virtual   void visit(optMacroName *n) { unimplementedVisitor("visit(optMacroName)"); }
+  virtual  void visit(optMacroName *n, Object* o) { unimplementedVisitor("visit(optMacroName, Object)"); }
+
+ virtual   void visit(include_segment *n) { unimplementedVisitor("visit(include_segment)"); }
+  virtual  void visit(include_segment *n, Object* o) { unimplementedVisitor("visit(include_segment, Object)"); }
+
+ virtual   void visit(keywordSpecList *n) { unimplementedVisitor("visit(keywordSpecList)"); }
+  virtual  void visit(keywordSpecList *n, Object* o) { unimplementedVisitor("visit(keywordSpecList, Object)"); }
+
+ virtual   void visit(keywordSpec *n) { unimplementedVisitor("visit(keywordSpec)"); }
+  virtual  void visit(keywordSpec *n, Object* o) { unimplementedVisitor("visit(keywordSpec, Object)"); }
+
+ virtual   void visit(nameSpecList *n) { unimplementedVisitor("visit(nameSpecList)"); }
+  virtual  void visit(nameSpecList *n, Object* o) { unimplementedVisitor("visit(nameSpecList, Object)"); }
+
+ virtual   void visit(nameSpec *n) { unimplementedVisitor("visit(nameSpec)"); }
+  virtual  void visit(nameSpec *n, Object* o) { unimplementedVisitor("visit(nameSpec, Object)"); }
+
+ virtual   void visit(rules_segment *n) { unimplementedVisitor("visit(rules_segment)"); }
+  virtual  void visit(rules_segment *n, Object* o) { unimplementedVisitor("visit(rules_segment, Object)"); }
+
+ virtual   void visit(nonTermList *n) { unimplementedVisitor("visit(nonTermList)"); }
+  virtual  void visit(nonTermList *n, Object* o) { unimplementedVisitor("visit(nonTermList, Object)"); }
+
+ virtual   void visit(nonTerm *n) { unimplementedVisitor("visit(nonTerm)"); }
+  virtual  void visit(nonTerm *n, Object* o) { unimplementedVisitor("visit(nonTerm, Object)"); }
+
+ virtual   void visit(RuleName *n) { unimplementedVisitor("visit(RuleName)"); }
+  virtual  void visit(RuleName *n, Object* o) { unimplementedVisitor("visit(RuleName, Object)"); }
+
+ virtual   void visit(ruleList *n) { unimplementedVisitor("visit(ruleList)"); }
+  virtual  void visit(ruleList *n, Object* o) { unimplementedVisitor("visit(ruleList, Object)"); }
+
+ virtual   void visit(rule *n) { unimplementedVisitor("visit(rule)"); }
+  virtual  void visit(rule *n, Object* o) { unimplementedVisitor("visit(rule, Object)"); }
+
+ virtual   void visit(symWithAttrsList *n) { unimplementedVisitor("visit(symWithAttrsList)"); }
+  virtual  void visit(symWithAttrsList *n, Object* o) { unimplementedVisitor("visit(symWithAttrsList, Object)"); }
+
+ virtual   void visit(symAttrs *n) { unimplementedVisitor("visit(symAttrs)"); }
+  virtual  void visit(symAttrs *n, Object* o) { unimplementedVisitor("visit(symAttrs, Object)"); }
+
+ virtual   void visit(action_segment *n) { unimplementedVisitor("visit(action_segment)"); }
+  virtual  void visit(action_segment *n, Object* o) { unimplementedVisitor("visit(action_segment, Object)"); }
+
+ virtual   void visit(start_symbolList *n) { unimplementedVisitor("visit(start_symbolList)"); }
+  virtual  void visit(start_symbolList *n, Object* o) { unimplementedVisitor("visit(start_symbolList, Object)"); }
+
+ virtual   void visit(terminalList *n) { unimplementedVisitor("visit(terminalList)"); }
+  virtual  void visit(terminalList *n, Object* o) { unimplementedVisitor("visit(terminalList, Object)"); }
+
+ virtual   void visit(terminal *n) { unimplementedVisitor("visit(terminal)"); }
+  virtual  void visit(terminal *n, Object* o) { unimplementedVisitor("visit(terminal, Object)"); }
+
+ virtual   void visit(optTerminalAlias *n) { unimplementedVisitor("visit(optTerminalAlias)"); }
+  virtual  void visit(optTerminalAlias *n, Object* o) { unimplementedVisitor("visit(optTerminalAlias, Object)"); }
+
+ virtual   void visit(type_declarationsList *n) { unimplementedVisitor("visit(type_declarationsList)"); }
+  virtual  void visit(type_declarationsList *n, Object* o) { unimplementedVisitor("visit(type_declarationsList, Object)"); }
+
+ virtual   void visit(type_declarations *n) { unimplementedVisitor("visit(type_declarations)"); }
+  virtual  void visit(type_declarations *n, Object* o) { unimplementedVisitor("visit(type_declarations, Object)"); }
+
+ virtual   void visit(symbol_pairList *n) { unimplementedVisitor("visit(symbol_pairList)"); }
+  virtual  void visit(symbol_pairList *n, Object* o) { unimplementedVisitor("visit(symbol_pairList, Object)"); }
+
+ virtual   void visit(symbol_pair *n) { unimplementedVisitor("visit(symbol_pair)"); }
+  virtual  void visit(symbol_pair *n, Object* o) { unimplementedVisitor("visit(symbol_pair, Object)"); }
+
+ virtual   void visit(recover_symbol *n) { unimplementedVisitor("visit(recover_symbol)"); }
+  virtual  void visit(recover_symbol *n, Object* o) { unimplementedVisitor("visit(recover_symbol, Object)"); }
+
+ virtual   void visit(END_KEY_OPT *n) { unimplementedVisitor("visit(END_KEY_OPT)"); }
+  virtual  void visit(END_KEY_OPT *n, Object* o) { unimplementedVisitor("visit(END_KEY_OPT, Object)"); }
+
+ virtual   void visit(option_value0 *n) { unimplementedVisitor("visit(option_value0)"); }
+  virtual  void visit(option_value0 *n, Object* o) { unimplementedVisitor("visit(option_value0, Object)"); }
+
+ virtual   void visit(option_value1 *n) { unimplementedVisitor("visit(option_value1)"); }
+  virtual  void visit(option_value1 *n, Object* o) { unimplementedVisitor("visit(option_value1, Object)"); }
+
+ virtual   void visit(aliasSpec0 *n) { unimplementedVisitor("visit(aliasSpec0)"); }
+  virtual  void visit(aliasSpec0 *n, Object* o) { unimplementedVisitor("visit(aliasSpec0, Object)"); }
+
+ virtual   void visit(aliasSpec1 *n) { unimplementedVisitor("visit(aliasSpec1)"); }
+  virtual  void visit(aliasSpec1 *n, Object* o) { unimplementedVisitor("visit(aliasSpec1, Object)"); }
+
+ virtual   void visit(aliasSpec2 *n) { unimplementedVisitor("visit(aliasSpec2)"); }
+  virtual  void visit(aliasSpec2 *n, Object* o) { unimplementedVisitor("visit(aliasSpec2, Object)"); }
+
+ virtual   void visit(aliasSpec3 *n) { unimplementedVisitor("visit(aliasSpec3)"); }
+  virtual  void visit(aliasSpec3 *n, Object* o) { unimplementedVisitor("visit(aliasSpec3, Object)"); }
+
+ virtual   void visit(aliasSpec4 *n) { unimplementedVisitor("visit(aliasSpec4)"); }
+  virtual  void visit(aliasSpec4 *n, Object* o) { unimplementedVisitor("visit(aliasSpec4, Object)"); }
+
+ virtual   void visit(aliasSpec5 *n) { unimplementedVisitor("visit(aliasSpec5)"); }
+  virtual  void visit(aliasSpec5 *n, Object* o) { unimplementedVisitor("visit(aliasSpec5, Object)"); }
+
+ virtual   void visit(alias_rhs0 *n) { unimplementedVisitor("visit(alias_rhs0)"); }
+  virtual  void visit(alias_rhs0 *n, Object* o) { unimplementedVisitor("visit(alias_rhs0, Object)"); }
+
+ virtual   void visit(alias_rhs1 *n) { unimplementedVisitor("visit(alias_rhs1)"); }
+  virtual  void visit(alias_rhs1 *n, Object* o) { unimplementedVisitor("visit(alias_rhs1, Object)"); }
+
+ virtual   void visit(alias_rhs2 *n) { unimplementedVisitor("visit(alias_rhs2)"); }
+  virtual  void visit(alias_rhs2 *n, Object* o) { unimplementedVisitor("visit(alias_rhs2, Object)"); }
+
+ virtual   void visit(alias_rhs3 *n) { unimplementedVisitor("visit(alias_rhs3)"); }
+  virtual  void visit(alias_rhs3 *n, Object* o) { unimplementedVisitor("visit(alias_rhs3, Object)"); }
+
+ virtual   void visit(alias_rhs4 *n) { unimplementedVisitor("visit(alias_rhs4)"); }
+  virtual  void visit(alias_rhs4 *n, Object* o) { unimplementedVisitor("visit(alias_rhs4, Object)"); }
+
+ virtual   void visit(alias_rhs5 *n) { unimplementedVisitor("visit(alias_rhs5)"); }
+  virtual  void visit(alias_rhs5 *n, Object* o) { unimplementedVisitor("visit(alias_rhs5, Object)"); }
+
+ virtual   void visit(alias_rhs6 *n) { unimplementedVisitor("visit(alias_rhs6)"); }
+  virtual  void visit(alias_rhs6 *n, Object* o) { unimplementedVisitor("visit(alias_rhs6, Object)"); }
+
+ virtual   void visit(macro_name_symbol0 *n) { unimplementedVisitor("visit(macro_name_symbol0)"); }
+  virtual  void visit(macro_name_symbol0 *n, Object* o) { unimplementedVisitor("visit(macro_name_symbol0, Object)"); }
+
+ virtual   void visit(macro_name_symbol1 *n) { unimplementedVisitor("visit(macro_name_symbol1)"); }
+  virtual  void visit(macro_name_symbol1 *n, Object* o) { unimplementedVisitor("visit(macro_name_symbol1, Object)"); }
+
+ virtual   void visit(drop_command0 *n) { unimplementedVisitor("visit(drop_command0)"); }
+  virtual  void visit(drop_command0 *n, Object* o) { unimplementedVisitor("visit(drop_command0, Object)"); }
+
+ virtual   void visit(drop_command1 *n) { unimplementedVisitor("visit(drop_command1)"); }
+  virtual  void visit(drop_command1 *n, Object* o) { unimplementedVisitor("visit(drop_command1, Object)"); }
+
+ virtual   void visit(name0 *n) { unimplementedVisitor("visit(name0)"); }
+  virtual  void visit(name0 *n, Object* o) { unimplementedVisitor("visit(name0, Object)"); }
+
+ virtual   void visit(name1 *n) { unimplementedVisitor("visit(name1)"); }
+  virtual  void visit(name1 *n, Object* o) { unimplementedVisitor("visit(name1, Object)"); }
+
+ virtual   void visit(name2 *n) { unimplementedVisitor("visit(name2)"); }
+  virtual  void visit(name2 *n, Object* o) { unimplementedVisitor("visit(name2, Object)"); }
+
+ virtual   void visit(name3 *n) { unimplementedVisitor("visit(name3)"); }
+  virtual  void visit(name3 *n, Object* o) { unimplementedVisitor("visit(name3, Object)"); }
+
+ virtual   void visit(name4 *n) { unimplementedVisitor("visit(name4)"); }
+  virtual  void visit(name4 *n, Object* o) { unimplementedVisitor("visit(name4, Object)"); }
+
+ virtual   void visit(name5 *n) { unimplementedVisitor("visit(name5)"); }
+  virtual  void visit(name5 *n, Object* o) { unimplementedVisitor("visit(name5, Object)"); }
+
+ virtual   void visit(produces0 *n) { unimplementedVisitor("visit(produces0)"); }
+  virtual  void visit(produces0 *n, Object* o) { unimplementedVisitor("visit(produces0, Object)"); }
+
+ virtual   void visit(produces1 *n) { unimplementedVisitor("visit(produces1)"); }
+  virtual  void visit(produces1 *n, Object* o) { unimplementedVisitor("visit(produces1, Object)"); }
+
+ virtual   void visit(produces2 *n) { unimplementedVisitor("visit(produces2)"); }
+  virtual  void visit(produces2 *n, Object* o) { unimplementedVisitor("visit(produces2, Object)"); }
+
+ virtual   void visit(produces3 *n) { unimplementedVisitor("visit(produces3)"); }
+  virtual  void visit(produces3 *n, Object* o) { unimplementedVisitor("visit(produces3, Object)"); }
+
+ virtual   void visit(symWithAttrs0 *n) { unimplementedVisitor("visit(symWithAttrs0)"); }
+  virtual  void visit(symWithAttrs0 *n, Object* o) { unimplementedVisitor("visit(symWithAttrs0, Object)"); }
+
+ virtual   void visit(symWithAttrs1 *n) { unimplementedVisitor("visit(symWithAttrs1)"); }
+  virtual  void visit(symWithAttrs1 *n, Object* o) { unimplementedVisitor("visit(symWithAttrs1, Object)"); }
+
+ virtual   void visit(start_symbol0 *n) { unimplementedVisitor("visit(start_symbol0)"); }
+  virtual  void visit(start_symbol0 *n, Object* o) { unimplementedVisitor("visit(start_symbol0, Object)"); }
+
+ virtual   void visit(start_symbol1 *n) { unimplementedVisitor("visit(start_symbol1)"); }
+  virtual  void visit(start_symbol1 *n, Object* o) { unimplementedVisitor("visit(start_symbol1, Object)"); }
+
+ virtual   void visit(terminal_symbol0 *n) { unimplementedVisitor("visit(terminal_symbol0)"); }
+  virtual  void visit(terminal_symbol0 *n, Object* o) { unimplementedVisitor("visit(terminal_symbol0, Object)"); }
+
+ virtual   void visit(terminal_symbol1 *n) { unimplementedVisitor("visit(terminal_symbol1)"); }
+  virtual  void visit(terminal_symbol1 *n, Object* o) { unimplementedVisitor("visit(terminal_symbol1, Object)"); }
+
+
+  virtual  void visit(ASTNode *n)
+    {
+        if (dynamic_cast< ASTNodeToken*>(n)){ visit((ASTNodeToken*) n);return;}
+        if (dynamic_cast< LPG*>(n)){ visit((LPG*) n);return;}
+        if (dynamic_cast< LPG_itemList*>(n)){ visit((LPG_itemList*) n);return;}
+        if (dynamic_cast< AliasSeg*>(n)){ visit((AliasSeg*) n);return;}
+        if (dynamic_cast< AstSeg*>(n)){ visit((AstSeg*) n);return;}
+        if (dynamic_cast< DefineSeg*>(n)){ visit((DefineSeg*) n);return;}
+        if (dynamic_cast< EofSeg*>(n)){ visit((EofSeg*) n);return;}
+        if (dynamic_cast< EolSeg*>(n)){ visit((EolSeg*) n);return;}
+        if (dynamic_cast< ErrorSeg*>(n)){ visit((ErrorSeg*) n);return;}
+        if (dynamic_cast< ExportSeg*>(n)){ visit((ExportSeg*) n);return;}
+        if (dynamic_cast< GlobalsSeg*>(n)){ visit((GlobalsSeg*) n);return;}
+        if (dynamic_cast< HeadersSeg*>(n)){ visit((HeadersSeg*) n);return;}
+        if (dynamic_cast< IdentifierSeg*>(n)){ visit((IdentifierSeg*) n);return;}
+        if (dynamic_cast< ImportSeg*>(n)){ visit((ImportSeg*) n);return;}
+        if (dynamic_cast< IncludeSeg*>(n)){ visit((IncludeSeg*) n);return;}
+        if (dynamic_cast< KeywordsSeg*>(n)){ visit((KeywordsSeg*) n);return;}
+        if (dynamic_cast< NamesSeg*>(n)){ visit((NamesSeg*) n);return;}
+        if (dynamic_cast< NoticeSeg*>(n)){ visit((NoticeSeg*) n);return;}
+        if (dynamic_cast< RulesSeg*>(n)){ visit((RulesSeg*) n);return;}
+        if (dynamic_cast< SoftKeywordsSeg*>(n)){ visit((SoftKeywordsSeg*) n);return;}
+        if (dynamic_cast< StartSeg*>(n)){ visit((StartSeg*) n);return;}
+        if (dynamic_cast< TerminalsSeg*>(n)){ visit((TerminalsSeg*) n);return;}
+        if (dynamic_cast< TrailersSeg*>(n)){ visit((TrailersSeg*) n);return;}
+        if (dynamic_cast< TypesSeg*>(n)){ visit((TypesSeg*) n);return;}
+        if (dynamic_cast< RecoverSeg*>(n)){ visit((RecoverSeg*) n);return;}
+        if (dynamic_cast< PredecessorSeg*>(n)){ visit((PredecessorSeg*) n);return;}
+        if (dynamic_cast< option_specList*>(n)){ visit((option_specList*) n);return;}
+        if (dynamic_cast< option_spec*>(n)){ visit((option_spec*) n);return;}
+        if (dynamic_cast< optionList*>(n)){ visit((optionList*) n);return;}
+        if (dynamic_cast< option*>(n)){ visit((option*) n);return;}
+        if (dynamic_cast< SYMBOLList*>(n)){ visit((SYMBOLList*) n);return;}
+        if (dynamic_cast< aliasSpecList*>(n)){ visit((aliasSpecList*) n);return;}
+        if (dynamic_cast< alias_lhs_macro_name*>(n)){ visit((alias_lhs_macro_name*) n);return;}
+        if (dynamic_cast< defineSpecList*>(n)){ visit((defineSpecList*) n);return;}
+        if (dynamic_cast< defineSpec*>(n)){ visit((defineSpec*) n);return;}
+        if (dynamic_cast< macro_segment*>(n)){ visit((macro_segment*) n);return;}
+        if (dynamic_cast< terminal_symbolList*>(n)){ visit((terminal_symbolList*) n);return;}
+        if (dynamic_cast< action_segmentList*>(n)){ visit((action_segmentList*) n);return;}
+        if (dynamic_cast< import_segment*>(n)){ visit((import_segment*) n);return;}
+        if (dynamic_cast< drop_commandList*>(n)){ visit((drop_commandList*) n);return;}
+        if (dynamic_cast< drop_ruleList*>(n)){ visit((drop_ruleList*) n);return;}
+        if (dynamic_cast< drop_rule*>(n)){ visit((drop_rule*) n);return;}
+        if (dynamic_cast< optMacroName*>(n)){ visit((optMacroName*) n);return;}
+        if (dynamic_cast< include_segment*>(n)){ visit((include_segment*) n);return;}
+        if (dynamic_cast< keywordSpecList*>(n)){ visit((keywordSpecList*) n);return;}
+        if (dynamic_cast< keywordSpec*>(n)){ visit((keywordSpec*) n);return;}
+        if (dynamic_cast< nameSpecList*>(n)){ visit((nameSpecList*) n);return;}
+        if (dynamic_cast< nameSpec*>(n)){ visit((nameSpec*) n);return;}
+        if (dynamic_cast< rules_segment*>(n)){ visit((rules_segment*) n);return;}
+        if (dynamic_cast< nonTermList*>(n)){ visit((nonTermList*) n);return;}
+        if (dynamic_cast< nonTerm*>(n)){ visit((nonTerm*) n);return;}
+        if (dynamic_cast< RuleName*>(n)){ visit((RuleName*) n);return;}
+        if (dynamic_cast< ruleList*>(n)){ visit((ruleList*) n);return;}
+        if (dynamic_cast< rule*>(n)){ visit((rule*) n);return;}
+        if (dynamic_cast< symWithAttrsList*>(n)){ visit((symWithAttrsList*) n);return;}
+        if (dynamic_cast< symAttrs*>(n)){ visit((symAttrs*) n);return;}
+        if (dynamic_cast< action_segment*>(n)){ visit((action_segment*) n);return;}
+        if (dynamic_cast< start_symbolList*>(n)){ visit((start_symbolList*) n);return;}
+        if (dynamic_cast< terminalList*>(n)){ visit((terminalList*) n);return;}
+        if (dynamic_cast< terminal*>(n)){ visit((terminal*) n);return;}
+        if (dynamic_cast< optTerminalAlias*>(n)){ visit((optTerminalAlias*) n);return;}
+        if (dynamic_cast< type_declarationsList*>(n)){ visit((type_declarationsList*) n);return;}
+        if (dynamic_cast< type_declarations*>(n)){ visit((type_declarations*) n);return;}
+        if (dynamic_cast< symbol_pairList*>(n)){ visit((symbol_pairList*) n);return;}
+        if (dynamic_cast< symbol_pair*>(n)){ visit((symbol_pair*) n);return;}
+        if (dynamic_cast< recover_symbol*>(n)){ visit((recover_symbol*) n);return;}
+        if (dynamic_cast< END_KEY_OPT*>(n)){ visit((END_KEY_OPT*) n);return;}
+        if (dynamic_cast< option_value0*>(n)){ visit((option_value0*) n);return;}
+        if (dynamic_cast< option_value1*>(n)){ visit((option_value1*) n);return;}
+        if (dynamic_cast< aliasSpec0*>(n)){ visit((aliasSpec0*) n);return;}
+        if (dynamic_cast< aliasSpec1*>(n)){ visit((aliasSpec1*) n);return;}
+        if (dynamic_cast< aliasSpec2*>(n)){ visit((aliasSpec2*) n);return;}
+        if (dynamic_cast< aliasSpec3*>(n)){ visit((aliasSpec3*) n);return;}
+        if (dynamic_cast< aliasSpec4*>(n)){ visit((aliasSpec4*) n);return;}
+        if (dynamic_cast< aliasSpec5*>(n)){ visit((aliasSpec5*) n);return;}
+        if (dynamic_cast< alias_rhs0*>(n)){ visit((alias_rhs0*) n);return;}
+        if (dynamic_cast< alias_rhs1*>(n)){ visit((alias_rhs1*) n);return;}
+        if (dynamic_cast< alias_rhs2*>(n)){ visit((alias_rhs2*) n);return;}
+        if (dynamic_cast< alias_rhs3*>(n)){ visit((alias_rhs3*) n);return;}
+        if (dynamic_cast< alias_rhs4*>(n)){ visit((alias_rhs4*) n);return;}
+        if (dynamic_cast< alias_rhs5*>(n)){ visit((alias_rhs5*) n);return;}
+        if (dynamic_cast< alias_rhs6*>(n)){ visit((alias_rhs6*) n);return;}
+        if (dynamic_cast< macro_name_symbol0*>(n)){ visit((macro_name_symbol0*) n);return;}
+        if (dynamic_cast< macro_name_symbol1*>(n)){ visit((macro_name_symbol1*) n);return;}
+        if (dynamic_cast< drop_command0*>(n)){ visit((drop_command0*) n);return;}
+        if (dynamic_cast< drop_command1*>(n)){ visit((drop_command1*) n);return;}
+        if (dynamic_cast< name0*>(n)){ visit((name0*) n);return;}
+        if (dynamic_cast< name1*>(n)){ visit((name1*) n);return;}
+        if (dynamic_cast< name2*>(n)){ visit((name2*) n);return;}
+        if (dynamic_cast< name3*>(n)){ visit((name3*) n);return;}
+        if (dynamic_cast< name4*>(n)){ visit((name4*) n);return;}
+        if (dynamic_cast< name5*>(n)){ visit((name5*) n);return;}
+        if (dynamic_cast< produces0*>(n)){ visit((produces0*) n);return;}
+        if (dynamic_cast< produces1*>(n)){ visit((produces1*) n);return;}
+        if (dynamic_cast< produces2*>(n)){ visit((produces2*) n);return;}
+        if (dynamic_cast< produces3*>(n)){ visit((produces3*) n);return;}
+        if (dynamic_cast< symWithAttrs0*>(n)){ visit((symWithAttrs0*) n);return;}
+        if (dynamic_cast< symWithAttrs1*>(n)){ visit((symWithAttrs1*) n);return;}
+        if (dynamic_cast< start_symbol0*>(n)){ visit((start_symbol0*) n);return;}
+        if (dynamic_cast< start_symbol1*>(n)){ visit((start_symbol1*) n);return;}
+        if (dynamic_cast< terminal_symbol0*>(n)){ visit((terminal_symbol0*) n);return;}
+        if (dynamic_cast< terminal_symbol1*>(n)){ visit((terminal_symbol1*) n);return;}
+        throw UnsupportedOperationException("visit(" + n->to_utf8_string() + ")");
+    }
+    void visit(ASTNode *n, Object* o)
+    {
+        if (dynamic_cast<ASTNodeToken*>(n)) {visit((ASTNodeToken*) n, o);return;}
+        if (dynamic_cast<LPG*>(n)) {visit((LPG*) n, o);return;}
+        if (dynamic_cast<LPG_itemList*>(n)) {visit((LPG_itemList*) n, o);return;}
+        if (dynamic_cast<AliasSeg*>(n)) {visit((AliasSeg*) n, o);return;}
+        if (dynamic_cast<AstSeg*>(n)) {visit((AstSeg*) n, o);return;}
+        if (dynamic_cast<DefineSeg*>(n)) {visit((DefineSeg*) n, o);return;}
+        if (dynamic_cast<EofSeg*>(n)) {visit((EofSeg*) n, o);return;}
+        if (dynamic_cast<EolSeg*>(n)) {visit((EolSeg*) n, o);return;}
+        if (dynamic_cast<ErrorSeg*>(n)) {visit((ErrorSeg*) n, o);return;}
+        if (dynamic_cast<ExportSeg*>(n)) {visit((ExportSeg*) n, o);return;}
+        if (dynamic_cast<GlobalsSeg*>(n)) {visit((GlobalsSeg*) n, o);return;}
+        if (dynamic_cast<HeadersSeg*>(n)) {visit((HeadersSeg*) n, o);return;}
+        if (dynamic_cast<IdentifierSeg*>(n)) {visit((IdentifierSeg*) n, o);return;}
+        if (dynamic_cast<ImportSeg*>(n)) {visit((ImportSeg*) n, o);return;}
+        if (dynamic_cast<IncludeSeg*>(n)) {visit((IncludeSeg*) n, o);return;}
+        if (dynamic_cast<KeywordsSeg*>(n)) {visit((KeywordsSeg*) n, o);return;}
+        if (dynamic_cast<NamesSeg*>(n)) {visit((NamesSeg*) n, o);return;}
+        if (dynamic_cast<NoticeSeg*>(n)) {visit((NoticeSeg*) n, o);return;}
+        if (dynamic_cast<RulesSeg*>(n)) {visit((RulesSeg*) n, o);return;}
+        if (dynamic_cast<SoftKeywordsSeg*>(n)) {visit((SoftKeywordsSeg*) n, o);return;}
+        if (dynamic_cast<StartSeg*>(n)) {visit((StartSeg*) n, o);return;}
+        if (dynamic_cast<TerminalsSeg*>(n)) {visit((TerminalsSeg*) n, o);return;}
+        if (dynamic_cast<TrailersSeg*>(n)) {visit((TrailersSeg*) n, o);return;}
+        if (dynamic_cast<TypesSeg*>(n)) {visit((TypesSeg*) n, o);return;}
+        if (dynamic_cast<RecoverSeg*>(n)) {visit((RecoverSeg*) n, o);return;}
+        if (dynamic_cast<PredecessorSeg*>(n)) {visit((PredecessorSeg*) n, o);return;}
+        if (dynamic_cast<option_specList*>(n)) {visit((option_specList*) n, o);return;}
+        if (dynamic_cast<option_spec*>(n)) {visit((option_spec*) n, o);return;}
+        if (dynamic_cast<optionList*>(n)) {visit((optionList*) n, o);return;}
+        if (dynamic_cast<option*>(n)) {visit((option*) n, o);return;}
+        if (dynamic_cast<SYMBOLList*>(n)) {visit((SYMBOLList*) n, o);return;}
+        if (dynamic_cast<aliasSpecList*>(n)) {visit((aliasSpecList*) n, o);return;}
+        if (dynamic_cast<alias_lhs_macro_name*>(n)) {visit((alias_lhs_macro_name*) n, o);return;}
+        if (dynamic_cast<defineSpecList*>(n)) {visit((defineSpecList*) n, o);return;}
+        if (dynamic_cast<defineSpec*>(n)) {visit((defineSpec*) n, o);return;}
+        if (dynamic_cast<macro_segment*>(n)) {visit((macro_segment*) n, o);return;}
+        if (dynamic_cast<terminal_symbolList*>(n)) {visit((terminal_symbolList*) n, o);return;}
+        if (dynamic_cast<action_segmentList*>(n)) {visit((action_segmentList*) n, o);return;}
+        if (dynamic_cast<import_segment*>(n)) {visit((import_segment*) n, o);return;}
+        if (dynamic_cast<drop_commandList*>(n)) {visit((drop_commandList*) n, o);return;}
+        if (dynamic_cast<drop_ruleList*>(n)) {visit((drop_ruleList*) n, o);return;}
+        if (dynamic_cast<drop_rule*>(n)) {visit((drop_rule*) n, o);return;}
+        if (dynamic_cast<optMacroName*>(n)) {visit((optMacroName*) n, o);return;}
+        if (dynamic_cast<include_segment*>(n)) {visit((include_segment*) n, o);return;}
+        if (dynamic_cast<keywordSpecList*>(n)) {visit((keywordSpecList*) n, o);return;}
+        if (dynamic_cast<keywordSpec*>(n)) {visit((keywordSpec*) n, o);return;}
+        if (dynamic_cast<nameSpecList*>(n)) {visit((nameSpecList*) n, o);return;}
+        if (dynamic_cast<nameSpec*>(n)) {visit((nameSpec*) n, o);return;}
+        if (dynamic_cast<rules_segment*>(n)) {visit((rules_segment*) n, o);return;}
+        if (dynamic_cast<nonTermList*>(n)) {visit((nonTermList*) n, o);return;}
+        if (dynamic_cast<nonTerm*>(n)) {visit((nonTerm*) n, o);return;}
+        if (dynamic_cast<RuleName*>(n)) {visit((RuleName*) n, o);return;}
+        if (dynamic_cast<ruleList*>(n)) {visit((ruleList*) n, o);return;}
+        if (dynamic_cast<rule*>(n)) {visit((rule*) n, o);return;}
+        if (dynamic_cast<symWithAttrsList*>(n)) {visit((symWithAttrsList*) n, o);return;}
+        if (dynamic_cast<symAttrs*>(n)) {visit((symAttrs*) n, o);return;}
+        if (dynamic_cast<action_segment*>(n)) {visit((action_segment*) n, o);return;}
+        if (dynamic_cast<start_symbolList*>(n)) {visit((start_symbolList*) n, o);return;}
+        if (dynamic_cast<terminalList*>(n)) {visit((terminalList*) n, o);return;}
+        if (dynamic_cast<terminal*>(n)) {visit((terminal*) n, o);return;}
+        if (dynamic_cast<optTerminalAlias*>(n)) {visit((optTerminalAlias*) n, o);return;}
+        if (dynamic_cast<type_declarationsList*>(n)) {visit((type_declarationsList*) n, o);return;}
+        if (dynamic_cast<type_declarations*>(n)) {visit((type_declarations*) n, o);return;}
+        if (dynamic_cast<symbol_pairList*>(n)) {visit((symbol_pairList*) n, o);return;}
+        if (dynamic_cast<symbol_pair*>(n)) {visit((symbol_pair*) n, o);return;}
+        if (dynamic_cast<recover_symbol*>(n)) {visit((recover_symbol*) n, o);return;}
+        if (dynamic_cast<END_KEY_OPT*>(n)) {visit((END_KEY_OPT*) n, o);return;}
+        if (dynamic_cast<option_value0*>(n)) {visit((option_value0*) n, o);return;}
+        if (dynamic_cast<option_value1*>(n)) {visit((option_value1*) n, o);return;}
+        if (dynamic_cast<aliasSpec0*>(n)) {visit((aliasSpec0*) n, o);return;}
+        if (dynamic_cast<aliasSpec1*>(n)) {visit((aliasSpec1*) n, o);return;}
+        if (dynamic_cast<aliasSpec2*>(n)) {visit((aliasSpec2*) n, o);return;}
+        if (dynamic_cast<aliasSpec3*>(n)) {visit((aliasSpec3*) n, o);return;}
+        if (dynamic_cast<aliasSpec4*>(n)) {visit((aliasSpec4*) n, o);return;}
+        if (dynamic_cast<aliasSpec5*>(n)) {visit((aliasSpec5*) n, o);return;}
+        if (dynamic_cast<alias_rhs0*>(n)) {visit((alias_rhs0*) n, o);return;}
+        if (dynamic_cast<alias_rhs1*>(n)) {visit((alias_rhs1*) n, o);return;}
+        if (dynamic_cast<alias_rhs2*>(n)) {visit((alias_rhs2*) n, o);return;}
+        if (dynamic_cast<alias_rhs3*>(n)) {visit((alias_rhs3*) n, o);return;}
+        if (dynamic_cast<alias_rhs4*>(n)) {visit((alias_rhs4*) n, o);return;}
+        if (dynamic_cast<alias_rhs5*>(n)) {visit((alias_rhs5*) n, o);return;}
+        if (dynamic_cast<alias_rhs6*>(n)) {visit((alias_rhs6*) n, o);return;}
+        if (dynamic_cast<macro_name_symbol0*>(n)) {visit((macro_name_symbol0*) n, o);return;}
+        if (dynamic_cast<macro_name_symbol1*>(n)) {visit((macro_name_symbol1*) n, o);return;}
+        if (dynamic_cast<drop_command0*>(n)) {visit((drop_command0*) n, o);return;}
+        if (dynamic_cast<drop_command1*>(n)) {visit((drop_command1*) n, o);return;}
+        if (dynamic_cast<name0*>(n)) {visit((name0*) n, o);return;}
+        if (dynamic_cast<name1*>(n)) {visit((name1*) n, o);return;}
+        if (dynamic_cast<name2*>(n)) {visit((name2*) n, o);return;}
+        if (dynamic_cast<name3*>(n)) {visit((name3*) n, o);return;}
+        if (dynamic_cast<name4*>(n)) {visit((name4*) n, o);return;}
+        if (dynamic_cast<name5*>(n)) {visit((name5*) n, o);return;}
+        if (dynamic_cast<produces0*>(n)) {visit((produces0*) n, o);return;}
+        if (dynamic_cast<produces1*>(n)) {visit((produces1*) n, o);return;}
+        if (dynamic_cast<produces2*>(n)) {visit((produces2*) n, o);return;}
+        if (dynamic_cast<produces3*>(n)) {visit((produces3*) n, o);return;}
+        if (dynamic_cast<symWithAttrs0*>(n)) {visit((symWithAttrs0*) n, o);return;}
+        if (dynamic_cast<symWithAttrs1*>(n)) {visit((symWithAttrs1*) n, o);return;}
+        if (dynamic_cast<start_symbol0*>(n)) {visit((start_symbol0*) n, o);return;}
+        if (dynamic_cast<start_symbol1*>(n)) {visit((start_symbol1*) n, o);return;}
+        if (dynamic_cast<terminal_symbol0*>(n)) {visit((terminal_symbol0*) n, o);return;}
+        if (dynamic_cast<terminal_symbol1*>(n)) {visit((terminal_symbol1*) n, o);return;}
+        throw UnsupportedOperationException("visit(" + n->to_utf8_string() + ")");
+    }
+};
+struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
+{
+    virtual lpg::Any unimplementedVisitor(const std::string& s);
+
+    lpg::Any visit(ASTNodeToken *n) { return unimplementedVisitor("visit(ASTNodeToken)"); }
+    lpg::Any visit(ASTNodeToken *n, Object* o) { return  unimplementedVisitor("visit(ASTNodeToken, Object)"); }
+
+    lpg::Any visit(LPG *n) { return unimplementedVisitor("visit(LPG)"); }
+    lpg::Any visit(LPG *n, Object* o) { return  unimplementedVisitor("visit(LPG, Object)"); }
+
+    lpg::Any visit(LPG_itemList *n) { return unimplementedVisitor("visit(LPG_itemList)"); }
+    lpg::Any visit(LPG_itemList *n, Object* o) { return  unimplementedVisitor("visit(LPG_itemList, Object)"); }
+
+    lpg::Any visit(AliasSeg *n) { return unimplementedVisitor("visit(AliasSeg)"); }
+    lpg::Any visit(AliasSeg *n, Object* o) { return  unimplementedVisitor("visit(AliasSeg, Object)"); }
+
+    lpg::Any visit(AstSeg *n) { return unimplementedVisitor("visit(AstSeg)"); }
+    lpg::Any visit(AstSeg *n, Object* o) { return  unimplementedVisitor("visit(AstSeg, Object)"); }
+
+    lpg::Any visit(DefineSeg *n) { return unimplementedVisitor("visit(DefineSeg)"); }
+    lpg::Any visit(DefineSeg *n, Object* o) { return  unimplementedVisitor("visit(DefineSeg, Object)"); }
+
+    lpg::Any visit(EofSeg *n) { return unimplementedVisitor("visit(EofSeg)"); }
+    lpg::Any visit(EofSeg *n, Object* o) { return  unimplementedVisitor("visit(EofSeg, Object)"); }
+
+    lpg::Any visit(EolSeg *n) { return unimplementedVisitor("visit(EolSeg)"); }
+    lpg::Any visit(EolSeg *n, Object* o) { return  unimplementedVisitor("visit(EolSeg, Object)"); }
+
+    lpg::Any visit(ErrorSeg *n) { return unimplementedVisitor("visit(ErrorSeg)"); }
+    lpg::Any visit(ErrorSeg *n, Object* o) { return  unimplementedVisitor("visit(ErrorSeg, Object)"); }
+
+    lpg::Any visit(ExportSeg *n) { return unimplementedVisitor("visit(ExportSeg)"); }
+    lpg::Any visit(ExportSeg *n, Object* o) { return  unimplementedVisitor("visit(ExportSeg, Object)"); }
+
+    lpg::Any visit(GlobalsSeg *n) { return unimplementedVisitor("visit(GlobalsSeg)"); }
+    lpg::Any visit(GlobalsSeg *n, Object* o) { return  unimplementedVisitor("visit(GlobalsSeg, Object)"); }
+
+    lpg::Any visit(HeadersSeg *n) { return unimplementedVisitor("visit(HeadersSeg)"); }
+    lpg::Any visit(HeadersSeg *n, Object* o) { return  unimplementedVisitor("visit(HeadersSeg, Object)"); }
+
+    lpg::Any visit(IdentifierSeg *n) { return unimplementedVisitor("visit(IdentifierSeg)"); }
+    lpg::Any visit(IdentifierSeg *n, Object* o) { return  unimplementedVisitor("visit(IdentifierSeg, Object)"); }
+
+    lpg::Any visit(ImportSeg *n) { return unimplementedVisitor("visit(ImportSeg)"); }
+    lpg::Any visit(ImportSeg *n, Object* o) { return  unimplementedVisitor("visit(ImportSeg, Object)"); }
+
+    lpg::Any visit(IncludeSeg *n) { return unimplementedVisitor("visit(IncludeSeg)"); }
+    lpg::Any visit(IncludeSeg *n, Object* o) { return  unimplementedVisitor("visit(IncludeSeg, Object)"); }
+
+    lpg::Any visit(KeywordsSeg *n) { return unimplementedVisitor("visit(KeywordsSeg)"); }
+    lpg::Any visit(KeywordsSeg *n, Object* o) { return  unimplementedVisitor("visit(KeywordsSeg, Object)"); }
+
+    lpg::Any visit(NamesSeg *n) { return unimplementedVisitor("visit(NamesSeg)"); }
+    lpg::Any visit(NamesSeg *n, Object* o) { return  unimplementedVisitor("visit(NamesSeg, Object)"); }
+
+    lpg::Any visit(NoticeSeg *n) { return unimplementedVisitor("visit(NoticeSeg)"); }
+    lpg::Any visit(NoticeSeg *n, Object* o) { return  unimplementedVisitor("visit(NoticeSeg, Object)"); }
+
+    lpg::Any visit(RulesSeg *n) { return unimplementedVisitor("visit(RulesSeg)"); }
+    lpg::Any visit(RulesSeg *n, Object* o) { return  unimplementedVisitor("visit(RulesSeg, Object)"); }
+
+    lpg::Any visit(SoftKeywordsSeg *n) { return unimplementedVisitor("visit(SoftKeywordsSeg)"); }
+    lpg::Any visit(SoftKeywordsSeg *n, Object* o) { return  unimplementedVisitor("visit(SoftKeywordsSeg, Object)"); }
+
+    lpg::Any visit(StartSeg *n) { return unimplementedVisitor("visit(StartSeg)"); }
+    lpg::Any visit(StartSeg *n, Object* o) { return  unimplementedVisitor("visit(StartSeg, Object)"); }
+
+    lpg::Any visit(TerminalsSeg *n) { return unimplementedVisitor("visit(TerminalsSeg)"); }
+    lpg::Any visit(TerminalsSeg *n, Object* o) { return  unimplementedVisitor("visit(TerminalsSeg, Object)"); }
+
+    lpg::Any visit(TrailersSeg *n) { return unimplementedVisitor("visit(TrailersSeg)"); }
+    lpg::Any visit(TrailersSeg *n, Object* o) { return  unimplementedVisitor("visit(TrailersSeg, Object)"); }
+
+    lpg::Any visit(TypesSeg *n) { return unimplementedVisitor("visit(TypesSeg)"); }
+    lpg::Any visit(TypesSeg *n, Object* o) { return  unimplementedVisitor("visit(TypesSeg, Object)"); }
+
+    lpg::Any visit(RecoverSeg *n) { return unimplementedVisitor("visit(RecoverSeg)"); }
+    lpg::Any visit(RecoverSeg *n, Object* o) { return  unimplementedVisitor("visit(RecoverSeg, Object)"); }
+
+    lpg::Any visit(PredecessorSeg *n) { return unimplementedVisitor("visit(PredecessorSeg)"); }
+    lpg::Any visit(PredecessorSeg *n, Object* o) { return  unimplementedVisitor("visit(PredecessorSeg, Object)"); }
+
+    lpg::Any visit(option_specList *n) { return unimplementedVisitor("visit(option_specList)"); }
+    lpg::Any visit(option_specList *n, Object* o) { return  unimplementedVisitor("visit(option_specList, Object)"); }
+
+    lpg::Any visit(option_spec *n) { return unimplementedVisitor("visit(option_spec)"); }
+    lpg::Any visit(option_spec *n, Object* o) { return  unimplementedVisitor("visit(option_spec, Object)"); }
+
+    lpg::Any visit(optionList *n) { return unimplementedVisitor("visit(optionList)"); }
+    lpg::Any visit(optionList *n, Object* o) { return  unimplementedVisitor("visit(optionList, Object)"); }
+
+    lpg::Any visit(option *n) { return unimplementedVisitor("visit(option)"); }
+    lpg::Any visit(option *n, Object* o) { return  unimplementedVisitor("visit(option, Object)"); }
+
+    lpg::Any visit(SYMBOLList *n) { return unimplementedVisitor("visit(SYMBOLList)"); }
+    lpg::Any visit(SYMBOLList *n, Object* o) { return  unimplementedVisitor("visit(SYMBOLList, Object)"); }
+
+    lpg::Any visit(aliasSpecList *n) { return unimplementedVisitor("visit(aliasSpecList)"); }
+    lpg::Any visit(aliasSpecList *n, Object* o) { return  unimplementedVisitor("visit(aliasSpecList, Object)"); }
+
+    lpg::Any visit(alias_lhs_macro_name *n) { return unimplementedVisitor("visit(alias_lhs_macro_name)"); }
+    lpg::Any visit(alias_lhs_macro_name *n, Object* o) { return  unimplementedVisitor("visit(alias_lhs_macro_name, Object)"); }
+
+    lpg::Any visit(defineSpecList *n) { return unimplementedVisitor("visit(defineSpecList)"); }
+    lpg::Any visit(defineSpecList *n, Object* o) { return  unimplementedVisitor("visit(defineSpecList, Object)"); }
+
+    lpg::Any visit(defineSpec *n) { return unimplementedVisitor("visit(defineSpec)"); }
+    lpg::Any visit(defineSpec *n, Object* o) { return  unimplementedVisitor("visit(defineSpec, Object)"); }
+
+    lpg::Any visit(macro_segment *n) { return unimplementedVisitor("visit(macro_segment)"); }
+    lpg::Any visit(macro_segment *n, Object* o) { return  unimplementedVisitor("visit(macro_segment, Object)"); }
+
+    lpg::Any visit(terminal_symbolList *n) { return unimplementedVisitor("visit(terminal_symbolList)"); }
+    lpg::Any visit(terminal_symbolList *n, Object* o) { return  unimplementedVisitor("visit(terminal_symbolList, Object)"); }
+
+    lpg::Any visit(action_segmentList *n) { return unimplementedVisitor("visit(action_segmentList)"); }
+    lpg::Any visit(action_segmentList *n, Object* o) { return  unimplementedVisitor("visit(action_segmentList, Object)"); }
+
+    lpg::Any visit(import_segment *n) { return unimplementedVisitor("visit(import_segment)"); }
+    lpg::Any visit(import_segment *n, Object* o) { return  unimplementedVisitor("visit(import_segment, Object)"); }
+
+    lpg::Any visit(drop_commandList *n) { return unimplementedVisitor("visit(drop_commandList)"); }
+    lpg::Any visit(drop_commandList *n, Object* o) { return  unimplementedVisitor("visit(drop_commandList, Object)"); }
+
+    lpg::Any visit(drop_ruleList *n) { return unimplementedVisitor("visit(drop_ruleList)"); }
+    lpg::Any visit(drop_ruleList *n, Object* o) { return  unimplementedVisitor("visit(drop_ruleList, Object)"); }
+
+    lpg::Any visit(drop_rule *n) { return unimplementedVisitor("visit(drop_rule)"); }
+    lpg::Any visit(drop_rule *n, Object* o) { return  unimplementedVisitor("visit(drop_rule, Object)"); }
+
+    lpg::Any visit(optMacroName *n) { return unimplementedVisitor("visit(optMacroName)"); }
+    lpg::Any visit(optMacroName *n, Object* o) { return  unimplementedVisitor("visit(optMacroName, Object)"); }
+
+    lpg::Any visit(include_segment *n) { return unimplementedVisitor("visit(include_segment)"); }
+    lpg::Any visit(include_segment *n, Object* o) { return  unimplementedVisitor("visit(include_segment, Object)"); }
+
+    lpg::Any visit(keywordSpecList *n) { return unimplementedVisitor("visit(keywordSpecList)"); }
+    lpg::Any visit(keywordSpecList *n, Object* o) { return  unimplementedVisitor("visit(keywordSpecList, Object)"); }
+
+    lpg::Any visit(keywordSpec *n) { return unimplementedVisitor("visit(keywordSpec)"); }
+    lpg::Any visit(keywordSpec *n, Object* o) { return  unimplementedVisitor("visit(keywordSpec, Object)"); }
+
+    lpg::Any visit(nameSpecList *n) { return unimplementedVisitor("visit(nameSpecList)"); }
+    lpg::Any visit(nameSpecList *n, Object* o) { return  unimplementedVisitor("visit(nameSpecList, Object)"); }
+
+    lpg::Any visit(nameSpec *n) { return unimplementedVisitor("visit(nameSpec)"); }
+    lpg::Any visit(nameSpec *n, Object* o) { return  unimplementedVisitor("visit(nameSpec, Object)"); }
+
+    lpg::Any visit(rules_segment *n) { return unimplementedVisitor("visit(rules_segment)"); }
+    lpg::Any visit(rules_segment *n, Object* o) { return  unimplementedVisitor("visit(rules_segment, Object)"); }
+
+    lpg::Any visit(nonTermList *n) { return unimplementedVisitor("visit(nonTermList)"); }
+    lpg::Any visit(nonTermList *n, Object* o) { return  unimplementedVisitor("visit(nonTermList, Object)"); }
+
+    lpg::Any visit(nonTerm *n) { return unimplementedVisitor("visit(nonTerm)"); }
+    lpg::Any visit(nonTerm *n, Object* o) { return  unimplementedVisitor("visit(nonTerm, Object)"); }
+
+    lpg::Any visit(RuleName *n) { return unimplementedVisitor("visit(RuleName)"); }
+    lpg::Any visit(RuleName *n, Object* o) { return  unimplementedVisitor("visit(RuleName, Object)"); }
+
+    lpg::Any visit(ruleList *n) { return unimplementedVisitor("visit(ruleList)"); }
+    lpg::Any visit(ruleList *n, Object* o) { return  unimplementedVisitor("visit(ruleList, Object)"); }
+
+    lpg::Any visit(rule *n) { return unimplementedVisitor("visit(rule)"); }
+    lpg::Any visit(rule *n, Object* o) { return  unimplementedVisitor("visit(rule, Object)"); }
+
+    lpg::Any visit(symWithAttrsList *n) { return unimplementedVisitor("visit(symWithAttrsList)"); }
+    lpg::Any visit(symWithAttrsList *n, Object* o) { return  unimplementedVisitor("visit(symWithAttrsList, Object)"); }
+
+    lpg::Any visit(symAttrs *n) { return unimplementedVisitor("visit(symAttrs)"); }
+    lpg::Any visit(symAttrs *n, Object* o) { return  unimplementedVisitor("visit(symAttrs, Object)"); }
+
+    lpg::Any visit(action_segment *n) { return unimplementedVisitor("visit(action_segment)"); }
+    lpg::Any visit(action_segment *n, Object* o) { return  unimplementedVisitor("visit(action_segment, Object)"); }
+
+    lpg::Any visit(start_symbolList *n) { return unimplementedVisitor("visit(start_symbolList)"); }
+    lpg::Any visit(start_symbolList *n, Object* o) { return  unimplementedVisitor("visit(start_symbolList, Object)"); }
+
+    lpg::Any visit(terminalList *n) { return unimplementedVisitor("visit(terminalList)"); }
+    lpg::Any visit(terminalList *n, Object* o) { return  unimplementedVisitor("visit(terminalList, Object)"); }
+
+    lpg::Any visit(terminal *n) { return unimplementedVisitor("visit(terminal)"); }
+    lpg::Any visit(terminal *n, Object* o) { return  unimplementedVisitor("visit(terminal, Object)"); }
+
+    lpg::Any visit(optTerminalAlias *n) { return unimplementedVisitor("visit(optTerminalAlias)"); }
+    lpg::Any visit(optTerminalAlias *n, Object* o) { return  unimplementedVisitor("visit(optTerminalAlias, Object)"); }
+
+    lpg::Any visit(type_declarationsList *n) { return unimplementedVisitor("visit(type_declarationsList)"); }
+    lpg::Any visit(type_declarationsList *n, Object* o) { return  unimplementedVisitor("visit(type_declarationsList, Object)"); }
+
+    lpg::Any visit(type_declarations *n) { return unimplementedVisitor("visit(type_declarations)"); }
+    lpg::Any visit(type_declarations *n, Object* o) { return  unimplementedVisitor("visit(type_declarations, Object)"); }
+
+    lpg::Any visit(symbol_pairList *n) { return unimplementedVisitor("visit(symbol_pairList)"); }
+    lpg::Any visit(symbol_pairList *n, Object* o) { return  unimplementedVisitor("visit(symbol_pairList, Object)"); }
+
+    lpg::Any visit(symbol_pair *n) { return unimplementedVisitor("visit(symbol_pair)"); }
+    lpg::Any visit(symbol_pair *n, Object* o) { return  unimplementedVisitor("visit(symbol_pair, Object)"); }
+
+    lpg::Any visit(recover_symbol *n) { return unimplementedVisitor("visit(recover_symbol)"); }
+    lpg::Any visit(recover_symbol *n, Object* o) { return  unimplementedVisitor("visit(recover_symbol, Object)"); }
+
+    lpg::Any visit(END_KEY_OPT *n) { return unimplementedVisitor("visit(END_KEY_OPT)"); }
+    lpg::Any visit(END_KEY_OPT *n, Object* o) { return  unimplementedVisitor("visit(END_KEY_OPT, Object)"); }
+
+    lpg::Any visit(option_value0 *n) { return unimplementedVisitor("visit(option_value0)"); }
+    lpg::Any visit(option_value0 *n, Object* o) { return  unimplementedVisitor("visit(option_value0, Object)"); }
+
+    lpg::Any visit(option_value1 *n) { return unimplementedVisitor("visit(option_value1)"); }
+    lpg::Any visit(option_value1 *n, Object* o) { return  unimplementedVisitor("visit(option_value1, Object)"); }
+
+    lpg::Any visit(aliasSpec0 *n) { return unimplementedVisitor("visit(aliasSpec0)"); }
+    lpg::Any visit(aliasSpec0 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec0, Object)"); }
+
+    lpg::Any visit(aliasSpec1 *n) { return unimplementedVisitor("visit(aliasSpec1)"); }
+    lpg::Any visit(aliasSpec1 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec1, Object)"); }
+
+    lpg::Any visit(aliasSpec2 *n) { return unimplementedVisitor("visit(aliasSpec2)"); }
+    lpg::Any visit(aliasSpec2 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec2, Object)"); }
+
+    lpg::Any visit(aliasSpec3 *n) { return unimplementedVisitor("visit(aliasSpec3)"); }
+    lpg::Any visit(aliasSpec3 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec3, Object)"); }
+
+    lpg::Any visit(aliasSpec4 *n) { return unimplementedVisitor("visit(aliasSpec4)"); }
+    lpg::Any visit(aliasSpec4 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec4, Object)"); }
+
+    lpg::Any visit(aliasSpec5 *n) { return unimplementedVisitor("visit(aliasSpec5)"); }
+    lpg::Any visit(aliasSpec5 *n, Object* o) { return  unimplementedVisitor("visit(aliasSpec5, Object)"); }
+
+    lpg::Any visit(alias_rhs0 *n) { return unimplementedVisitor("visit(alias_rhs0)"); }
+    lpg::Any visit(alias_rhs0 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs0, Object)"); }
+
+    lpg::Any visit(alias_rhs1 *n) { return unimplementedVisitor("visit(alias_rhs1)"); }
+    lpg::Any visit(alias_rhs1 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs1, Object)"); }
+
+    lpg::Any visit(alias_rhs2 *n) { return unimplementedVisitor("visit(alias_rhs2)"); }
+    lpg::Any visit(alias_rhs2 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs2, Object)"); }
+
+    lpg::Any visit(alias_rhs3 *n) { return unimplementedVisitor("visit(alias_rhs3)"); }
+    lpg::Any visit(alias_rhs3 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs3, Object)"); }
+
+    lpg::Any visit(alias_rhs4 *n) { return unimplementedVisitor("visit(alias_rhs4)"); }
+    lpg::Any visit(alias_rhs4 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs4, Object)"); }
+
+    lpg::Any visit(alias_rhs5 *n) { return unimplementedVisitor("visit(alias_rhs5)"); }
+    lpg::Any visit(alias_rhs5 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs5, Object)"); }
+
+    lpg::Any visit(alias_rhs6 *n) { return unimplementedVisitor("visit(alias_rhs6)"); }
+    lpg::Any visit(alias_rhs6 *n, Object* o) { return  unimplementedVisitor("visit(alias_rhs6, Object)"); }
+
+    lpg::Any visit(macro_name_symbol0 *n) { return unimplementedVisitor("visit(macro_name_symbol0)"); }
+    lpg::Any visit(macro_name_symbol0 *n, Object* o) { return  unimplementedVisitor("visit(macro_name_symbol0, Object)"); }
+
+    lpg::Any visit(macro_name_symbol1 *n) { return unimplementedVisitor("visit(macro_name_symbol1)"); }
+    lpg::Any visit(macro_name_symbol1 *n, Object* o) { return  unimplementedVisitor("visit(macro_name_symbol1, Object)"); }
+
+    lpg::Any visit(drop_command0 *n) { return unimplementedVisitor("visit(drop_command0)"); }
+    lpg::Any visit(drop_command0 *n, Object* o) { return  unimplementedVisitor("visit(drop_command0, Object)"); }
+
+    lpg::Any visit(drop_command1 *n) { return unimplementedVisitor("visit(drop_command1)"); }
+    lpg::Any visit(drop_command1 *n, Object* o) { return  unimplementedVisitor("visit(drop_command1, Object)"); }
+
+    lpg::Any visit(name0 *n) { return unimplementedVisitor("visit(name0)"); }
+    lpg::Any visit(name0 *n, Object* o) { return  unimplementedVisitor("visit(name0, Object)"); }
+
+    lpg::Any visit(name1 *n) { return unimplementedVisitor("visit(name1)"); }
+    lpg::Any visit(name1 *n, Object* o) { return  unimplementedVisitor("visit(name1, Object)"); }
+
+    lpg::Any visit(name2 *n) { return unimplementedVisitor("visit(name2)"); }
+    lpg::Any visit(name2 *n, Object* o) { return  unimplementedVisitor("visit(name2, Object)"); }
+
+    lpg::Any visit(name3 *n) { return unimplementedVisitor("visit(name3)"); }
+    lpg::Any visit(name3 *n, Object* o) { return  unimplementedVisitor("visit(name3, Object)"); }
+
+    lpg::Any visit(name4 *n) { return unimplementedVisitor("visit(name4)"); }
+    lpg::Any visit(name4 *n, Object* o) { return  unimplementedVisitor("visit(name4, Object)"); }
+
+    lpg::Any visit(name5 *n) { return unimplementedVisitor("visit(name5)"); }
+    lpg::Any visit(name5 *n, Object* o) { return  unimplementedVisitor("visit(name5, Object)"); }
+
+    lpg::Any visit(produces0 *n) { return unimplementedVisitor("visit(produces0)"); }
+    lpg::Any visit(produces0 *n, Object* o) { return  unimplementedVisitor("visit(produces0, Object)"); }
+
+    lpg::Any visit(produces1 *n) { return unimplementedVisitor("visit(produces1)"); }
+    lpg::Any visit(produces1 *n, Object* o) { return  unimplementedVisitor("visit(produces1, Object)"); }
+
+    lpg::Any visit(produces2 *n) { return unimplementedVisitor("visit(produces2)"); }
+    lpg::Any visit(produces2 *n, Object* o) { return  unimplementedVisitor("visit(produces2, Object)"); }
+
+    lpg::Any visit(produces3 *n) { return unimplementedVisitor("visit(produces3)"); }
+    lpg::Any visit(produces3 *n, Object* o) { return  unimplementedVisitor("visit(produces3, Object)"); }
+
+    lpg::Any visit(symWithAttrs0 *n) { return unimplementedVisitor("visit(symWithAttrs0)"); }
+    lpg::Any visit(symWithAttrs0 *n, Object* o) { return  unimplementedVisitor("visit(symWithAttrs0, Object)"); }
+
+    lpg::Any visit(symWithAttrs1 *n) { return unimplementedVisitor("visit(symWithAttrs1)"); }
+    lpg::Any visit(symWithAttrs1 *n, Object* o) { return  unimplementedVisitor("visit(symWithAttrs1, Object)"); }
+
+    lpg::Any visit(start_symbol0 *n) { return unimplementedVisitor("visit(start_symbol0)"); }
+    lpg::Any visit(start_symbol0 *n, Object* o) { return  unimplementedVisitor("visit(start_symbol0, Object)"); }
+
+    lpg::Any visit(start_symbol1 *n) { return unimplementedVisitor("visit(start_symbol1)"); }
+    lpg::Any visit(start_symbol1 *n, Object* o) { return  unimplementedVisitor("visit(start_symbol1, Object)"); }
+
+    lpg::Any visit(terminal_symbol0 *n) { return unimplementedVisitor("visit(terminal_symbol0)"); }
+    lpg::Any visit(terminal_symbol0 *n, Object* o) { return  unimplementedVisitor("visit(terminal_symbol0, Object)"); }
+
+    lpg::Any visit(terminal_symbol1 *n) { return unimplementedVisitor("visit(terminal_symbol1)"); }
+    lpg::Any visit(terminal_symbol1 *n, Object* o) { return  unimplementedVisitor("visit(terminal_symbol1, Object)"); }
+
+
+    lpg::Any visit(ASTNode *n)
+    {
+        if (dynamic_cast<ASTNodeToken*>(n) ) return visit((ASTNodeToken*) n);
+        if (dynamic_cast<LPG*>(n) ) return visit((LPG*) n);
+        if (dynamic_cast<LPG_itemList*>(n) ) return visit((LPG_itemList*) n);
+        if (dynamic_cast<AliasSeg*>(n) ) return visit((AliasSeg*) n);
+        if (dynamic_cast<AstSeg*>(n) ) return visit((AstSeg*) n);
+        if (dynamic_cast<DefineSeg*>(n) ) return visit((DefineSeg*) n);
+        if (dynamic_cast<EofSeg*>(n) ) return visit((EofSeg*) n);
+        if (dynamic_cast<EolSeg*>(n) ) return visit((EolSeg*) n);
+        if (dynamic_cast<ErrorSeg*>(n) ) return visit((ErrorSeg*) n);
+        if (dynamic_cast<ExportSeg*>(n) ) return visit((ExportSeg*) n);
+        if (dynamic_cast<GlobalsSeg*>(n) ) return visit((GlobalsSeg*) n);
+        if (dynamic_cast<HeadersSeg*>(n) ) return visit((HeadersSeg*) n);
+        if (dynamic_cast<IdentifierSeg*>(n) ) return visit((IdentifierSeg*) n);
+        if (dynamic_cast<ImportSeg*>(n) ) return visit((ImportSeg*) n);
+        if (dynamic_cast<IncludeSeg*>(n) ) return visit((IncludeSeg*) n);
+        if (dynamic_cast<KeywordsSeg*>(n) ) return visit((KeywordsSeg*) n);
+        if (dynamic_cast<NamesSeg*>(n) ) return visit((NamesSeg*) n);
+        if (dynamic_cast<NoticeSeg*>(n) ) return visit((NoticeSeg*) n);
+        if (dynamic_cast<RulesSeg*>(n) ) return visit((RulesSeg*) n);
+        if (dynamic_cast<SoftKeywordsSeg*>(n) ) return visit((SoftKeywordsSeg*) n);
+        if (dynamic_cast<StartSeg*>(n) ) return visit((StartSeg*) n);
+        if (dynamic_cast<TerminalsSeg*>(n) ) return visit((TerminalsSeg*) n);
+        if (dynamic_cast<TrailersSeg*>(n) ) return visit((TrailersSeg*) n);
+        if (dynamic_cast<TypesSeg*>(n) ) return visit((TypesSeg*) n);
+        if (dynamic_cast<RecoverSeg*>(n) ) return visit((RecoverSeg*) n);
+        if (dynamic_cast<PredecessorSeg*>(n) ) return visit((PredecessorSeg*) n);
+        if (dynamic_cast<option_specList*>(n) ) return visit((option_specList*) n);
+        if (dynamic_cast<option_spec*>(n) ) return visit((option_spec*) n);
+        if (dynamic_cast<optionList*>(n) ) return visit((optionList*) n);
+        if (dynamic_cast<option*>(n) ) return visit((option*) n);
+        if (dynamic_cast<SYMBOLList*>(n) ) return visit((SYMBOLList*) n);
+        if (dynamic_cast<aliasSpecList*>(n) ) return visit((aliasSpecList*) n);
+        if (dynamic_cast<alias_lhs_macro_name*>(n) ) return visit((alias_lhs_macro_name*) n);
+        if (dynamic_cast<defineSpecList*>(n) ) return visit((defineSpecList*) n);
+        if (dynamic_cast<defineSpec*>(n) ) return visit((defineSpec*) n);
+        if (dynamic_cast<macro_segment*>(n) ) return visit((macro_segment*) n);
+        if (dynamic_cast<terminal_symbolList*>(n) ) return visit((terminal_symbolList*) n);
+        if (dynamic_cast<action_segmentList*>(n) ) return visit((action_segmentList*) n);
+        if (dynamic_cast<import_segment*>(n) ) return visit((import_segment*) n);
+        if (dynamic_cast<drop_commandList*>(n) ) return visit((drop_commandList*) n);
+        if (dynamic_cast<drop_ruleList*>(n) ) return visit((drop_ruleList*) n);
+        if (dynamic_cast<drop_rule*>(n) ) return visit((drop_rule*) n);
+        if (dynamic_cast<optMacroName*>(n) ) return visit((optMacroName*) n);
+        if (dynamic_cast<include_segment*>(n) ) return visit((include_segment*) n);
+        if (dynamic_cast<keywordSpecList*>(n) ) return visit((keywordSpecList*) n);
+        if (dynamic_cast<keywordSpec*>(n) ) return visit((keywordSpec*) n);
+        if (dynamic_cast<nameSpecList*>(n) ) return visit((nameSpecList*) n);
+        if (dynamic_cast<nameSpec*>(n) ) return visit((nameSpec*) n);
+        if (dynamic_cast<rules_segment*>(n) ) return visit((rules_segment*) n);
+        if (dynamic_cast<nonTermList*>(n) ) return visit((nonTermList*) n);
+        if (dynamic_cast<nonTerm*>(n) ) return visit((nonTerm*) n);
+        if (dynamic_cast<RuleName*>(n) ) return visit((RuleName*) n);
+        if (dynamic_cast<ruleList*>(n) ) return visit((ruleList*) n);
+        if (dynamic_cast<rule*>(n) ) return visit((rule*) n);
+        if (dynamic_cast<symWithAttrsList*>(n) ) return visit((symWithAttrsList*) n);
+        if (dynamic_cast<symAttrs*>(n) ) return visit((symAttrs*) n);
+        if (dynamic_cast<action_segment*>(n) ) return visit((action_segment*) n);
+        if (dynamic_cast<start_symbolList*>(n) ) return visit((start_symbolList*) n);
+        if (dynamic_cast<terminalList*>(n) ) return visit((terminalList*) n);
+        if (dynamic_cast<terminal*>(n) ) return visit((terminal*) n);
+        if (dynamic_cast<optTerminalAlias*>(n) ) return visit((optTerminalAlias*) n);
+        if (dynamic_cast<type_declarationsList*>(n) ) return visit((type_declarationsList*) n);
+        if (dynamic_cast<type_declarations*>(n) ) return visit((type_declarations*) n);
+        if (dynamic_cast<symbol_pairList*>(n) ) return visit((symbol_pairList*) n);
+        if (dynamic_cast<symbol_pair*>(n) ) return visit((symbol_pair*) n);
+        if (dynamic_cast<recover_symbol*>(n) ) return visit((recover_symbol*) n);
+        if (dynamic_cast<END_KEY_OPT*>(n) ) return visit((END_KEY_OPT*) n);
+        if (dynamic_cast<option_value0*>(n) ) return visit((option_value0*) n);
+        if (dynamic_cast<option_value1*>(n) ) return visit((option_value1*) n);
+        if (dynamic_cast<aliasSpec0*>(n) ) return visit((aliasSpec0*) n);
+        if (dynamic_cast<aliasSpec1*>(n) ) return visit((aliasSpec1*) n);
+        if (dynamic_cast<aliasSpec2*>(n) ) return visit((aliasSpec2*) n);
+        if (dynamic_cast<aliasSpec3*>(n) ) return visit((aliasSpec3*) n);
+        if (dynamic_cast<aliasSpec4*>(n) ) return visit((aliasSpec4*) n);
+        if (dynamic_cast<aliasSpec5*>(n) ) return visit((aliasSpec5*) n);
+        if (dynamic_cast<alias_rhs0*>(n) ) return visit((alias_rhs0*) n);
+        if (dynamic_cast<alias_rhs1*>(n) ) return visit((alias_rhs1*) n);
+        if (dynamic_cast<alias_rhs2*>(n) ) return visit((alias_rhs2*) n);
+        if (dynamic_cast<alias_rhs3*>(n) ) return visit((alias_rhs3*) n);
+        if (dynamic_cast<alias_rhs4*>(n) ) return visit((alias_rhs4*) n);
+        if (dynamic_cast<alias_rhs5*>(n) ) return visit((alias_rhs5*) n);
+        if (dynamic_cast<alias_rhs6*>(n) ) return visit((alias_rhs6*) n);
+        if (dynamic_cast<macro_name_symbol0*>(n) ) return visit((macro_name_symbol0*) n);
+        if (dynamic_cast<macro_name_symbol1*>(n) ) return visit((macro_name_symbol1*) n);
+        if (dynamic_cast<drop_command0*>(n) ) return visit((drop_command0*) n);
+        if (dynamic_cast<drop_command1*>(n) ) return visit((drop_command1*) n);
+        if (dynamic_cast<name0*>(n) ) return visit((name0*) n);
+        if (dynamic_cast<name1*>(n) ) return visit((name1*) n);
+        if (dynamic_cast<name2*>(n) ) return visit((name2*) n);
+        if (dynamic_cast<name3*>(n) ) return visit((name3*) n);
+        if (dynamic_cast<name4*>(n) ) return visit((name4*) n);
+        if (dynamic_cast<name5*>(n) ) return visit((name5*) n);
+        if (dynamic_cast<produces0*>(n) ) return visit((produces0*) n);
+        if (dynamic_cast<produces1*>(n) ) return visit((produces1*) n);
+        if (dynamic_cast<produces2*>(n) ) return visit((produces2*) n);
+        if (dynamic_cast<produces3*>(n) ) return visit((produces3*) n);
+        if (dynamic_cast<symWithAttrs0*>(n) ) return visit((symWithAttrs0*) n);
+        if (dynamic_cast<symWithAttrs1*>(n) ) return visit((symWithAttrs1*) n);
+        if (dynamic_cast<start_symbol0*>(n) ) return visit((start_symbol0*) n);
+        if (dynamic_cast<start_symbol1*>(n) ) return visit((start_symbol1*) n);
+        if (dynamic_cast<terminal_symbol0*>(n) ) return visit((terminal_symbol0*) n);
+        if (dynamic_cast<terminal_symbol1*>(n) ) return visit((terminal_symbol1*) n);
+        throw UnsupportedOperationException("visit(" + n->to_utf8_string() + ")");
+    }
+    lpg::Any visit(ASTNode *n, Object *o)
+    {
+        if (dynamic_cast<ASTNodeToken*>(n) ) return visit((ASTNodeToken*) n, o);
+        if (dynamic_cast<LPG*>(n) ) return visit((LPG*) n, o);
+        if (dynamic_cast<LPG_itemList*>(n) ) return visit((LPG_itemList*) n, o);
+        if (dynamic_cast<AliasSeg*>(n) ) return visit((AliasSeg*) n, o);
+        if (dynamic_cast<AstSeg*>(n) ) return visit((AstSeg*) n, o);
+        if (dynamic_cast<DefineSeg*>(n) ) return visit((DefineSeg*) n, o);
+        if (dynamic_cast<EofSeg*>(n) ) return visit((EofSeg*) n, o);
+        if (dynamic_cast<EolSeg*>(n) ) return visit((EolSeg*) n, o);
+        if (dynamic_cast<ErrorSeg*>(n) ) return visit((ErrorSeg*) n, o);
+        if (dynamic_cast<ExportSeg*>(n) ) return visit((ExportSeg*) n, o);
+        if (dynamic_cast<GlobalsSeg*>(n) ) return visit((GlobalsSeg*) n, o);
+        if (dynamic_cast<HeadersSeg*>(n) ) return visit((HeadersSeg*) n, o);
+        if (dynamic_cast<IdentifierSeg*>(n) ) return visit((IdentifierSeg*) n, o);
+        if (dynamic_cast<ImportSeg*>(n) ) return visit((ImportSeg*) n, o);
+        if (dynamic_cast<IncludeSeg*>(n) ) return visit((IncludeSeg*) n, o);
+        if (dynamic_cast<KeywordsSeg*>(n) ) return visit((KeywordsSeg*) n, o);
+        if (dynamic_cast<NamesSeg*>(n) ) return visit((NamesSeg*) n, o);
+        if (dynamic_cast<NoticeSeg*>(n) ) return visit((NoticeSeg*) n, o);
+        if (dynamic_cast<RulesSeg*>(n) ) return visit((RulesSeg*) n, o);
+        if (dynamic_cast<SoftKeywordsSeg*>(n) ) return visit((SoftKeywordsSeg*) n, o);
+        if (dynamic_cast<StartSeg*>(n) ) return visit((StartSeg*) n, o);
+        if (dynamic_cast<TerminalsSeg*>(n) ) return visit((TerminalsSeg*) n, o);
+        if (dynamic_cast<TrailersSeg*>(n) ) return visit((TrailersSeg*) n, o);
+        if (dynamic_cast<TypesSeg*>(n) ) return visit((TypesSeg*) n, o);
+        if (dynamic_cast<RecoverSeg*>(n) ) return visit((RecoverSeg*) n, o);
+        if (dynamic_cast<PredecessorSeg*>(n) ) return visit((PredecessorSeg*) n, o);
+        if (dynamic_cast<option_specList*>(n) ) return visit((option_specList*) n, o);
+        if (dynamic_cast<option_spec*>(n) ) return visit((option_spec*) n, o);
+        if (dynamic_cast<optionList*>(n) ) return visit((optionList*) n, o);
+        if (dynamic_cast<option*>(n) ) return visit((option*) n, o);
+        if (dynamic_cast<SYMBOLList*>(n) ) return visit((SYMBOLList*) n, o);
+        if (dynamic_cast<aliasSpecList*>(n) ) return visit((aliasSpecList*) n, o);
+        if (dynamic_cast<alias_lhs_macro_name*>(n) ) return visit((alias_lhs_macro_name*) n, o);
+        if (dynamic_cast<defineSpecList*>(n) ) return visit((defineSpecList*) n, o);
+        if (dynamic_cast<defineSpec*>(n) ) return visit((defineSpec*) n, o);
+        if (dynamic_cast<macro_segment*>(n) ) return visit((macro_segment*) n, o);
+        if (dynamic_cast<terminal_symbolList*>(n) ) return visit((terminal_symbolList*) n, o);
+        if (dynamic_cast<action_segmentList*>(n) ) return visit((action_segmentList*) n, o);
+        if (dynamic_cast<import_segment*>(n) ) return visit((import_segment*) n, o);
+        if (dynamic_cast<drop_commandList*>(n) ) return visit((drop_commandList*) n, o);
+        if (dynamic_cast<drop_ruleList*>(n) ) return visit((drop_ruleList*) n, o);
+        if (dynamic_cast<drop_rule*>(n) ) return visit((drop_rule*) n, o);
+        if (dynamic_cast<optMacroName*>(n) ) return visit((optMacroName*) n, o);
+        if (dynamic_cast<include_segment*>(n) ) return visit((include_segment*) n, o);
+        if (dynamic_cast<keywordSpecList*>(n) ) return visit((keywordSpecList*) n, o);
+        if (dynamic_cast<keywordSpec*>(n) ) return visit((keywordSpec*) n, o);
+        if (dynamic_cast<nameSpecList*>(n) ) return visit((nameSpecList*) n, o);
+        if (dynamic_cast<nameSpec*>(n) ) return visit((nameSpec*) n, o);
+        if (dynamic_cast<rules_segment*>(n) ) return visit((rules_segment*) n, o);
+        if (dynamic_cast<nonTermList*>(n) ) return visit((nonTermList*) n, o);
+        if (dynamic_cast<nonTerm*>(n) ) return visit((nonTerm*) n, o);
+        if (dynamic_cast<RuleName*>(n) ) return visit((RuleName*) n, o);
+        if (dynamic_cast<ruleList*>(n) ) return visit((ruleList*) n, o);
+        if (dynamic_cast<rule*>(n) ) return visit((rule*) n, o);
+        if (dynamic_cast<symWithAttrsList*>(n) ) return visit((symWithAttrsList*) n, o);
+        if (dynamic_cast<symAttrs*>(n) ) return visit((symAttrs*) n, o);
+        if (dynamic_cast<action_segment*>(n) ) return visit((action_segment*) n, o);
+        if (dynamic_cast<start_symbolList*>(n) ) return visit((start_symbolList*) n, o);
+        if (dynamic_cast<terminalList*>(n) ) return visit((terminalList*) n, o);
+        if (dynamic_cast<terminal*>(n) ) return visit((terminal*) n, o);
+        if (dynamic_cast<optTerminalAlias*>(n) ) return visit((optTerminalAlias*) n, o);
+        if (dynamic_cast<type_declarationsList*>(n) ) return visit((type_declarationsList*) n, o);
+        if (dynamic_cast<type_declarations*>(n) ) return visit((type_declarations*) n, o);
+        if (dynamic_cast<symbol_pairList*>(n) ) return visit((symbol_pairList*) n, o);
+        if (dynamic_cast<symbol_pair*>(n) ) return visit((symbol_pair*) n, o);
+        if (dynamic_cast<recover_symbol*>(n) ) return visit((recover_symbol*) n, o);
+        if (dynamic_cast<END_KEY_OPT*>(n) ) return visit((END_KEY_OPT*) n, o);
+        if (dynamic_cast<option_value0*>(n) ) return visit((option_value0*) n, o);
+        if (dynamic_cast<option_value1*>(n) ) return visit((option_value1*) n, o);
+        if (dynamic_cast<aliasSpec0*>(n) ) return visit((aliasSpec0*) n, o);
+        if (dynamic_cast<aliasSpec1*>(n) ) return visit((aliasSpec1*) n, o);
+        if (dynamic_cast<aliasSpec2*>(n) ) return visit((aliasSpec2*) n, o);
+        if (dynamic_cast<aliasSpec3*>(n) ) return visit((aliasSpec3*) n, o);
+        if (dynamic_cast<aliasSpec4*>(n) ) return visit((aliasSpec4*) n, o);
+        if (dynamic_cast<aliasSpec5*>(n) ) return visit((aliasSpec5*) n, o);
+        if (dynamic_cast<alias_rhs0*>(n) ) return visit((alias_rhs0*) n, o);
+        if (dynamic_cast<alias_rhs1*>(n) ) return visit((alias_rhs1*) n, o);
+        if (dynamic_cast<alias_rhs2*>(n) ) return visit((alias_rhs2*) n, o);
+        if (dynamic_cast<alias_rhs3*>(n) ) return visit((alias_rhs3*) n, o);
+        if (dynamic_cast<alias_rhs4*>(n) ) return visit((alias_rhs4*) n, o);
+        if (dynamic_cast<alias_rhs5*>(n) ) return visit((alias_rhs5*) n, o);
+        if (dynamic_cast<alias_rhs6*>(n) ) return visit((alias_rhs6*) n, o);
+        if (dynamic_cast<macro_name_symbol0*>(n) ) return visit((macro_name_symbol0*) n, o);
+        if (dynamic_cast<macro_name_symbol1*>(n) ) return visit((macro_name_symbol1*) n, o);
+        if (dynamic_cast<drop_command0*>(n) ) return visit((drop_command0*) n, o);
+        if (dynamic_cast<drop_command1*>(n) ) return visit((drop_command1*) n, o);
+        if (dynamic_cast<name0*>(n) ) return visit((name0*) n, o);
+        if (dynamic_cast<name1*>(n) ) return visit((name1*) n, o);
+        if (dynamic_cast<name2*>(n) ) return visit((name2*) n, o);
+        if (dynamic_cast<name3*>(n) ) return visit((name3*) n, o);
+        if (dynamic_cast<name4*>(n) ) return visit((name4*) n, o);
+        if (dynamic_cast<name5*>(n) ) return visit((name5*) n, o);
+        if (dynamic_cast<produces0*>(n) ) return visit((produces0*) n, o);
+        if (dynamic_cast<produces1*>(n) ) return visit((produces1*) n, o);
+        if (dynamic_cast<produces2*>(n) ) return visit((produces2*) n, o);
+        if (dynamic_cast<produces3*>(n) ) return visit((produces3*) n, o);
+        if (dynamic_cast<symWithAttrs0*>(n) ) return visit((symWithAttrs0*) n, o);
+        if (dynamic_cast<symWithAttrs1*>(n) ) return visit((symWithAttrs1*) n, o);
+        if (dynamic_cast<start_symbol0*>(n) ) return visit((start_symbol0*) n, o);
+        if (dynamic_cast<start_symbol1*>(n) ) return visit((start_symbol1*) n, o);
+        if (dynamic_cast<terminal_symbol0*>(n) ) return visit((terminal_symbol0*) n, o);
+        if (dynamic_cast<terminal_symbol1*>(n) ) return visit((terminal_symbol1*) n, o);
+        throw UnsupportedOperationException("visit(" + n->to_utf8_string() + ")");
+    }
+};
+struct AbstractPreOrderVisitor :public PreOrderVisitor
 {
     virtual void unimplementedVisitor(const std::string& s)=0;
 

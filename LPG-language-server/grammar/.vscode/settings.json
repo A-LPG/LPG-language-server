@@ -1,0 +1,8 @@
+{
+    "lpg.generation.setting": {
+        
+        "built_in_template": "rt_cpp",
+       "mode": "external",
+       "outputDir": "../src/parser"
+   }
+}

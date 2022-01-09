@@ -1,11 +1,8 @@
 
     //#line 360 "btParserTemplateF.gi
-
-     #include "LPGParser.h"
-
 #include "LPGParser_top_level_ast.h"
-
-    void LPGParser::ruleAction(int ruleNumber)
+     #include "LPGParser.h"
+     void LPGParser::ruleAction(int ruleNumber)
     {
         switch (ruleNumber)
         {

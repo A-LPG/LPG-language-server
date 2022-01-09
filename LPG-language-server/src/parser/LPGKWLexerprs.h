@@ -13,8 +13,8 @@
 
 #pragma once
  #include <string>
-  #include "LPGKWLexersym.h"
- #include "lpg2/ParseTable.h"
+  #include "lpg2/ParseTable.h"
+ #include "LPGKWLexersym.h"
  struct LPGKWLexerprs :public ParseTable,public LPGKWLexersym {
              typedef  unsigned char byte;
      constexpr   static int ERROR_SYMBOL = 0;
@@ -32,7 +32,7 @@
      constexpr   static int NUM_STATES = 145;
      int getNumStates() { return NUM_STATES; }
 
-     constexpr   static int NT_OFFSET = 30;
+     constexpr   static int NT_OFFSET = 40;
      int getNtOffset() { return NT_OFFSET; }
 
      constexpr   static int LA_STATE_OFFSET = 208;
@@ -47,7 +47,7 @@
      constexpr   static int NUM_NONTERMINALS = 3;
      int getNumNonterminals() { return NUM_NONTERMINALS; }
 
-     constexpr   static int NUM_SYMBOLS = 33;
+     constexpr   static int NUM_SYMBOLS = 43;
      int getNumSymbols() { return NUM_SYMBOLS; }
 
      constexpr   static int START_STATE = 30;
@@ -59,7 +59,7 @@
      constexpr   static int EOFT_SYMBOL = 27;
      int getEoftSymbol() { return EOFT_SYMBOL; }
 
-     constexpr   static int EOLT_SYMBOL = 31;
+     constexpr   static int EOLT_SYMBOL = 41;
      int getEoltSymbol() { return EOLT_SYMBOL; }
 
      constexpr   static int ACCEPT_ACTION = 178;
@@ -78,6 +78,7 @@ inline static char _isNullable[] = {0,
             0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,
             0,0,0
         };
 char * get_isNullable_data(){ return  _isNullable;}
@@ -88,6 +89,7 @@ inline static signed int _prosthesesIndex[] = {0,
 signed int * get_prosthesesIndex_data(){ return  _prosthesesIndex;}
       int prosthesesIndex(int index) { return _prosthesesIndex[index]; }
 inline static char _isKeyword[] = {0,
+            0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0
@@ -163,6 +165,7 @@ inline static signed int _termCheck[] = {0,
             14,9,0,1,0,1,0,0,2,2,
             0,0,0,2,4,3,0,1,0,0,
             0,2,0,5,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0,
             0,0,0,0,0,0,0,0,0,0
         };

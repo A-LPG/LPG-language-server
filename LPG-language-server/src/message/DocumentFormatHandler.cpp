@@ -14,7 +14,7 @@ using namespace LPGParser_top_level_ast;
 
 
 
-struct FormatVisitor : public AbstractVisitor {
+struct FormatVisitor : public AbstractPreOrderVisitor {
 	struct Set
 	{
         std::unordered_set<IToken*> data;

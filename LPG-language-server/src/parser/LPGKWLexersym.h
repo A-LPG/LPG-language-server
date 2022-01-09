@@ -46,6 +46,16 @@
       Char_x = 26,
       Char_y = 13,
       Char_z = 30,
+      Char_0 = 31,
+      Char_1 = 32,
+      Char_2 = 33,
+      Char_3 = 34,
+      Char_4 = 35,
+      Char_5 = 36,
+      Char_6 = 37,
+      Char_7 = 38,
+      Char_8 = 39,
+      Char_9 = 40,
       Char_EOF = 27;
 
       inline const static std::vector<std::wstring> orderedTerminalSymbols = {
@@ -79,9 +89,20 @@
                  L"EOF",
                  L"_",
                  L"q",
-                 L"z"
+                 L"z",
+                 L"0",
+                 L"1",
+                 L"2",
+                 L"3",
+                 L"4",
+                 L"5",
+                 L"6",
+                 L"7",
+                 L"8",
+                 L"9"
              };
 
-     static constexpr  int numTokenKinds = 31;
+     static constexpr  int numTokenKinds = 40;
+
      static constexpr  bool isValidForParser = true;
 };

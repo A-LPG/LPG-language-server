@@ -10,7 +10,7 @@
 
 namespace 
 {
-	struct findRefsOf_AbstractVisitor :public AbstractVisitor
+	struct findRefsOf_AbstractVisitor :public AbstractPreOrderVisitor
 	{
         std::wstring name;
         std::vector<ASTNode*>& result;
@@ -23,7 +23,7 @@ namespace
              if (n->getSYMBOL()->toString()==(name))
                  result.emplace_back(n);
          	
-             return AbstractVisitor::visit(n);
+             return AbstractPreOrderVisitor::visit(n);
          }
 	};
 }

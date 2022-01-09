@@ -226,6 +226,7 @@
                  L"CtlCharNotWS"
              };
 
-     static constexpr  int numTokenKinds = 103;
+     static constexpr  int numTokenKinds = 102;
+
      static constexpr  bool isValidForParser = true;
 };
