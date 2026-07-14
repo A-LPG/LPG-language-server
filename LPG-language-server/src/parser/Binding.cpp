@@ -1057,7 +1057,7 @@ void process_type_binding(std::shared_ptr<CompilationUnit>& unit, ProblemHandler
      if(!unit_binding)
          return;
      unit_binding->unit_table.insert(unit->runtime_unit);
-     JiksPgOption pg_option(&unit_binding->lex_stream, unit->working_file->filename.path);
+     JiksPgOption pg_option(&unit_binding->lex_stream, unit->working_file->filename.path());
      pg_option.SetMessageHandler(handler);
      std::stack<option*> option_set;
      unit->parent.collect_options(option_set, unit, nullptr);

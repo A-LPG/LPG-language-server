@@ -112,7 +112,7 @@ struct WorkSpaceManagerData
 			{
 				for (auto d : it.second)
 				{
-					releatioin.emplace_back(Edge(it.first.path, d.path));
+					releatioin.emplace_back(Edge(it.first.path(), d.path()));
 				}
 			}
 		}
@@ -160,7 +160,7 @@ struct WorkSpaceManagerData
 
 		for (auto& it : sort_array)
 		{
-			auto _file = _owner->find(it);
+			auto _file = _owner->find(AbsolutePath(it));
 			if (!_file) continue;
 			ProblemHandler handle;
 			{
@@ -200,7 +200,7 @@ struct WorkSpaceManagerData
 			auto path = close.uri.GetAbsolutePath();
 			writeLock a(_rw_mutex);
 			open_by_client.erase(path);
-			units.erase(path);
+			units.erase(path.path());
 			empty = open_by_client.empty();
 		}
 		if(empty)
@@ -260,7 +260,7 @@ struct WorkSpaceManagerData
 		}
 		for (auto& it : files_to_be_delete)
 		{
-			_owner->RemoveDependency(it);
+			_owner->RemoveDependency(AbsolutePath(it));
 		}
 		
 	}
@@ -387,16 +387,16 @@ void WorkSpaceManager::collect_def(
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::CreateUnit(const AbsolutePath& fileName, Monitor* monitor)
 {
-	auto  unit = find(AbsolutePath(fileName, false));
+	auto  unit = find(fileName);
 	if (unit) return unit;
 	boost::system::error_code ec;
 
-	if (!boost::filesystem::exists(fileName.path, ec))
+	if (!boost::filesystem::exists(fileName.path(), ec))
 	{
 		return  {};
 	}
 	std::wstring content;
-	if(!IcuUtil::getFileUnicodeContent(IcuUtil::s2ws(fileName.path).c_str(), content))
+	if(!IcuUtil::getFileUnicodeContent(IcuUtil::s2ws(fileName.path()).c_str(), content))
 	{
 		return {};
 	}
@@ -416,24 +416,24 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 {
 	boost::system::error_code ec;
 	
-	auto  unit = find(AbsolutePath(fileName,false ));
+	auto  unit = find(AbsolutePath(fileName));
 	if (unit) return unit;
 	
 	if(boost::filesystem::exists(fileName, ec))
 	{
-		return  CreateUnit(AbsolutePath(fileName, false),monitor);
+		return  CreateUnit(AbsolutePath(fileName),monitor);
 	}
 	
 	{
 		
 		string refPath(directory.path);
 		refPath.append(fileName);
-		unit = find(AbsolutePath(refPath, false));
+		unit = find(AbsolutePath(refPath));
 		if (unit) return unit;
 		
 		if (boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath, false),monitor);
+			return  CreateUnit(AbsolutePath(refPath),monitor);
 		}
 	}
 
@@ -442,11 +442,11 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::lookupImportedFile(Directory&
 	{
 		string refPath(it.path);
 		refPath.append(fileName);
-		unit = find(AbsolutePath(refPath, false));
+		unit = find(AbsolutePath(refPath));
 		if (unit) return unit;
 		if (boost::filesystem::exists(refPath, ec))
 		{
-			return  CreateUnit(AbsolutePath(refPath, false),monitor);
+			return  CreateUnit(AbsolutePath(refPath),monitor);
 		}
 	}
 	return {};
@@ -552,7 +552,7 @@ std::vector<Object*> WorkSpaceManager::findDefOf(const SearchPolicy& policy, AST
 
 std::shared_ptr<CompilationUnit> WorkSpaceManager::find(const AbsolutePath& path)
 {
-	std::stringex temp(path.path);
+	std::stringex temp(path.path());
 	temp.replace("\\", "/");
 	return  d_ptr->Find(temp);
 }
@@ -645,7 +645,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 		unit->counter.store(_change->counter.load(std::memory_order_relaxed));
 
 	
-		unit->runtime_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename));
+		unit->runtime_unit->_lexer.reset(content, IcuUtil::s2ws(_change->filename.path()));
 
 		unit->runtime_unit->_parser.reset(unit->runtime_unit->_lexer.getLexStream());
 
@@ -659,7 +659,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 			return nullptr;
 		unit->runtime_unit->diagnostics.swap(handle.diagnostics);
 	
-		d_ptr->units[_change->filename] = unit;
+		d_ptr->units[_change->filename.path()] = unit;
 		
 		process_symbol(unit);
 		unit->runtime_unit->mutex.lock();
@@ -683,7 +683,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 				{
 					for (auto& it : unit->dependence_info.include_files)
 					{
-						if (it.first == footprint[i].path)
+						if (it.first == footprint[i].path())
 						{
 							return it.second;
 						}
@@ -691,7 +691,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 
 					for (auto& value : unit->dependence_info.template_files)
 					{
-						if (value.first == footprint[i].path)
+						if (value.first == footprint[i].path())
 						{
 							return value.second;
 						}
@@ -699,7 +699,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 
 					for (auto& value : unit->dependence_info.filter_files)
 					{
-						if (value.first == footprint[i].path)
+						if (value.first == footprint[i].path())
 						{
 							return value.second;
 						}
@@ -707,7 +707,7 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 
 					for (auto& value : unit->dependence_info.import_terminals_files)
 					{
-						if (value.first == footprint[i].path)
+						if (value.first == footprint[i].path())
 						{
 							return value.second;
 						}
@@ -732,9 +732,9 @@ std::shared_ptr<CompilationUnit> WorkSpaceManager::ProcessFileContent(std::share
 			std::stringex info = "file recursive:\n";
 			for (auto& it : footprint)
 			{
-				info += it.path + " -->\n";
+				info += it.path() + " -->\n";
 			}
-			info += _change->filename;
+			info += _change->filename.path();
 		
 			handle.handleMessage(lsDiagnosticSeverity::Error, left, right,info);
 		}
@@ -923,7 +923,7 @@ void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 			for(auto& it : paths)
 			{
 				boost::replace_all(it, "\\", "/");
-				Directory directory(it);
+				Directory directory{AbsolutePath(it)};
 				remove.push_back(directory);
 			}
 
@@ -940,7 +940,7 @@ void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 			for (auto& it : paths)
 			{
 				boost::replace_all(it, "\\", "/");
-				Directory directory(it);
+				Directory directory{AbsolutePath(it)};
 				remove.push_back(directory);
 			}
 		}
@@ -960,7 +960,7 @@ void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 		for(auto& it : paths)
 		{
 			boost::replace_all(it, "\\", "/");
-			Directory directory(it);
+			Directory directory{AbsolutePath(it)};
 			d_ptr->includeDirs.push_back(directory);
 		}
 		
@@ -974,7 +974,7 @@ void WorkSpaceManager::UpdateSetting(const GenerationOptions& setting) const
 		for (auto& it : paths)
 		{
 			boost::replace_all(it, "\\", "/");
-			Directory directory(it);	
+			Directory directory{AbsolutePath(it)};	
 			d_ptr->includeDirs.push_back(directory);
 		}
 	}

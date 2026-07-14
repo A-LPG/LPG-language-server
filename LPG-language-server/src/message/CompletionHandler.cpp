@@ -192,7 +192,7 @@ void  CompletionHandler::Data::MakeCompletionItem(const std::string& proposal, c
     }
     if(!addlInfo.empty())
     {
-        std::pair<boost::optional< std::string>, boost::optional<MarkupContent> > info;
+        std::pair<optional<std::string>, optional<MarkupContent> > info;
         info.first = addlInfo;
         item.documentation = std::move(info);
     }
@@ -419,7 +419,7 @@ void   CompletionHandler::Data::get_for_key_word()
 
             	
                 std::vector<std::string> names;
-                lsp::scanFileNamesUseRecursive(unit->working_file->directory.path, names,"");
+                            lsp::scanFileNamesUseRecursive(unit->working_file->directory.path, names,"");
                 for (auto& name : names)
                 {
                 	if(exclude_include_files.find(name)== exclude_include_files.end())

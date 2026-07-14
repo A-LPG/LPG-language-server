@@ -1,3 +1,4 @@
+#include <optional>
 #include <LibLsp/lsp/working_files.h>
 
 #include "MessageHandler.h"
@@ -12,7 +13,7 @@ using namespace LPGParser_top_level_ast;
 
 struct DefinitionProvider
 {
-    boost::optional<lsLocation> getLocation(std::shared_ptr<CompilationUnit>& ast_unit, IToken* left_token, IToken* right_token)
+    std::optional<lsLocation> getLocation(std::shared_ptr<CompilationUnit>& ast_unit, IToken* left_token, IToken* right_token)
     {
         auto lex = left_token->getILexStream();
         auto temp_unit = ast_unit->parent.FindFile(lex);
@@ -37,7 +38,7 @@ struct DefinitionProvider
         }
     }
 	
-    boost::optional<lsLocation> getLocation(std::shared_ptr<CompilationUnit>& ast_unit, Object* target)
+    std::optional<lsLocation> getLocation(std::shared_ptr<CompilationUnit>& ast_unit, Object* target)
     {
         if (target == nullptr || !ast_unit)
             return {};

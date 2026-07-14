@@ -5,7 +5,6 @@
 #include "LibLsp/lsp/general/initialize.h"
 #include "LibLsp/lsp/ProtocolJsonHandler.h"
 #include "LibLsp/lsp/AbsolutePath.h"
-#include <network/uri.hpp>
 #include "LibLsp/JsonRpc/Condition.h"
 #include "LibLsp/lsp/textDocument/did_change.h"
 #include "LibLsp/lsp/textDocument/did_save.h"	
@@ -41,6 +40,7 @@
 #include "LibLsp/lsp/workspace/did_change_watched_files.h"
 #include "LibLsp/lsp/general/initialized.h"
 #include "LibLsp/JsonRpc/cancellation.h"
+#include "LibLsp/JsonRpc/optionalVersion.h"
 #include "LibLsp/lsp/textDocument/SemanticTokens.h"
 #include "LibLsp/lsp/textDocument/rename.h"
 #include "LibLsp/lsp/lsAny.h"
@@ -103,7 +103,7 @@ public:
 	RemoteEndPoint& _sp;
 	
 
-	boost::optional<Rsp_Error> need_initialize_error;
+	optional<Rsp_Error> need_initialize_error;
 	
 	bool enable_watch_parent_process = false;
 	std::unique_ptr<ParentProcessWatcher> parent_process_watcher;
@@ -239,8 +239,8 @@ public:
 				}
 		
 				
-				std::pair<boost::optional<lsTextDocumentSyncKind>,
-				          boost::optional<lsTextDocumentSyncOptions> > textDocumentSync;
+				std::pair<optional<lsTextDocumentSyncKind>,
+				          optional<lsTextDocumentSyncOptions> > textDocumentSync;
 				lsTextDocumentSyncOptions options;
 				options.openClose = true;
 				options.change = lsTextDocumentSyncKind::Incremental;
@@ -259,7 +259,7 @@ public:
 					completion.resolveProvider = true;
 					capabilities.completionProvider = completion;
 				}
-				std::pair< boost::optional<bool>, boost::optional<WorkDoneProgressOptions> > option;
+				std::pair< optional<bool>, optional<WorkDoneProgressOptions> > option;
 				option.first = true;
 			
 				if (!clientPreferences->isDefinitionDynamicRegistered())
@@ -268,7 +268,7 @@ public:
 				}
 				if (!clientPreferences->isFoldgingRangeDynamicRegistered())
 				{
-					capabilities.foldingRangeProvider = std::pair< boost::optional<bool>, boost::optional<FoldingRangeOptions> >();
+					capabilities.foldingRangeProvider = std::pair< optional<bool>, optional<FoldingRangeOptions> >();
 					capabilities.foldingRangeProvider->first = true;
 				}
 				if (!clientPreferences->isReferencesDynamicRegistered())
@@ -285,7 +285,7 @@ public:
 				}
 				if (!clientPreferences->isRenameDynamicRegistrationSupported())
 				{
-					std::pair< boost::optional<bool>, boost::optional<RenameOptions> > rename_opt;
+					std::pair< optional<bool>, optional<RenameOptions> > rename_opt;
 					rename_opt.first = true;
 					capabilities.renameProvider = rename_opt;
 				}
@@ -303,12 +303,12 @@ public:
 
 					semantic_tokens_opt.legend.tokenTypes = semanticTokenTypes();
 
-					std::pair< boost::optional<bool>, boost::optional<lsp::Any> > rang;
+					std::pair< optional<bool>, optional<lsp::Any> > rang;
 					rang.first = false;
 					semantic_tokens_opt.range = rang;
 
-					std::pair< boost::optional<bool>,
-						boost::optional<SemanticTokensServerFull> > full;
+					std::pair< optional<bool>,
+						optional<SemanticTokensServerFull> > full;
 					full.first = true;
 
 					semantic_tokens_opt.full = full;
@@ -372,7 +372,9 @@ public:
 				{
 					collectRegisterCapability(Notify_WorkspaceDidChangeConfiguration::notify::kMethodInfo);
 				}
-			
+			    if(clientPreferences->isRenameDynamicRegistrationSupported()){
+                    collectRegisterCapability(td_rename::request::kMethodInfo);
+                }
 				Req_ClientRegisterCapability::request request;
 				for(auto& it : registeredCapabilities)
 				{
@@ -753,7 +755,7 @@ public:
 				}
 				auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
-				if (ShouldIgnoreFileForIndexing(path))
+				if (ShouldIgnoreFileForIndexing(path.path()))
 					return;
 				work_space_mgr.OnOpen(params.textDocument,&exit_monitor);
 			});
@@ -765,7 +767,7 @@ public:
 			}
 			const auto& params = notify.params;
 			AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
-			if (ShouldIgnoreFileForIndexing(path))
+			if (ShouldIgnoreFileForIndexing(path.path()))
 				return;
 			work_space_mgr.OnChange(params,&exit_monitor);
 			
@@ -778,7 +780,7 @@ public:
 				//Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
-				if (ShouldIgnoreFileForIndexing(path))
+				if (ShouldIgnoreFileForIndexing(path.path()))
 					return;
 				work_space_mgr.OnClose(params.textDocument);
 
@@ -792,7 +794,7 @@ public:
 				//Timer time;
 				const auto& params = notify.params;
 				AbsolutePath path = params.textDocument.uri.GetAbsolutePath();
-				if (ShouldIgnoreFileForIndexing(path))
+				if (ShouldIgnoreFileForIndexing(path.path()))
 					return;
 				work_space_mgr.OnSave(params.textDocument);
 				// 通知消失了

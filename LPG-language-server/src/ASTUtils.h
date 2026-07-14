@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <lpg2/IAst.h>
 #include <unordered_map>
 #include "LibLsp/lsp/lsPosition.h"
@@ -61,7 +62,7 @@ static	void allDefsOfType(std::vector<IAst*>& vec, std::unordered_multimap<std::
 	static std::string getWord(LexStream* lex, int offset);
 	static std::string getText(LexStream* lex, lsPosition& pos);
 	static int toOffset(ILexStream* lex, int line, int column);
-	static boost::optional<lsPosition> toPosition(ILexStream* lex, int offset);
+	static std::optional<lsPosition> toPosition(ILexStream* lex, int offset);
 
 	static std::string getLabelFor(ASTNode *n);
 

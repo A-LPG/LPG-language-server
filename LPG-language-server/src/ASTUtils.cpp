@@ -139,7 +139,7 @@ int ASTUtils::toOffset(ILexStream* lex, int line, int column)
  
 }
 
-boost::optional<lsPosition>  ASTUtils::toPosition(ILexStream* lex, int offset)
+std::optional<lsPosition>  ASTUtils::toPosition(ILexStream* lex, int offset)
 {
     if (!lex)
         return {};

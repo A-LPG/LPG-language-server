@@ -86,7 +86,7 @@ bool CompilationUnit::NeedToCompile() const
 
 string CompilationUnit::getName()
 {
-	return working_file->filename;
+	return working_file->filename.path();
 	
 }
 
@@ -122,7 +122,7 @@ CompilationUnit::CompilationUnit(std::shared_ptr<WorkingFile>& file, WorkSpaceMa
 	insert_local_macro(suffix_string);
 	insert_local_macro(entry_marker_string);
 
-	fileName=JiksPgOption::GetFilename(working_file->filename.path.c_str());
+	fileName=JiksPgOption::GetFilename(working_file->filename.path().c_str());
 }
 void CompilationUnit::insert_local_macro(const char* name)
 {

@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 #include <boost/optional/optional.hpp>
+#include <LibLsp/JsonRpc/optionalVersion.h>
 #include <LibLsp/lsp/lsAny.h>
 
 
@@ -41,27 +42,27 @@ struct GenerationOptions {
 	
 
 	// Search template  path for the LPG tool.
-	boost::optional< std::string> template_search_directory ;
+	optional<std::string> template_search_directory ;
 
 	// Search inlcude  path for the LPG tool.
-	boost::optional< std::string > include_search_directory ;
+	optional<std::string> include_search_directory ;
 
 
 	// Package or namespace name for generated files (default: none).
-	boost::optional< std::string >package ;
+	optional<std::string> package ;
 
-	boost::optional< std::string >language;
+	optional<std::string> language;
 
-	boost::optional< std::string >visitor ;
+	optional<std::string> visitor ;
 
-	boost::optional< std::string > trace;
+	optional<std::string> trace;
 
-	boost::optional< bool > quiet;
+	optional<bool> quiet;
 
-	boost::optional< bool > verbose;
+	optional<bool> verbose;
 
 	// Any additional parameter you want to send to LPG for generation (e.g. "-lalr=3").
-	boost::optional< std::string >additionalParameters ;
+	optional<std::string> additionalParameters ;
 	
 };
 

@@ -8,6 +8,7 @@
 #include <LibLsp/lsp/textDocument/rename.h>
 #include "LibLsp/JsonRpc/RequestInMessage.h"
 #include "LibLsp/JsonRpc/lsResponseMessage.h"
+#include "LibLsp/JsonRpc/optionalVersion.h"
 
 #include "LibLsp/lsp/lsWorkspaceEdit.h"
 #include "LibLsp/lsp/lsTextDocumentIdentifier.h"
@@ -112,9 +113,9 @@ struct RenameHandler
 struct RefactorWorkspaceEdit
 {
 	lsWorkspaceEdit edit;
-	boost::optional<lsCommandWithAny> 
+	optional<lsCommandWithAny> 
 	command;
-	boost::optional < std::string > errorMessage;
+	optional<std::string> errorMessage;
 	MAKE_SWAP_METHOD(RefactorWorkspaceEdit,
 		edit,
 		command,
@@ -316,7 +317,7 @@ MAKE_REFLECT_STRUCT(CallGraphNodeInfo, name,
 struct CallGraphResult
 {
 	std::vector<CallGraphNodeInfo> infos;
-	boost::optional<std::string> errorMessage;
+	optional<std::string> errorMessage;
 	MAKE_SWAP_METHOD(CallGraphResult, infos,errorMessage)
 };
 MAKE_REFLECT_STRUCT(CallGraphResult, infos, errorMessage)
@@ -347,7 +348,7 @@ MAKE_REFLECT_STRUCT(RailRoadScriptInfo, ruleName,rrdInfo)
 struct RailRoadResult
 {
 	std::vector<RailRoadScriptInfo> infos;
-	boost::optional<std::string> errorMessage;
+	optional<std::string> errorMessage;
 	MAKE_SWAP_METHOD(RailRoadResult, infos, errorMessage)
 };
 MAKE_REFLECT_STRUCT(RailRoadResult, infos, errorMessage)

@@ -198,9 +198,9 @@ void process_hover(std::shared_ptr<CompilationUnit>& unit,
                 name.trim_left(unit->runtime_unit->getEscapeToken());
                 auto key = IcuUtil::ws2s(name);
                 if (unit->local_macro_name_table.find(key) != unit->local_macro_name_table.end()) {
-                    std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>>  item;
+                    std::pair<optional<std::string>, optional<lsMarkedString>>  item;
                     item.first = "Build in macro :" + key;
-                    TextDocumentHover::Left left = std::vector< std::pair<boost::optional<std::string>, boost::optional<lsMarkedString>> >();
+                    TextDocumentHover::Left left = std::vector< std::pair<optional<std::string>, optional<lsMarkedString>> >();
 
                     left->push_back(item);
                     out.contents.first = left;
