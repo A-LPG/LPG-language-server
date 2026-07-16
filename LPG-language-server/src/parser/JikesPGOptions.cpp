@@ -279,18 +279,13 @@ OptionDescriptor *priority = new BooleanOptionDescriptor("priority", "???", true
 
 OptionDescriptor *programmingLang = new EnumOptionDescriptor("programming", "language",
                                                              "identifies the desired parser implementation language",
-                                                             &JiksPgOption::programming_language, "xml", "", "",
-                                                             new EnumValue("c", JiksPgOption::C),
+                                                             &JiksPgOption::programming_language, "java", "", "",
 															 new EnumValue("rt_cpp", JiksPgOption::CPP2),
                                                              new EnumValue("cpp", JiksPgOption::CPP),
                                                              new EnumValue("c++", JiksPgOption::CPP),
                                                              new EnumValue("csharp", JiksPgOption::CSHARP),
                                                              new EnumValue("c#", JiksPgOption::CSHARP),
                                                              new EnumValue("java", JiksPgOption::JAVA),
-                                                             new EnumValue("ml", JiksPgOption::ML),
-                                                             new EnumValue("plx", JiksPgOption::PLX),
-                                                             new EnumValue("plxasm", JiksPgOption::PLXASM),
-                                                             new EnumValue("xml", JiksPgOption::XML),
 															 new EnumValue("python3", JiksPgOption::PYTHON3),
     new EnumValue("python2", JiksPgOption::PYTHON2),
     new EnumValue("dart", JiksPgOption::DART),
@@ -361,18 +356,13 @@ OptionDescriptor *tabFile = new StringOptionDescriptor("tab", "file", "???", NUL
 OptionDescriptor *table = new EnumOptionDescriptor("table", "???",
                                                    &OptionProcessor::processTable,
                                                    "",
-                                                   new EnumValue("c", JiksPgOption::C),
 												   new EnumValue("rt_cpp", JiksPgOption::CPP2),
                                                    new EnumValue("cpp", JiksPgOption::CPP),
                                                    new EnumValue("c++", JiksPgOption::CPP),
 												   new EnumValue("csharp", JiksPgOption::CSHARP),
 											       new EnumValue("c#", JiksPgOption::CSHARP),
                                                    new EnumValue("java", JiksPgOption::JAVA),
-                                                   new EnumValue("ml", JiksPgOption::ML),
-                                                   new EnumValue("none", JiksPgOption::XML),
-                                                   new EnumValue("plx", JiksPgOption::PLX),
-                                                   new EnumValue("plxasm", JiksPgOption::PLXASM),
-                                                   new EnumValue("xml", JiksPgOption::XML),
+                                                   new EnumValue("none", JiksPgOption::NONE),
 												   new EnumValue("typescript", JiksPgOption::TSC),
     new EnumValue("python3", JiksPgOption::PYTHON3),
     new EnumValue("python2", JiksPgOption::PYTHON2),
@@ -388,11 +378,9 @@ OptionProcessor::processTable(OptionValue *v)
 
     if (!value.compare_nocase("none")) {
         options->table = false;
-        options->programming_language = JiksPgOption::XML;
+        options->programming_language = JiksPgOption::NONE;
     } else {
-        if (!value.compare_nocase("c")) {
-            options->programming_language = JiksPgOption::C;
-        } else if (!value.compare_nocase("cpp") || !value.compare_nocase("c++")) {
+        if (!value.compare_nocase("cpp") || !value.compare_nocase("c++")) {
             options->programming_language = JiksPgOption::CPP;
         }
         else if (!value.compare_nocase("rt_cpp")) {
@@ -413,16 +401,8 @@ OptionProcessor::processTable(OptionValue *v)
         else if (!value.compare_nocase("dart")) {
             options->programming_language = JiksPgOption::DART;
         }
-    	else if (!value.compare_nocase("java")) {
+        else if (!value.compare_nocase("java")) {
             options->programming_language = JiksPgOption::JAVA;
-        } else if (!value.compare_nocase("ml")) {
-            options->programming_language = JiksPgOption::ML;
-        } else if (!value.compare_nocase("plx")) {
-            options->programming_language = JiksPgOption::PLX;
-        } else if (!value.compare_nocase("plxasm")) {
-            options->programming_language = JiksPgOption::PLXASM;
-        } else if (!value.compare_nocase("xml")) {
-            options->programming_language = JiksPgOption::XML;
         }
         else if (!value.compare_nocase("rust")) {
             options->programming_language = JiksPgOption::RUST;
