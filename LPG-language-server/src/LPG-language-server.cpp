@@ -39,7 +39,7 @@
 #include "LibLsp/lsp/general/shutdown.h"
 #include "LibLsp/lsp/workspace/did_change_watched_files.h"
 #include "LibLsp/lsp/general/initialized.h"
-#include "LibLsp/JsonRpc/cancellation.h"
+#include "LibLsp/JsonRpc/Cancellation.h"
 #include "LibLsp/JsonRpc/optionalVersion.h"
 #include "LibLsp/lsp/textDocument/SemanticTokens.h"
 #include "LibLsp/lsp/textDocument/rename.h"
