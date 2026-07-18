@@ -144,14 +144,22 @@ foreach(include_dir  ${LSP_SEVER_THIRD_PARTY_DIR})
     endif()
 endforeach()
 
-find_package(Boost REQUIRED COMPONENTS filesystem program_options system thread)
+# Boost.System is header-only on modern Homebrew Boost (1.89+); do not
+# require a boost_system CMake package that may not ship a compiled target.
+find_package(Boost REQUIRED COMPONENTS filesystem program_options thread)
+find_package(Boost QUIET COMPONENTS system)
+set(_lpg_lsp_boost_libs
+        Boost::filesystem Boost::program_options Boost::thread)
+if(TARGET Boost::system)
+    list(APPEND _lpg_lsp_boost_libs Boost::system)
+endif()
 
 add_subdirectory(third_party/LspCpp)
 add_subdirectory(third_party/LPG-cpp-runtime)
 target_include_directories(lpg-language-server PRIVATE cpplpg2 lspcpp)
 target_include_directories(lpg-language-server SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(lpg-language-server PRIVATE cpplpg2 lspcpp
-        Boost::filesystem Boost::program_options Boost::system Boost::thread)
+        ${_lpg_lsp_boost_libs})
 
 ### Sources
 set(LSP_SEVER_LIST
