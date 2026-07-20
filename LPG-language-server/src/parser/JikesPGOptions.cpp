@@ -112,6 +112,8 @@ OptionDescriptor *debug = new BooleanOptionDescriptor("debug", "debug", false, &
 
 OptionDescriptor *edit = new BooleanOptionDescriptor("edit", "edit", false, &JiksPgOption::edit);
 
+OptionDescriptor *ebnf = new BooleanOptionDescriptor("ebnf", "Enable EBNF sugar (? * + groups and ISO brackets)", false, &JiksPgOption::ebnf);
+
 OptionDescriptor *errorMaps = new BooleanOptionDescriptor("error", "maps", "error-maps", false, &JiksPgOption::error_maps);
 
 OptionDescriptor *escapeChar = new CharOptionDescriptor("escape", "escape=<character>", " ",

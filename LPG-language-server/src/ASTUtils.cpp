@@ -246,9 +246,9 @@ std::string ASTUtils::getLabelFor(ASTNode* n)
         auto r = (rule*)n;
         auto nt = static_cast<nonTerm*>(r->getParent()->getParent());
         std::string nonTermName = nt->getruleNameWithAttributes()->getSYMBOL()->to_utf8_string();
-        return nonTermName + " " + nt->getproduces()->to_utf8_string() + " " + r->getsymWithAttrsList()->to_utf8_string();
+        return nonTermName + " " + nt->getproduces()->to_utf8_string() + " " + r->getebnf_seq()->to_utf8_string();
     }
-    if (dynamic_cast<symWithAttrsList*>(n))
+    if (dynamic_cast<ebnf_elemList*>(n))
     {
         return n->to_utf8_string();
     }

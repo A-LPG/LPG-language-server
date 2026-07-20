@@ -27,6 +27,11 @@
     RIGHT_PAREN ::= ')'
     LEFT_BRACKET ::= '['
     RIGHT_BRACKET ::= ']'
+    LEFT_BRACE ::= '{'
+    RIGHT_BRACE ::= '}'
+    STAR ::= '*'
+    PLUS ::= '+'
+    QUESTION ::= '?'
     SHARP ::= '#'
 %End
 
@@ -225,9 +230,26 @@
     produces ::= '->'
     produces ::= '->?'
 
-    rule ::= symWithAttrsList action_segment_list
+    rule ::= ebnf_seq action_segment_list
 
-    symWithAttrsList$$symWithAttrs ::= %empty | symWithAttrsList symWithAttrs
+    -- EBNF sugar AST (IDE): groups, postfix quantifiers, ISO [ ] / { }
+    ebnf_seq$$ebnf_elem ::= %empty | ebnf_seq ebnf_elem
+
+    ebnf_elem ::= ebnf_primary
+    ebnf_elem ::= ebnf_primary ebnf_quantifier
+
+    ebnf_primary ::= symWithAttrs
+    ebnf_primary$ebnf_group ::= '('$ ebnf_alt_list ')'$
+    ebnf_primary$ebnf_iso_opt ::= '['$ ebnf_seq ']'$
+    ebnf_primary$ebnf_iso_star ::= '{'$ ebnf_seq '}'$
+
+    ebnf_alt_list$$ebnf_seq ::= ebnf_seq
+                              | ebnf_alt_list '|'$ ebnf_seq
+
+    ebnf_quantifier ::= '?'
+    ebnf_quantifier ::= '*'
+    ebnf_quantifier ::= '+'
+    ebnf_quantifier ::= '*' MACRO_NAME
 
     symWithAttrs ::= EMPTY_KEY
     symWithAttrs ::= SYMBOL optAttrList

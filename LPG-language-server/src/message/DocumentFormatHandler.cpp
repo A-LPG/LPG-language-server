@@ -302,6 +302,31 @@ struct FormatVisitor : public AbstractPreOrderVisitor {
     fBuff.append(n->getMACRO_NAME()->toString() );
     return false;
 }
+ bool visit(ebnf_group* n) {
+    fBuff.append(L" (");
+    return true;
+}
+ void endVisit(ebnf_group* n) {
+    fBuff.append(L")");
+}
+ bool visit(ebnf_iso_opt* n) {
+    fBuff.append(L" [");
+    return true;
+}
+ void endVisit(ebnf_iso_opt* n) {
+    fBuff.push_back(L']');
+}
+ bool visit(ebnf_iso_star* n) {
+    fBuff.append(L" {");
+    return true;
+}
+ void endVisit(ebnf_iso_star* n) {
+    fBuff.push_back(L'}');
+}
+ void endVisit(ebnf_elem* n) {
+    if (n->getebnf_quantifier())
+        fBuff.append(n->getebnf_quantifier()->toString());
+}
 
 };
 

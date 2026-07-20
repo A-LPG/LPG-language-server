@@ -263,7 +263,7 @@ struct InlineNonTerminalHandler::Data
 			refactor_workspace_edit.errorMessage = "Non-terminal to be inlined cannot have an action block";
 			return;
 		}
-		symWithAttrsList* fRHS = rule_->getsymWithAttrsList();
+		ebnf_elemList* fRHS = rule_->getebnf_seq();
 		bool fInlineAll = params.fInlineAll;
 		std::vector<ASTNode*> refs;
 		if (fInlineAll)
@@ -435,8 +435,8 @@ struct MakeEmptyNonTerminalHandler::Data
 		auto rhs1 = static_cast<rule*>(rhSides->getElementAt(0));
 		auto rhs2 = static_cast<rule*>(rhSides->getElementAt(1));
 
-		auto rhs1Syms = rhs1->getsymWithAttrsList();
-		auto rhs2Syms = rhs2->getsymWithAttrsList();
+		auto rhs1Syms = rhs1->getebnf_seq();
+		auto rhs2Syms = rhs2->getebnf_seq();
 
 		// swap rhs1/rhs2 as needed to ensure that rhs1 is the "leaf case"
 		if (rhs1Syms->size() == rhs2Syms->size() + 1) {
@@ -619,8 +619,8 @@ struct MakeNonEmptyNonTerminalHandler::Data
 		auto rhs1 = static_cast<rule*>(rhSides->getElementAt(0));
 		auto rhs2 = static_cast<rule*>(rhSides->getElementAt(1));
 
-		auto rhs1Syms = rhs1->getsymWithAttrsList();
-		auto rhs2Syms = rhs2->getsymWithAttrsList();
+		auto rhs1Syms = rhs1->getebnf_seq();
+		auto rhs2Syms = rhs2->getebnf_seq();
 		if (rhs2Syms->size() == 1 && rhs2Syms->getElementAt(0)->toString()==(L"$empty")) {
 			auto tmp = rhs1;
 			auto tmpList = rhs1Syms;
@@ -845,7 +845,7 @@ struct MakeLeftRecursiveHandler::Data
 	}
 	bool checkProduction(rule* prod, nonTerm* nt)
 	{
-		auto rhsSyms = prod->getsymWithAttrsList();
+		auto rhsSyms = prod->getebnf_seq();
 		 int N = rhsSyms->size();
 
 		for (int i = 0; i < N; i++) { // make sure the production is of the form a ::= b c ... a
@@ -869,7 +869,7 @@ struct MakeLeftRecursiveHandler::Data
 	{
 		// TODO Replace hand-written transform code with usage of SAFARI AST rewriter.
 		auto ntSym = nt->getruleNameWithAttributes()->getSYMBOL()->toString();
-		auto syms = prod->getsymWithAttrsList();
+		auto syms = prod->getebnf_seq();
 		int N = syms->size();
 		auto symToDelete = syms->getElementAt(N - 1);
 	

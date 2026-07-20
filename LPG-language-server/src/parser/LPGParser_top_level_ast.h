@@ -94,7 +94,12 @@ namespace LPGParser_top_level_ast{
   struct RuleName;
   struct ruleList;
   struct rule;
-  struct symWithAttrsList;
+  struct ebnf_elemList;
+  struct ebnf_elem;
+  struct ebnf_group;
+  struct ebnf_iso_opt;
+  struct ebnf_iso_star;
+  struct ebnf_seqList;
   struct symAttrs;
   struct action_segment;
   struct start_symbolList;
@@ -136,6 +141,10 @@ namespace LPGParser_top_level_ast{
   struct produces1;
   struct produces2;
   struct produces3;
+  struct ebnf_quantifier0;
+  struct ebnf_quantifier1;
+  struct ebnf_quantifier2;
+  struct ebnf_quantifier3;
   struct symWithAttrs0;
   struct symWithAttrs1;
   struct start_symbol0;
@@ -201,7 +210,12 @@ struct Visitor
     virtual void visit(RuleName *n)=0;
     virtual void visit(ruleList *n)=0;
     virtual void visit(rule *n)=0;
-    virtual void visit(symWithAttrsList *n)=0;
+    virtual void visit(ebnf_elemList *n)=0;
+    virtual void visit(ebnf_elem *n)=0;
+    virtual void visit(ebnf_group *n)=0;
+    virtual void visit(ebnf_iso_opt *n)=0;
+    virtual void visit(ebnf_iso_star *n)=0;
+    virtual void visit(ebnf_seqList *n)=0;
     virtual void visit(symAttrs *n)=0;
     virtual void visit(action_segment *n)=0;
     virtual void visit(start_symbolList *n)=0;
@@ -243,6 +257,10 @@ struct Visitor
     virtual void visit(produces1 *n)=0;
     virtual void visit(produces2 *n)=0;
     virtual void visit(produces3 *n)=0;
+    virtual void visit(ebnf_quantifier0 *n)=0;
+    virtual void visit(ebnf_quantifier1 *n)=0;
+    virtual void visit(ebnf_quantifier2 *n)=0;
+    virtual void visit(ebnf_quantifier3 *n)=0;
     virtual void visit(symWithAttrs0 *n)=0;
     virtual void visit(symWithAttrs1 *n)=0;
     virtual void visit(start_symbol0 *n)=0;
@@ -308,7 +326,12 @@ struct ArgumentVisitor
     virtual void visit(RuleName *n, Object* o)=0;
     virtual void visit(ruleList *n, Object* o)=0;
     virtual void visit(rule *n, Object* o)=0;
-    virtual void visit(symWithAttrsList *n, Object* o)=0;
+    virtual void visit(ebnf_elemList *n, Object* o)=0;
+    virtual void visit(ebnf_elem *n, Object* o)=0;
+    virtual void visit(ebnf_group *n, Object* o)=0;
+    virtual void visit(ebnf_iso_opt *n, Object* o)=0;
+    virtual void visit(ebnf_iso_star *n, Object* o)=0;
+    virtual void visit(ebnf_seqList *n, Object* o)=0;
     virtual void visit(symAttrs *n, Object* o)=0;
     virtual void visit(action_segment *n, Object* o)=0;
     virtual void visit(start_symbolList *n, Object* o)=0;
@@ -350,6 +373,10 @@ struct ArgumentVisitor
     virtual void visit(produces1 *n, Object* o)=0;
     virtual void visit(produces2 *n, Object* o)=0;
     virtual void visit(produces3 *n, Object* o)=0;
+    virtual void visit(ebnf_quantifier0 *n, Object* o)=0;
+    virtual void visit(ebnf_quantifier1 *n, Object* o)=0;
+    virtual void visit(ebnf_quantifier2 *n, Object* o)=0;
+    virtual void visit(ebnf_quantifier3 *n, Object* o)=0;
     virtual void visit(symWithAttrs0 *n, Object* o)=0;
     virtual void visit(symWithAttrs1 *n, Object* o)=0;
     virtual void visit(start_symbol0 *n, Object* o)=0;
@@ -415,7 +442,12 @@ struct ResultVisitor
   virtual  lpg::Any visit(RuleName *n)=0;
   virtual  lpg::Any visit(ruleList *n)=0;
   virtual  lpg::Any visit(rule *n)=0;
-  virtual  lpg::Any visit(symWithAttrsList *n)=0;
+  virtual  lpg::Any visit(ebnf_elemList *n)=0;
+  virtual  lpg::Any visit(ebnf_elem *n)=0;
+  virtual  lpg::Any visit(ebnf_group *n)=0;
+  virtual  lpg::Any visit(ebnf_iso_opt *n)=0;
+  virtual  lpg::Any visit(ebnf_iso_star *n)=0;
+  virtual  lpg::Any visit(ebnf_seqList *n)=0;
   virtual  lpg::Any visit(symAttrs *n)=0;
   virtual  lpg::Any visit(action_segment *n)=0;
   virtual  lpg::Any visit(start_symbolList *n)=0;
@@ -457,6 +489,10 @@ struct ResultVisitor
   virtual  lpg::Any visit(produces1 *n)=0;
   virtual  lpg::Any visit(produces2 *n)=0;
   virtual  lpg::Any visit(produces3 *n)=0;
+  virtual  lpg::Any visit(ebnf_quantifier0 *n)=0;
+  virtual  lpg::Any visit(ebnf_quantifier1 *n)=0;
+  virtual  lpg::Any visit(ebnf_quantifier2 *n)=0;
+  virtual  lpg::Any visit(ebnf_quantifier3 *n)=0;
   virtual  lpg::Any visit(symWithAttrs0 *n)=0;
   virtual  lpg::Any visit(symWithAttrs1 *n)=0;
   virtual  lpg::Any visit(start_symbol0 *n)=0;
@@ -522,7 +558,12 @@ struct ResultArgumentVisitor
   virtual  lpg::Any visit(RuleName *n, Object* o)=0;
   virtual  lpg::Any visit(ruleList *n, Object* o)=0;
   virtual  lpg::Any visit(rule *n, Object* o)=0;
-  virtual  lpg::Any visit(symWithAttrsList *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_elemList *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_elem *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_group *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_iso_opt *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_iso_star *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_seqList *n, Object* o)=0;
   virtual  lpg::Any visit(symAttrs *n, Object* o)=0;
   virtual  lpg::Any visit(action_segment *n, Object* o)=0;
   virtual  lpg::Any visit(start_symbolList *n, Object* o)=0;
@@ -564,6 +605,10 @@ struct ResultArgumentVisitor
   virtual  lpg::Any visit(produces1 *n, Object* o)=0;
   virtual  lpg::Any visit(produces2 *n, Object* o)=0;
   virtual  lpg::Any visit(produces3 *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_quantifier0 *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_quantifier1 *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_quantifier2 *n, Object* o)=0;
+  virtual  lpg::Any visit(ebnf_quantifier3 *n, Object* o)=0;
   virtual  lpg::Any visit(symWithAttrs0 *n, Object* o)=0;
   virtual  lpg::Any visit(symWithAttrs1 *n, Object* o)=0;
   virtual  lpg::Any visit(start_symbol0 *n, Object* o)=0;
@@ -740,8 +785,23 @@ struct PreOrderVisitor :public IAstVisitor
  virtual   bool visit(rule *n)=0;
   virtual  void endVisit(rule *n)=0;
 
- virtual   bool visit(symWithAttrsList *n)=0;
-  virtual  void endVisit(symWithAttrsList *n)=0;
+ virtual   bool visit(ebnf_elemList *n)=0;
+  virtual  void endVisit(ebnf_elemList *n)=0;
+
+ virtual   bool visit(ebnf_elem *n)=0;
+  virtual  void endVisit(ebnf_elem *n)=0;
+
+ virtual   bool visit(ebnf_group *n)=0;
+  virtual  void endVisit(ebnf_group *n)=0;
+
+ virtual   bool visit(ebnf_iso_opt *n)=0;
+  virtual  void endVisit(ebnf_iso_opt *n)=0;
+
+ virtual   bool visit(ebnf_iso_star *n)=0;
+  virtual  void endVisit(ebnf_iso_star *n)=0;
+
+ virtual   bool visit(ebnf_seqList *n)=0;
+  virtual  void endVisit(ebnf_seqList *n)=0;
 
  virtual   bool visit(symAttrs *n)=0;
   virtual  void endVisit(symAttrs *n)=0;
@@ -866,6 +926,18 @@ struct PreOrderVisitor :public IAstVisitor
  virtual   bool visit(produces3 *n)=0;
   virtual  void endVisit(produces3 *n)=0;
 
+ virtual   bool visit(ebnf_quantifier0 *n)=0;
+  virtual  void endVisit(ebnf_quantifier0 *n)=0;
+
+ virtual   bool visit(ebnf_quantifier1 *n)=0;
+  virtual  void endVisit(ebnf_quantifier1 *n)=0;
+
+ virtual   bool visit(ebnf_quantifier2 *n)=0;
+  virtual  void endVisit(ebnf_quantifier2 *n)=0;
+
+ virtual   bool visit(ebnf_quantifier3 *n)=0;
+  virtual  void endVisit(ebnf_quantifier3 *n)=0;
+
  virtual   bool visit(symWithAttrs0 *n)=0;
   virtual  void endVisit(symWithAttrs0 *n)=0;
 
@@ -913,7 +985,7 @@ struct ASTNode :public IAst
         this->rightIToken = rightIToken;
     }
 
-    virtual void initialize() {}
+    void initialize() {}
 
     /**
      * A list of all children of this node, excluding the nullptr ones.
@@ -946,6 +1018,7 @@ struct ASTNode :public IAst
      virtual void accept(ArgumentVisitor *v, Object* o)=0;
      virtual lpg::Any accept(ResultVisitor *v)=0;
      virtual lpg::Any accept(ResultArgumentVisitor *v, Object* o)=0;
+     virtual void enter(PreOrderVisitor *v)=0;
 };
 
 struct AbstractASTNodeList :public ASTNode ,public IAbstractArrayList<ASTNode*>
@@ -1105,7 +1178,7 @@ struct LPG :public ASTNode
     }
     int getRuleIndex() { return 1 ;}
 
-    //#line 52 "LPGParser.g
+    //#line 57 "LPGParser.g
 
    
     void initialize() {
@@ -1161,19 +1234,7 @@ struct LPG_itemList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getLPG_itemAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
+    void enter(PreOrderVisitor *v);
     int getRuleIndex() { return 3 ;}
 };
 
@@ -2575,10 +2636,10 @@ struct option :public ASTNode
 *<li>Rule 37:  symbol_list ::= symbol_list ,$ SYMBOL
 *<li>Rule 75:  drop_symbols ::= SYMBOL
 *<li>Rule 76:  drop_symbols ::= drop_symbols SYMBOL
-*<li>Rule 136:  barSymbolList ::= SYMBOL
-*<li>Rule 137:  barSymbolList ::= barSymbolList |$ SYMBOL
-*<li>Rule 141:  recover_segment ::= $Empty
-*<li>Rule 142:  recover_segment ::= recover_segment recover_symbol
+*<li>Rule 148:  barSymbolList ::= SYMBOL
+*<li>Rule 149:  barSymbolList ::= barSymbolList |$ SYMBOL
+*<li>Rule 153:  recover_segment ::= $Empty
+*<li>Rule 154:  recover_segment ::= recover_segment recover_symbol
  *</b>
  */
 struct SYMBOLList :public AbstractASTNodeList{
@@ -2623,22 +2684,8 @@ struct SYMBOLList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                ASTNodeToken* element = (ASTNodeToken*)getSYMBOLAt(i);
-                if (! v->preVisit(element)) continue;
-                element->enter(v);
-                v->postVisit(element);
-            }
-        }
-        v->endVisit(this);
-    }
-    int getRuleIndex() { return 142 ;}
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 154 ;}
 };
 
 /**
@@ -2689,19 +2736,7 @@ struct aliasSpecList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getaliasSpecAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
+    void enter(PreOrderVisitor *v);
     int getRuleIndex() { return 39 ;}
 };
 
@@ -2854,7 +2889,7 @@ struct defineSpec :public ASTNode
     }
     int getRuleIndex() { return 57 ;}
 
-    //#line 123 "LPGParser.g
+    //#line 128 "LPGParser.g
 
     void initialize() {
 environment->_define_specs.insert({getmacro_name_symbol()->toString(), this});
@@ -2943,19 +2978,7 @@ struct terminal_symbolList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getterminal_symbolAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
+    void enter(PreOrderVisitor *v);
     int getRuleIndex() { return 65 ;}
 };
 
@@ -2965,8 +2988,8 @@ struct terminal_symbolList :public AbstractASTNodeList{
 *<li>Rule 67:  globals_segment ::= globals_segment action_segment
 *<li>Rule 96:  notice_segment ::= action_segment
 *<li>Rule 97:  notice_segment ::= notice_segment action_segment
-*<li>Rule 146:  action_segment_list ::= $Empty
-*<li>Rule 147:  action_segment_list ::= action_segment_list action_segment
+*<li>Rule 158:  action_segment_list ::= $Empty
+*<li>Rule 159:  action_segment_list ::= action_segment_list action_segment
  *</b>
  */
 struct action_segmentList :public AbstractASTNodeList{
@@ -3012,7 +3035,7 @@ struct action_segmentList :public AbstractASTNodeList{
         v->postVisit(this);
     }
     void enter(PreOrderVisitor *v);
-    int getRuleIndex() { return 147 ;}
+    int getRuleIndex() { return 159 ;}
 };
 
 /**
@@ -3124,19 +3147,7 @@ struct drop_commandList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getdrop_commandAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
+    void enter(PreOrderVisitor *v);
     int getRuleIndex() { return 72 ;}
 };
 
@@ -3390,19 +3401,7 @@ struct keywordSpecList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getkeywordSpecAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
+    void enter(PreOrderVisitor *v);
     int getRuleIndex() { return 84 ;}
 };
 
@@ -3785,7 +3784,7 @@ struct nonTerm :public ASTNode
     }
     int getRuleIndex() { return 101 ;}
 
-    //#line 198 "LPGParser.g
+    //#line 203 "LPGParser.g
 
     void initialize();
  };
@@ -3919,24 +3918,24 @@ struct ruleList :public AbstractASTNodeList{
 
 /**
  *<b>
-*<li>Rule 111:  rule ::= symWithAttrsList action_segment_list
+*<li>Rule 111:  rule ::= ebnf_seq action_segment_list
  *</b>
  */
 struct rule :public ASTNode
 {
-    symWithAttrsList *lpg_symWithAttrsList;
+    ebnf_elemList *lpg_ebnf_seq;
     action_segmentList *lpg_action_segment_list;
 
-    symWithAttrsList *getsymWithAttrsList() { return lpg_symWithAttrsList; };
-    void setsymWithAttrsList(symWithAttrsList *lpg_symWithAttrsList) { this->lpg_symWithAttrsList = lpg_symWithAttrsList; }
+    ebnf_elemList *getebnf_seq() { return lpg_ebnf_seq; };
+    void setebnf_seq(ebnf_elemList *lpg_ebnf_seq) { this->lpg_ebnf_seq = lpg_ebnf_seq; }
     action_segmentList *getaction_segment_list() { return lpg_action_segment_list; };
     void setaction_segment_list(action_segmentList *lpg_action_segment_list) { this->lpg_action_segment_list = lpg_action_segment_list; }
 
     rule(IToken* leftIToken, IToken* rightIToken,
-         symWithAttrsList *lpg_symWithAttrsList,
+         ebnf_elemList *lpg_ebnf_seq,
          action_segmentList *lpg_action_segment_list):ASTNode(leftIToken, rightIToken)    {
-        this->lpg_symWithAttrsList = lpg_symWithAttrsList;
-        ((ASTNode*) lpg_symWithAttrsList)->setParent(this);
+        this->lpg_ebnf_seq = lpg_ebnf_seq;
+        ((ASTNode*) lpg_ebnf_seq)->setParent(this);
         this->lpg_action_segment_list = lpg_action_segment_list;
         ((ASTNode*) lpg_action_segment_list)->setParent(this);
         initialize();
@@ -3948,7 +3947,7 @@ struct rule :public ASTNode
     std::vector<IAst*> getAllChildren()
     {
         std::vector<IAst*> list;
-        if(lpg_symWithAttrsList)  list.push_back((IAst*)lpg_symWithAttrsList);
+        if(lpg_ebnf_seq)  list.push_back((IAst*)lpg_ebnf_seq);
         if(lpg_action_segment_list)  list.push_back((IAst*)lpg_action_segment_list);
         return list;
     }
@@ -3970,7 +3969,7 @@ struct rule :public ASTNode
         bool checkChildren = v->visit(this);
         if (checkChildren)
         {
-            ((IAst*)lpg_symWithAttrsList)->accept(v);
+            ((IAst*)lpg_ebnf_seq)->accept(v);
             ((IAst*)lpg_action_segment_list)->accept(v);
         }
         v->endVisit(this);
@@ -3980,43 +3979,43 @@ struct rule :public ASTNode
 
 /**
  *<b>
-*<li>Rule 112:  symWithAttrsList ::= $Empty
-*<li>Rule 113:  symWithAttrsList ::= symWithAttrsList symWithAttrs
+*<li>Rule 112:  ebnf_seq ::= $Empty
+*<li>Rule 113:  ebnf_seq ::= ebnf_seq ebnf_elem
  *</b>
  */
-struct symWithAttrsList :public AbstractASTNodeList{
-    ASTNode* getsymWithAttrsAt(int i) { return (ASTNode*) getElementAt(i); }
+struct ebnf_elemList :public AbstractASTNodeList{
+    ASTNode* getebnf_elemAt(int i) { return (ASTNode*) getElementAt(i); }
 
-    symWithAttrsList(IToken* leftIToken, IToken* rightIToken, bool leftRecursive):AbstractASTNodeList(leftIToken, rightIToken, leftRecursive)
+    ebnf_elemList(IToken* leftIToken, IToken* rightIToken, bool leftRecursive):AbstractASTNodeList(leftIToken, rightIToken, leftRecursive)
 {
     }
 
-    symWithAttrsList(ASTNode* lpg_symWithAttrs, bool leftRecursive):AbstractASTNodeList        ((ASTNode*) lpg_symWithAttrs, leftRecursive)
+    ebnf_elemList(ASTNode* lpg_ebnf_elem, bool leftRecursive):AbstractASTNodeList        ((ASTNode*) lpg_ebnf_elem, leftRecursive)
     {
-        ((ASTNode*) lpg_symWithAttrs)->setParent(this);
+        ((ASTNode*) lpg_ebnf_elem)->setParent(this);
     }
 
-    void addElement(ASTNode *lpg_symWithAttrs)
+    void addElement(ASTNode *lpg_ebnf_elem)
     {
-        AbstractASTNodeList::addElement((ASTNode*) lpg_symWithAttrs);
-        ((ASTNode*) lpg_symWithAttrs)->setParent(this);
+        AbstractASTNodeList::addElement((ASTNode*) lpg_ebnf_elem);
+        ((ASTNode*) lpg_ebnf_elem)->setParent(this);
     }
 
 
-    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getsymWithAttrsAt(i)->accept(v); }
-    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getsymWithAttrsAt(i)->accept(v, o); }
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) getebnf_elemAt(i)->accept(v); }
+    void accept(ArgumentVisitor *v, Object* o) { for (int i = 0; i < size(); i++) getebnf_elemAt(i)->accept(v, o); }
     lpg::Any accept(ResultVisitor *v)
     {
         std::vector<lpg::Any> result;
         for (int i = 0; i < size(); i++)
-            result.push_back(getsymWithAttrsAt(i)->accept(v));
+            result.push_back(getebnf_elemAt(i)->accept(v));
         return result;
     }
     lpg::Any accept(ResultArgumentVisitor *v, Object *o)
     {
         std::vector<lpg::Any> result;
         for (int i = 0; i < size(); i++)
-            result.push_back(getsymWithAttrsAt(i)->accept(v, o));
+            result.push_back(getebnf_elemAt(i)->accept(v, o));
         return result;
     }
 
@@ -4026,26 +4025,284 @@ struct symWithAttrsList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 113 ;}
+};
+
+/**
+ *<em>
+*<li>Rule 114:  ebnf_elem ::= ebnf_primary
+ *</em>
+ *<p>
+ *<b>
+*<li>Rule 115:  ebnf_elem ::= ebnf_primary ebnf_quantifier
+ *</b>
+ */
+struct ebnf_elem :public ASTNode
+{
+    ASTNode *lpg_ebnf_primary;
+    ASTNode *lpg_ebnf_quantifier;
+
+    ASTNode *getebnf_primary() { return lpg_ebnf_primary; };
+    void setebnf_primary(ASTNode *lpg_ebnf_primary) { this->lpg_ebnf_primary = lpg_ebnf_primary; }
+    ASTNode *getebnf_quantifier() { return lpg_ebnf_quantifier; };
+    void setebnf_quantifier(ASTNode *lpg_ebnf_quantifier) { this->lpg_ebnf_quantifier = lpg_ebnf_quantifier; }
+
+    ebnf_elem(IToken* leftIToken, IToken* rightIToken,
+              ASTNode *lpg_ebnf_primary,
+              ASTNode *lpg_ebnf_quantifier):ASTNode(leftIToken, rightIToken)    {
+        this->lpg_ebnf_primary = lpg_ebnf_primary;
+        ((ASTNode*) lpg_ebnf_primary)->setParent(this);
+        this->lpg_ebnf_quantifier = lpg_ebnf_quantifier;
+        ((ASTNode*) lpg_ebnf_quantifier)->setParent(this);
+        initialize();
+    }
+
+    /**
+     * A list of all children of this node,don't including the nullptr ones.
+     */
+    std::vector<IAst*> getAllChildren()
+    {
+        std::vector<IAst*> list;
+        if(lpg_ebnf_primary)  list.push_back((IAst*)lpg_ebnf_primary);
+        if(lpg_ebnf_quantifier)  list.push_back((IAst*)lpg_ebnf_quantifier);
+        return list;
+    }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
     void enter(PreOrderVisitor *v)
     {
         bool checkChildren = v->visit(this);
         if (checkChildren)
         {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getsymWithAttrsAt(i);
-                element->accept(v);
-            }
+            ((IAst*)lpg_ebnf_primary)->accept(v);
+            ((IAst*)lpg_ebnf_quantifier)->accept(v);
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 113 ;}
+    int getRuleIndex() { return 115 ;}
 };
 
 /**
  *<b>
-*<li>Rule 116:  optAttrList ::= $Empty
-*<li>Rule 117:  optAttrList ::= MACRO_NAME
+*<li>Rule 117:  ebnf_primary ::= ($ ebnf_alt_list )$
+ *</b>
+ */
+struct ebnf_group :public ASTNode
+{
+    ebnf_seqList *lpg_ebnf_alt_list;
+
+    ebnf_seqList *getebnf_alt_list() { return lpg_ebnf_alt_list; };
+    void setebnf_alt_list(ebnf_seqList *lpg_ebnf_alt_list) { this->lpg_ebnf_alt_list = lpg_ebnf_alt_list; }
+
+    ebnf_group(IToken* leftIToken, IToken* rightIToken,
+               ebnf_seqList *lpg_ebnf_alt_list):ASTNode(leftIToken, rightIToken)    {
+        this->lpg_ebnf_alt_list = lpg_ebnf_alt_list;
+        ((ASTNode*) lpg_ebnf_alt_list)->setParent(this);
+        initialize();
+    }
+
+    /**
+     * A list of all children of this node,don't including the nullptr ones.
+     */
+    std::vector<IAst*> getAllChildren()
+    {
+        std::vector<IAst*> list;
+        if(lpg_ebnf_alt_list)  list.push_back((IAst*)lpg_ebnf_alt_list);
+        return list;
+    }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        bool checkChildren = v->visit(this);
+        if (checkChildren)
+            ((IAst*)lpg_ebnf_alt_list)->accept(v);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 117 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 118:  ebnf_primary ::= [$ ebnf_seq ]$
+ *</b>
+ */
+struct ebnf_iso_opt :public ASTNode
+{
+    ebnf_elemList *lpg_ebnf_seq;
+
+    ebnf_elemList *getebnf_seq() { return lpg_ebnf_seq; };
+    void setebnf_seq(ebnf_elemList *lpg_ebnf_seq) { this->lpg_ebnf_seq = lpg_ebnf_seq; }
+
+    ebnf_iso_opt(IToken* leftIToken, IToken* rightIToken,
+                 ebnf_elemList *lpg_ebnf_seq):ASTNode(leftIToken, rightIToken)    {
+        this->lpg_ebnf_seq = lpg_ebnf_seq;
+        ((ASTNode*) lpg_ebnf_seq)->setParent(this);
+        initialize();
+    }
+
+    /**
+     * A list of all children of this node,don't including the nullptr ones.
+     */
+    std::vector<IAst*> getAllChildren()
+    {
+        std::vector<IAst*> list;
+        if(lpg_ebnf_seq)  list.push_back((IAst*)lpg_ebnf_seq);
+        return list;
+    }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        bool checkChildren = v->visit(this);
+        if (checkChildren)
+            ((IAst*)lpg_ebnf_seq)->accept(v);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 118 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 119:  ebnf_primary ::= {$ ebnf_seq }$
+ *</b>
+ */
+struct ebnf_iso_star :public ASTNode
+{
+    ebnf_elemList *lpg_ebnf_seq;
+
+    ebnf_elemList *getebnf_seq() { return lpg_ebnf_seq; };
+    void setebnf_seq(ebnf_elemList *lpg_ebnf_seq) { this->lpg_ebnf_seq = lpg_ebnf_seq; }
+
+    ebnf_iso_star(IToken* leftIToken, IToken* rightIToken,
+                  ebnf_elemList *lpg_ebnf_seq):ASTNode(leftIToken, rightIToken)    {
+        this->lpg_ebnf_seq = lpg_ebnf_seq;
+        ((ASTNode*) lpg_ebnf_seq)->setParent(this);
+        initialize();
+    }
+
+    /**
+     * A list of all children of this node,don't including the nullptr ones.
+     */
+    std::vector<IAst*> getAllChildren()
+    {
+        std::vector<IAst*> list;
+        if(lpg_ebnf_seq)  list.push_back((IAst*)lpg_ebnf_seq);
+        return list;
+    }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        bool checkChildren = v->visit(this);
+        if (checkChildren)
+            ((IAst*)lpg_ebnf_seq)->accept(v);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 119 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 120:  ebnf_alt_list ::= ebnf_seq
+*<li>Rule 121:  ebnf_alt_list ::= ebnf_alt_list |$ ebnf_seq
+ *</b>
+ */
+struct ebnf_seqList :public AbstractASTNodeList{
+    ebnf_elemList* getebnf_seqAt(int i) { return (ebnf_elemList*) getElementAt(i); }
+
+    ebnf_seqList(IToken* leftIToken, IToken* rightIToken, bool leftRecursive):AbstractASTNodeList(leftIToken, rightIToken, leftRecursive)
+{
+    }
+
+    ebnf_seqList(ebnf_elemList* lpg_ebnf_seq, bool leftRecursive):AbstractASTNodeList        ((ASTNode*) lpg_ebnf_seq, leftRecursive)
+    {
+        ((ASTNode*) lpg_ebnf_seq)->setParent(this);
+    }
+
+    void addElement(ebnf_elemList *lpg_ebnf_seq)
+    {
+        AbstractASTNodeList::addElement((ASTNode*) lpg_ebnf_seq);
+        ((ASTNode*) lpg_ebnf_seq)->setParent(this);
+    }
+
+
+    void accept(Visitor *v) { for (int i = 0; i < size(); i++) v->visit(getebnf_seqAt(i)); }
+    void accept(ArgumentVisitor *v, Object *o) { for (int i = 0; i < size(); i++) v->visit(getebnf_seqAt(i), o); }
+    lpg::Any accept(ResultVisitor *v)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getebnf_seqAt(i)));
+        return result;
+    }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o)
+    {
+        std::vector<lpg::Any> result;
+        for (int i = 0; i < size(); i++)
+            result.push_back(v->visit(getebnf_seqAt(i), o));
+        return result;
+    }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 121 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 128:  optAttrList ::= $Empty
+*<li>Rule 129:  optAttrList ::= MACRO_NAME
  *</b>
  */
 struct symAttrs :public  ASTNode{
@@ -4094,12 +4351,12 @@ struct symAttrs :public  ASTNode{
             if (lpg_MACRO_NAME != nullptr) ((IAst*)lpg_MACRO_NAME)->accept(v);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 117 ;}
+    int getRuleIndex() { return 129 ;}
 };
 
 /**
  *<b>
-*<li>Rule 120:  action_segment ::= BLOCK
+*<li>Rule 132:  action_segment ::= BLOCK
  *</b>
  */
 struct action_segment :public ASTNodeToken
@@ -4132,16 +4389,16 @@ struct action_segment :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 120 ;}
+    int getRuleIndex() { return 132 ;}
 
-    //#line 242 "LPGParser.g
+    //#line 264 "LPGParser.g
 
 };
 
 /**
  *<b>
-*<li>Rule 121:  start_segment ::= start_symbol
-*<li>Rule 122:  start_segment ::= start_segment start_symbol
+*<li>Rule 133:  start_segment ::= start_symbol
+*<li>Rule 134:  start_segment ::= start_segment start_symbol
  *</b>
  */
 struct start_symbolList :public AbstractASTNodeList{
@@ -4186,26 +4443,14 @@ struct start_symbolList :public AbstractASTNodeList{
         enter((PreOrderVisitor*) v);
         v->postVisit(this);
     }
-    void enter(PreOrderVisitor *v)
-    {
-        bool checkChildren = v->visit(this);
-        if (checkChildren)
-        {
-            for (int i = 0; i < size(); i++)
-            {
-                IAst* element = (IAst*)getstart_symbolAt(i);
-                element->accept(v);
-            }
-        }
-        v->endVisit(this);
-    }
-    int getRuleIndex() { return 122 ;}
+    void enter(PreOrderVisitor *v);
+    int getRuleIndex() { return 134 ;}
 };
 
 /**
  *<b>
-*<li>Rule 125:  terminals_segment ::= terminal
-*<li>Rule 126:  terminals_segment ::= terminals_segment terminal
+*<li>Rule 137:  terminals_segment ::= terminal
+*<li>Rule 138:  terminals_segment ::= terminals_segment terminal
  *</b>
  */
 struct terminalList :public AbstractASTNodeList{
@@ -4251,12 +4496,12 @@ struct terminalList :public AbstractASTNodeList{
         v->postVisit(this);
     }
     void enter(PreOrderVisitor *v);
-    int getRuleIndex() { return 126 ;}
+    int getRuleIndex() { return 138 ;}
 };
 
 /**
  *<b>
-*<li>Rule 127:  terminal ::= terminal_symbol optTerminalAlias
+*<li>Rule 139:  terminal ::= terminal_symbol optTerminalAlias
  *</b>
  */
 struct terminal :public ASTNode
@@ -4319,9 +4564,9 @@ struct terminal :public ASTNode
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 127 ;}
+    int getRuleIndex() { return 139 ;}
 
-    //#line 255 "LPGParser.g
+    //#line 277 "LPGParser.g
 
     void initialize() {
      	environment->_terms.insert({getterminal_symbol()->toString(), this});
@@ -4330,11 +4575,11 @@ struct terminal :public ASTNode
 
 /**
  *<em>
-*<li>Rule 128:  optTerminalAlias ::= $Empty
+*<li>Rule 140:  optTerminalAlias ::= $Empty
  *</em>
  *<p>
  *<b>
-*<li>Rule 129:  optTerminalAlias ::= produces name
+*<li>Rule 141:  optTerminalAlias ::= produces name
  *</b>
  */
 struct optTerminalAlias :public ASTNode
@@ -4390,13 +4635,13 @@ struct optTerminalAlias :public ASTNode
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 129 ;}
+    int getRuleIndex() { return 141 ;}
 };
 
 /**
  *<b>
-*<li>Rule 133:  types_segment ::= type_declarations
-*<li>Rule 134:  types_segment ::= types_segment type_declarations
+*<li>Rule 145:  types_segment ::= type_declarations
+*<li>Rule 146:  types_segment ::= types_segment type_declarations
  *</b>
  */
 struct type_declarationsList :public AbstractASTNodeList{
@@ -4442,12 +4687,12 @@ struct type_declarationsList :public AbstractASTNodeList{
         v->postVisit(this);
     }
     void enter(PreOrderVisitor *v);
-    int getRuleIndex() { return 134 ;}
+    int getRuleIndex() { return 146 ;}
 };
 
 /**
  *<b>
-*<li>Rule 135:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
+*<li>Rule 147:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
  *</b>
  */
 struct type_declarations :public ASTNode
@@ -4522,13 +4767,13 @@ struct type_declarations :public ASTNode
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 135 ;}
+    int getRuleIndex() { return 147 ;}
 };
 
 /**
  *<b>
-*<li>Rule 138:  predecessor_segment ::= $Empty
-*<li>Rule 139:  predecessor_segment ::= predecessor_segment symbol_pair
+*<li>Rule 150:  predecessor_segment ::= $Empty
+*<li>Rule 151:  predecessor_segment ::= predecessor_segment symbol_pair
  *</b>
  */
 struct symbol_pairList :public AbstractASTNodeList{
@@ -4574,12 +4819,12 @@ struct symbol_pairList :public AbstractASTNodeList{
         v->postVisit(this);
     }
     void enter(PreOrderVisitor *v);
-    int getRuleIndex() { return 139 ;}
+    int getRuleIndex() { return 151 ;}
 };
 
 /**
  *<b>
-*<li>Rule 140:  symbol_pair ::= SYMBOL SYMBOL
+*<li>Rule 152:  symbol_pair ::= SYMBOL SYMBOL
  *</b>
  */
 struct symbol_pair :public ASTNode
@@ -4635,12 +4880,12 @@ struct symbol_pair :public ASTNode
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 140 ;}
+    int getRuleIndex() { return 152 ;}
 };
 
 /**
  *<b>
-*<li>Rule 143:  recover_symbol ::= SYMBOL
+*<li>Rule 155:  recover_symbol ::= SYMBOL
  *</b>
  */
 struct recover_symbol :public ASTNodeToken
@@ -4673,9 +4918,9 @@ struct recover_symbol :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 143 ;}
+    int getRuleIndex() { return 155 ;}
 
-    //#line 288 "LPGParser.g
+    //#line 310 "LPGParser.g
 
     void initialize() {
         environment->_recover_symbols.insert({ getSYMBOL()->toString(), this });
@@ -4684,11 +4929,11 @@ struct recover_symbol :public ASTNodeToken
 
 /**
  *<em>
-*<li>Rule 144:  END_KEY_OPT ::= $Empty
+*<li>Rule 156:  END_KEY_OPT ::= $Empty
  *</em>
  *<p>
  *<b>
-*<li>Rule 145:  END_KEY_OPT ::= END_KEY
+*<li>Rule 157:  END_KEY_OPT ::= END_KEY
  *</b>
  */
 struct END_KEY_OPT :public ASTNodeToken
@@ -4716,7 +4961,7 @@ struct END_KEY_OPT :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 145 ;}
+    int getRuleIndex() { return 157 ;}
 };
 
 /**
@@ -5986,7 +6231,167 @@ struct produces3 :public ASTNodeToken
 
 /**
  *<b>
-*<li>Rule 114:  symWithAttrs ::= EMPTY_KEY
+*<li>Rule 122:  ebnf_quantifier ::= ?
+ *</b>
+ */
+struct ebnf_quantifier0 :public ASTNodeToken
+{
+    IToken* getQUESTION() { return leftIToken; }
+
+    ebnf_quantifier0(IToken* token) :ASTNodeToken(token)
+{
+ initialize(); }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        v->visit(this);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 122 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 123:  ebnf_quantifier ::= *
+ *</b>
+ */
+struct ebnf_quantifier1 :public ASTNodeToken
+{
+    IToken* getSTAR() { return leftIToken; }
+
+    ebnf_quantifier1(IToken* token) :ASTNodeToken(token)
+{
+ initialize(); }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        v->visit(this);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 123 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 124:  ebnf_quantifier ::= +
+ *</b>
+ */
+struct ebnf_quantifier2 :public ASTNodeToken
+{
+    IToken* getPLUS() { return leftIToken; }
+
+    ebnf_quantifier2(IToken* token) :ASTNodeToken(token)
+{
+ initialize(); }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        v->visit(this);
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 124 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 125:  ebnf_quantifier ::= * MACRO_NAME
+ *</b>
+ */
+struct ebnf_quantifier3 :public ASTNode
+{
+    ASTNodeToken *lpg_STAR;
+    ASTNodeToken *lpg_MACRO_NAME;
+
+    ASTNodeToken *getSTAR() { return lpg_STAR; };
+    void setSTAR(ASTNodeToken *lpg_STAR) { this->lpg_STAR = lpg_STAR; }
+    ASTNodeToken *getMACRO_NAME() { return lpg_MACRO_NAME; };
+    void setMACRO_NAME(ASTNodeToken *lpg_MACRO_NAME) { this->lpg_MACRO_NAME = lpg_MACRO_NAME; }
+
+    ebnf_quantifier3(IToken* leftIToken, IToken* rightIToken,
+                     ASTNodeToken *lpg_STAR,
+                     ASTNodeToken *lpg_MACRO_NAME):ASTNode(leftIToken, rightIToken)    {
+        this->lpg_STAR = lpg_STAR;
+        ((ASTNode*) lpg_STAR)->setParent(this);
+        this->lpg_MACRO_NAME = lpg_MACRO_NAME;
+        ((ASTNode*) lpg_MACRO_NAME)->setParent(this);
+        initialize();
+    }
+
+    /**
+     * A list of all children of this node,don't including the nullptr ones.
+     */
+    std::vector<IAst*> getAllChildren()
+    {
+        std::vector<IAst*> list;
+        if(lpg_STAR)  list.push_back((IAst*)lpg_STAR);
+        if(lpg_MACRO_NAME)  list.push_back((IAst*)lpg_MACRO_NAME);
+        return list;
+    }
+
+    void accept(Visitor *v) { v->visit(this); }
+    void accept(ArgumentVisitor *v, Object* o) { v->visit(this, o); }
+    lpg::Any accept(ResultVisitor *v) { return v->visit(this); }
+    lpg::Any accept(ResultArgumentVisitor *v, Object* o) { return v->visit(this, o); }
+
+    void accept(IAstVisitor* v)
+    {
+        if (! v->preVisit(this)) return;
+        enter((PreOrderVisitor*) v);
+        v->postVisit(this);
+    }
+
+    void enter(PreOrderVisitor *v)
+    {
+        bool checkChildren = v->visit(this);
+        if (checkChildren)
+        {
+            ((IAst*)lpg_STAR)->accept(v);
+            ((IAst*)lpg_MACRO_NAME)->accept(v);
+        }
+        v->endVisit(this);
+    }
+    int getRuleIndex() { return 125 ;}
+};
+
+/**
+ *<b>
+*<li>Rule 126:  symWithAttrs ::= EMPTY_KEY
  *</b>
  */
 struct symWithAttrs0 :public ASTNodeToken
@@ -6014,12 +6419,12 @@ struct symWithAttrs0 :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 114 ;}
+    int getRuleIndex() { return 126 ;}
 };
 
 /**
  *<b>
-*<li>Rule 115:  symWithAttrs ::= SYMBOL optAttrList
+*<li>Rule 127:  symWithAttrs ::= SYMBOL optAttrList
  *</b>
  */
 struct symWithAttrs1 :public ASTNode
@@ -6078,12 +6483,12 @@ struct symWithAttrs1 :public ASTNode
         }
         v->endVisit(this);
     }
-    int getRuleIndex() { return 115 ;}
+    int getRuleIndex() { return 127 ;}
 };
 
 /**
  *<b>
-*<li>Rule 123:  start_symbol ::= SYMBOL
+*<li>Rule 135:  start_symbol ::= SYMBOL
  *</b>
  */
 struct start_symbol0 :public ASTNodeToken
@@ -6111,12 +6516,12 @@ struct start_symbol0 :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 123 ;}
+    int getRuleIndex() { return 135 ;}
 };
 
 /**
  *<b>
-*<li>Rule 124:  start_symbol ::= MACRO_NAME
+*<li>Rule 136:  start_symbol ::= MACRO_NAME
  *</b>
  */
 struct start_symbol1 :public ASTNodeToken
@@ -6144,12 +6549,12 @@ struct start_symbol1 :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 124 ;}
+    int getRuleIndex() { return 136 ;}
 };
 
 /**
  *<b>
-*<li>Rule 130:  terminal_symbol ::= SYMBOL
+*<li>Rule 142:  terminal_symbol ::= SYMBOL
  *</b>
  */
 struct terminal_symbol0 :public ASTNodeToken
@@ -6182,9 +6587,9 @@ struct terminal_symbol0 :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 130 ;}
+    int getRuleIndex() { return 142 ;}
 
-    //#line 263 "LPGParser.g
+    //#line 285 "LPGParser.g
 
     void initialize() {
         environment->terminal_symbol_produce_SYMBOL.insert({getSYMBOL()->toString(), this});
@@ -6193,7 +6598,7 @@ struct terminal_symbol0 :public ASTNodeToken
 
 /**
  *<b>
-*<li>Rule 131:  terminal_symbol ::= MACRO_NAME
+*<li>Rule 143:  terminal_symbol ::= MACRO_NAME
  *</b>
  */
 struct terminal_symbol1 :public ASTNodeToken
@@ -6221,7 +6626,7 @@ struct terminal_symbol1 :public ASTNodeToken
         v->visit(this);
         v->endVisit(this);
     }
-    int getRuleIndex() { return 131 ;}
+    int getRuleIndex() { return 143 ;}
 };
 
 struct AbstractVisitor :public Visitor, public ArgumentVisitor
@@ -6390,8 +6795,23 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
  virtual   void visit(rule *n) { unimplementedVisitor("visit(rule)"); }
   virtual  void visit(rule *n, Object* o) { unimplementedVisitor("visit(rule, Object)"); }
 
- virtual   void visit(symWithAttrsList *n) { unimplementedVisitor("visit(symWithAttrsList)"); }
-  virtual  void visit(symWithAttrsList *n, Object* o) { unimplementedVisitor("visit(symWithAttrsList, Object)"); }
+ virtual   void visit(ebnf_elemList *n) { unimplementedVisitor("visit(ebnf_elemList)"); }
+  virtual  void visit(ebnf_elemList *n, Object* o) { unimplementedVisitor("visit(ebnf_elemList, Object)"); }
+
+ virtual   void visit(ebnf_elem *n) { unimplementedVisitor("visit(ebnf_elem)"); }
+  virtual  void visit(ebnf_elem *n, Object* o) { unimplementedVisitor("visit(ebnf_elem, Object)"); }
+
+ virtual   void visit(ebnf_group *n) { unimplementedVisitor("visit(ebnf_group)"); }
+  virtual  void visit(ebnf_group *n, Object* o) { unimplementedVisitor("visit(ebnf_group, Object)"); }
+
+ virtual   void visit(ebnf_iso_opt *n) { unimplementedVisitor("visit(ebnf_iso_opt)"); }
+  virtual  void visit(ebnf_iso_opt *n, Object* o) { unimplementedVisitor("visit(ebnf_iso_opt, Object)"); }
+
+ virtual   void visit(ebnf_iso_star *n) { unimplementedVisitor("visit(ebnf_iso_star)"); }
+  virtual  void visit(ebnf_iso_star *n, Object* o) { unimplementedVisitor("visit(ebnf_iso_star, Object)"); }
+
+ virtual   void visit(ebnf_seqList *n) { unimplementedVisitor("visit(ebnf_seqList)"); }
+  virtual  void visit(ebnf_seqList *n, Object* o) { unimplementedVisitor("visit(ebnf_seqList, Object)"); }
 
  virtual   void visit(symAttrs *n) { unimplementedVisitor("visit(symAttrs)"); }
   virtual  void visit(symAttrs *n, Object* o) { unimplementedVisitor("visit(symAttrs, Object)"); }
@@ -6516,6 +6936,18 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
  virtual   void visit(produces3 *n) { unimplementedVisitor("visit(produces3)"); }
   virtual  void visit(produces3 *n, Object* o) { unimplementedVisitor("visit(produces3, Object)"); }
 
+ virtual   void visit(ebnf_quantifier0 *n) { unimplementedVisitor("visit(ebnf_quantifier0)"); }
+  virtual  void visit(ebnf_quantifier0 *n, Object* o) { unimplementedVisitor("visit(ebnf_quantifier0, Object)"); }
+
+ virtual   void visit(ebnf_quantifier1 *n) { unimplementedVisitor("visit(ebnf_quantifier1)"); }
+  virtual  void visit(ebnf_quantifier1 *n, Object* o) { unimplementedVisitor("visit(ebnf_quantifier1, Object)"); }
+
+ virtual   void visit(ebnf_quantifier2 *n) { unimplementedVisitor("visit(ebnf_quantifier2)"); }
+  virtual  void visit(ebnf_quantifier2 *n, Object* o) { unimplementedVisitor("visit(ebnf_quantifier2, Object)"); }
+
+ virtual   void visit(ebnf_quantifier3 *n) { unimplementedVisitor("visit(ebnf_quantifier3)"); }
+  virtual  void visit(ebnf_quantifier3 *n, Object* o) { unimplementedVisitor("visit(ebnf_quantifier3, Object)"); }
+
  virtual   void visit(symWithAttrs0 *n) { unimplementedVisitor("visit(symWithAttrs0)"); }
   virtual  void visit(symWithAttrs0 *n, Object* o) { unimplementedVisitor("visit(symWithAttrs0, Object)"); }
 
@@ -6591,7 +7023,12 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
         if (dynamic_cast< RuleName*>(n)){ visit((RuleName*) n);return;}
         if (dynamic_cast< ruleList*>(n)){ visit((ruleList*) n);return;}
         if (dynamic_cast< rule*>(n)){ visit((rule*) n);return;}
-        if (dynamic_cast< symWithAttrsList*>(n)){ visit((symWithAttrsList*) n);return;}
+        if (dynamic_cast< ebnf_elemList*>(n)){ visit((ebnf_elemList*) n);return;}
+        if (dynamic_cast< ebnf_elem*>(n)){ visit((ebnf_elem*) n);return;}
+        if (dynamic_cast< ebnf_group*>(n)){ visit((ebnf_group*) n);return;}
+        if (dynamic_cast< ebnf_iso_opt*>(n)){ visit((ebnf_iso_opt*) n);return;}
+        if (dynamic_cast< ebnf_iso_star*>(n)){ visit((ebnf_iso_star*) n);return;}
+        if (dynamic_cast< ebnf_seqList*>(n)){ visit((ebnf_seqList*) n);return;}
         if (dynamic_cast< symAttrs*>(n)){ visit((symAttrs*) n);return;}
         if (dynamic_cast< action_segment*>(n)){ visit((action_segment*) n);return;}
         if (dynamic_cast< start_symbolList*>(n)){ visit((start_symbolList*) n);return;}
@@ -6633,6 +7070,10 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
         if (dynamic_cast< produces1*>(n)){ visit((produces1*) n);return;}
         if (dynamic_cast< produces2*>(n)){ visit((produces2*) n);return;}
         if (dynamic_cast< produces3*>(n)){ visit((produces3*) n);return;}
+        if (dynamic_cast< ebnf_quantifier0*>(n)){ visit((ebnf_quantifier0*) n);return;}
+        if (dynamic_cast< ebnf_quantifier1*>(n)){ visit((ebnf_quantifier1*) n);return;}
+        if (dynamic_cast< ebnf_quantifier2*>(n)){ visit((ebnf_quantifier2*) n);return;}
+        if (dynamic_cast< ebnf_quantifier3*>(n)){ visit((ebnf_quantifier3*) n);return;}
         if (dynamic_cast< symWithAttrs0*>(n)){ visit((symWithAttrs0*) n);return;}
         if (dynamic_cast< symWithAttrs1*>(n)){ visit((symWithAttrs1*) n);return;}
         if (dynamic_cast< start_symbol0*>(n)){ visit((start_symbol0*) n);return;}
@@ -6697,7 +7138,12 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
         if (dynamic_cast<RuleName*>(n)) {visit((RuleName*) n, o);return;}
         if (dynamic_cast<ruleList*>(n)) {visit((ruleList*) n, o);return;}
         if (dynamic_cast<rule*>(n)) {visit((rule*) n, o);return;}
-        if (dynamic_cast<symWithAttrsList*>(n)) {visit((symWithAttrsList*) n, o);return;}
+        if (dynamic_cast<ebnf_elemList*>(n)) {visit((ebnf_elemList*) n, o);return;}
+        if (dynamic_cast<ebnf_elem*>(n)) {visit((ebnf_elem*) n, o);return;}
+        if (dynamic_cast<ebnf_group*>(n)) {visit((ebnf_group*) n, o);return;}
+        if (dynamic_cast<ebnf_iso_opt*>(n)) {visit((ebnf_iso_opt*) n, o);return;}
+        if (dynamic_cast<ebnf_iso_star*>(n)) {visit((ebnf_iso_star*) n, o);return;}
+        if (dynamic_cast<ebnf_seqList*>(n)) {visit((ebnf_seqList*) n, o);return;}
         if (dynamic_cast<symAttrs*>(n)) {visit((symAttrs*) n, o);return;}
         if (dynamic_cast<action_segment*>(n)) {visit((action_segment*) n, o);return;}
         if (dynamic_cast<start_symbolList*>(n)) {visit((start_symbolList*) n, o);return;}
@@ -6739,6 +7185,10 @@ struct AbstractVisitor :public Visitor, public ArgumentVisitor
         if (dynamic_cast<produces1*>(n)) {visit((produces1*) n, o);return;}
         if (dynamic_cast<produces2*>(n)) {visit((produces2*) n, o);return;}
         if (dynamic_cast<produces3*>(n)) {visit((produces3*) n, o);return;}
+        if (dynamic_cast<ebnf_quantifier0*>(n)) {visit((ebnf_quantifier0*) n, o);return;}
+        if (dynamic_cast<ebnf_quantifier1*>(n)) {visit((ebnf_quantifier1*) n, o);return;}
+        if (dynamic_cast<ebnf_quantifier2*>(n)) {visit((ebnf_quantifier2*) n, o);return;}
+        if (dynamic_cast<ebnf_quantifier3*>(n)) {visit((ebnf_quantifier3*) n, o);return;}
         if (dynamic_cast<symWithAttrs0*>(n)) {visit((symWithAttrs0*) n, o);return;}
         if (dynamic_cast<symWithAttrs1*>(n)) {visit((symWithAttrs1*) n, o);return;}
         if (dynamic_cast<start_symbol0*>(n)) {visit((start_symbol0*) n, o);return;}
@@ -6914,8 +7364,23 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
     lpg::Any visit(rule *n) { return unimplementedVisitor("visit(rule)"); }
     lpg::Any visit(rule *n, Object* o) { return  unimplementedVisitor("visit(rule, Object)"); }
 
-    lpg::Any visit(symWithAttrsList *n) { return unimplementedVisitor("visit(symWithAttrsList)"); }
-    lpg::Any visit(symWithAttrsList *n, Object* o) { return  unimplementedVisitor("visit(symWithAttrsList, Object)"); }
+    lpg::Any visit(ebnf_elemList *n) { return unimplementedVisitor("visit(ebnf_elemList)"); }
+    lpg::Any visit(ebnf_elemList *n, Object* o) { return  unimplementedVisitor("visit(ebnf_elemList, Object)"); }
+
+    lpg::Any visit(ebnf_elem *n) { return unimplementedVisitor("visit(ebnf_elem)"); }
+    lpg::Any visit(ebnf_elem *n, Object* o) { return  unimplementedVisitor("visit(ebnf_elem, Object)"); }
+
+    lpg::Any visit(ebnf_group *n) { return unimplementedVisitor("visit(ebnf_group)"); }
+    lpg::Any visit(ebnf_group *n, Object* o) { return  unimplementedVisitor("visit(ebnf_group, Object)"); }
+
+    lpg::Any visit(ebnf_iso_opt *n) { return unimplementedVisitor("visit(ebnf_iso_opt)"); }
+    lpg::Any visit(ebnf_iso_opt *n, Object* o) { return  unimplementedVisitor("visit(ebnf_iso_opt, Object)"); }
+
+    lpg::Any visit(ebnf_iso_star *n) { return unimplementedVisitor("visit(ebnf_iso_star)"); }
+    lpg::Any visit(ebnf_iso_star *n, Object* o) { return  unimplementedVisitor("visit(ebnf_iso_star, Object)"); }
+
+    lpg::Any visit(ebnf_seqList *n) { return unimplementedVisitor("visit(ebnf_seqList)"); }
+    lpg::Any visit(ebnf_seqList *n, Object* o) { return  unimplementedVisitor("visit(ebnf_seqList, Object)"); }
 
     lpg::Any visit(symAttrs *n) { return unimplementedVisitor("visit(symAttrs)"); }
     lpg::Any visit(symAttrs *n, Object* o) { return  unimplementedVisitor("visit(symAttrs, Object)"); }
@@ -7040,6 +7505,18 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
     lpg::Any visit(produces3 *n) { return unimplementedVisitor("visit(produces3)"); }
     lpg::Any visit(produces3 *n, Object* o) { return  unimplementedVisitor("visit(produces3, Object)"); }
 
+    lpg::Any visit(ebnf_quantifier0 *n) { return unimplementedVisitor("visit(ebnf_quantifier0)"); }
+    lpg::Any visit(ebnf_quantifier0 *n, Object* o) { return  unimplementedVisitor("visit(ebnf_quantifier0, Object)"); }
+
+    lpg::Any visit(ebnf_quantifier1 *n) { return unimplementedVisitor("visit(ebnf_quantifier1)"); }
+    lpg::Any visit(ebnf_quantifier1 *n, Object* o) { return  unimplementedVisitor("visit(ebnf_quantifier1, Object)"); }
+
+    lpg::Any visit(ebnf_quantifier2 *n) { return unimplementedVisitor("visit(ebnf_quantifier2)"); }
+    lpg::Any visit(ebnf_quantifier2 *n, Object* o) { return  unimplementedVisitor("visit(ebnf_quantifier2, Object)"); }
+
+    lpg::Any visit(ebnf_quantifier3 *n) { return unimplementedVisitor("visit(ebnf_quantifier3)"); }
+    lpg::Any visit(ebnf_quantifier3 *n, Object* o) { return  unimplementedVisitor("visit(ebnf_quantifier3, Object)"); }
+
     lpg::Any visit(symWithAttrs0 *n) { return unimplementedVisitor("visit(symWithAttrs0)"); }
     lpg::Any visit(symWithAttrs0 *n, Object* o) { return  unimplementedVisitor("visit(symWithAttrs0, Object)"); }
 
@@ -7115,7 +7592,12 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
         if (dynamic_cast<RuleName*>(n) ) return visit((RuleName*) n);
         if (dynamic_cast<ruleList*>(n) ) return visit((ruleList*) n);
         if (dynamic_cast<rule*>(n) ) return visit((rule*) n);
-        if (dynamic_cast<symWithAttrsList*>(n) ) return visit((symWithAttrsList*) n);
+        if (dynamic_cast<ebnf_elemList*>(n) ) return visit((ebnf_elemList*) n);
+        if (dynamic_cast<ebnf_elem*>(n) ) return visit((ebnf_elem*) n);
+        if (dynamic_cast<ebnf_group*>(n) ) return visit((ebnf_group*) n);
+        if (dynamic_cast<ebnf_iso_opt*>(n) ) return visit((ebnf_iso_opt*) n);
+        if (dynamic_cast<ebnf_iso_star*>(n) ) return visit((ebnf_iso_star*) n);
+        if (dynamic_cast<ebnf_seqList*>(n) ) return visit((ebnf_seqList*) n);
         if (dynamic_cast<symAttrs*>(n) ) return visit((symAttrs*) n);
         if (dynamic_cast<action_segment*>(n) ) return visit((action_segment*) n);
         if (dynamic_cast<start_symbolList*>(n) ) return visit((start_symbolList*) n);
@@ -7157,6 +7639,10 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
         if (dynamic_cast<produces1*>(n) ) return visit((produces1*) n);
         if (dynamic_cast<produces2*>(n) ) return visit((produces2*) n);
         if (dynamic_cast<produces3*>(n) ) return visit((produces3*) n);
+        if (dynamic_cast<ebnf_quantifier0*>(n) ) return visit((ebnf_quantifier0*) n);
+        if (dynamic_cast<ebnf_quantifier1*>(n) ) return visit((ebnf_quantifier1*) n);
+        if (dynamic_cast<ebnf_quantifier2*>(n) ) return visit((ebnf_quantifier2*) n);
+        if (dynamic_cast<ebnf_quantifier3*>(n) ) return visit((ebnf_quantifier3*) n);
         if (dynamic_cast<symWithAttrs0*>(n) ) return visit((symWithAttrs0*) n);
         if (dynamic_cast<symWithAttrs1*>(n) ) return visit((symWithAttrs1*) n);
         if (dynamic_cast<start_symbol0*>(n) ) return visit((start_symbol0*) n);
@@ -7221,7 +7707,12 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
         if (dynamic_cast<RuleName*>(n) ) return visit((RuleName*) n, o);
         if (dynamic_cast<ruleList*>(n) ) return visit((ruleList*) n, o);
         if (dynamic_cast<rule*>(n) ) return visit((rule*) n, o);
-        if (dynamic_cast<symWithAttrsList*>(n) ) return visit((symWithAttrsList*) n, o);
+        if (dynamic_cast<ebnf_elemList*>(n) ) return visit((ebnf_elemList*) n, o);
+        if (dynamic_cast<ebnf_elem*>(n) ) return visit((ebnf_elem*) n, o);
+        if (dynamic_cast<ebnf_group*>(n) ) return visit((ebnf_group*) n, o);
+        if (dynamic_cast<ebnf_iso_opt*>(n) ) return visit((ebnf_iso_opt*) n, o);
+        if (dynamic_cast<ebnf_iso_star*>(n) ) return visit((ebnf_iso_star*) n, o);
+        if (dynamic_cast<ebnf_seqList*>(n) ) return visit((ebnf_seqList*) n, o);
         if (dynamic_cast<symAttrs*>(n) ) return visit((symAttrs*) n, o);
         if (dynamic_cast<action_segment*>(n) ) return visit((action_segment*) n, o);
         if (dynamic_cast<start_symbolList*>(n) ) return visit((start_symbolList*) n, o);
@@ -7263,6 +7754,10 @@ struct AbstractResultVisitor :public ResultVisitor,public ResultArgumentVisitor
         if (dynamic_cast<produces1*>(n) ) return visit((produces1*) n, o);
         if (dynamic_cast<produces2*>(n) ) return visit((produces2*) n, o);
         if (dynamic_cast<produces3*>(n) ) return visit((produces3*) n, o);
+        if (dynamic_cast<ebnf_quantifier0*>(n) ) return visit((ebnf_quantifier0*) n, o);
+        if (dynamic_cast<ebnf_quantifier1*>(n) ) return visit((ebnf_quantifier1*) n, o);
+        if (dynamic_cast<ebnf_quantifier2*>(n) ) return visit((ebnf_quantifier2*) n, o);
+        if (dynamic_cast<ebnf_quantifier3*>(n) ) return visit((ebnf_quantifier3*) n, o);
         if (dynamic_cast<symWithAttrs0*>(n) ) return visit((symWithAttrs0*) n, o);
         if (dynamic_cast<symWithAttrs1*>(n) ) return visit((symWithAttrs1*) n, o);
         if (dynamic_cast<start_symbol0*>(n) ) return visit((start_symbol0*) n, o);
@@ -7442,8 +7937,23 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
  virtual   bool visit(rule *n) { unimplementedVisitor("visit(rule)"); return true; }
   virtual  void endVisit(rule *n) { unimplementedVisitor("endVisit(rule)"); }
 
- virtual   bool visit(symWithAttrsList *n) { unimplementedVisitor("visit(symWithAttrsList)"); return true; }
-  virtual  void endVisit(symWithAttrsList *n) { unimplementedVisitor("endVisit(symWithAttrsList)"); }
+ virtual   bool visit(ebnf_elemList *n) { unimplementedVisitor("visit(ebnf_elemList)"); return true; }
+  virtual  void endVisit(ebnf_elemList *n) { unimplementedVisitor("endVisit(ebnf_elemList)"); }
+
+ virtual   bool visit(ebnf_elem *n) { unimplementedVisitor("visit(ebnf_elem)"); return true; }
+  virtual  void endVisit(ebnf_elem *n) { unimplementedVisitor("endVisit(ebnf_elem)"); }
+
+ virtual   bool visit(ebnf_group *n) { unimplementedVisitor("visit(ebnf_group)"); return true; }
+  virtual  void endVisit(ebnf_group *n) { unimplementedVisitor("endVisit(ebnf_group)"); }
+
+ virtual   bool visit(ebnf_iso_opt *n) { unimplementedVisitor("visit(ebnf_iso_opt)"); return true; }
+  virtual  void endVisit(ebnf_iso_opt *n) { unimplementedVisitor("endVisit(ebnf_iso_opt)"); }
+
+ virtual   bool visit(ebnf_iso_star *n) { unimplementedVisitor("visit(ebnf_iso_star)"); return true; }
+  virtual  void endVisit(ebnf_iso_star *n) { unimplementedVisitor("endVisit(ebnf_iso_star)"); }
+
+ virtual   bool visit(ebnf_seqList *n) { unimplementedVisitor("visit(ebnf_seqList)"); return true; }
+  virtual  void endVisit(ebnf_seqList *n) { unimplementedVisitor("endVisit(ebnf_seqList)"); }
 
  virtual   bool visit(symAttrs *n) { unimplementedVisitor("visit(symAttrs)"); return true; }
   virtual  void endVisit(symAttrs *n) { unimplementedVisitor("endVisit(symAttrs)"); }
@@ -7568,6 +8078,18 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
  virtual   bool visit(produces3 *n) { unimplementedVisitor("visit(produces3)"); return true; }
   virtual  void endVisit(produces3 *n) { unimplementedVisitor("endVisit(produces3)"); }
 
+ virtual   bool visit(ebnf_quantifier0 *n) { unimplementedVisitor("visit(ebnf_quantifier0)"); return true; }
+  virtual  void endVisit(ebnf_quantifier0 *n) { unimplementedVisitor("endVisit(ebnf_quantifier0)"); }
+
+ virtual   bool visit(ebnf_quantifier1 *n) { unimplementedVisitor("visit(ebnf_quantifier1)"); return true; }
+  virtual  void endVisit(ebnf_quantifier1 *n) { unimplementedVisitor("endVisit(ebnf_quantifier1)"); }
+
+ virtual   bool visit(ebnf_quantifier2 *n) { unimplementedVisitor("visit(ebnf_quantifier2)"); return true; }
+  virtual  void endVisit(ebnf_quantifier2 *n) { unimplementedVisitor("endVisit(ebnf_quantifier2)"); }
+
+ virtual   bool visit(ebnf_quantifier3 *n) { unimplementedVisitor("visit(ebnf_quantifier3)"); return true; }
+  virtual  void endVisit(ebnf_quantifier3 *n) { unimplementedVisitor("endVisit(ebnf_quantifier3)"); }
+
  virtual   bool visit(symWithAttrs0 *n) { unimplementedVisitor("visit(symWithAttrs0)"); return true; }
   virtual  void endVisit(symWithAttrs0 *n) { unimplementedVisitor("endVisit(symWithAttrs0)"); }
 
@@ -7643,7 +8165,12 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
         if (dynamic_cast<RuleName*>(n) ) return visit((RuleName*) n);
         if (dynamic_cast<ruleList*>(n) ) return visit((ruleList*) n);
         if (dynamic_cast<rule*>(n) ) return visit((rule*) n);
-        if (dynamic_cast<symWithAttrsList*>(n) ) return visit((symWithAttrsList*) n);
+        if (dynamic_cast<ebnf_elemList*>(n) ) return visit((ebnf_elemList*) n);
+        if (dynamic_cast<ebnf_elem*>(n) ) return visit((ebnf_elem*) n);
+        if (dynamic_cast<ebnf_group*>(n) ) return visit((ebnf_group*) n);
+        if (dynamic_cast<ebnf_iso_opt*>(n) ) return visit((ebnf_iso_opt*) n);
+        if (dynamic_cast<ebnf_iso_star*>(n) ) return visit((ebnf_iso_star*) n);
+        if (dynamic_cast<ebnf_seqList*>(n) ) return visit((ebnf_seqList*) n);
         if (dynamic_cast<symAttrs*>(n) ) return visit((symAttrs*) n);
         if (dynamic_cast<action_segment*>(n) ) return visit((action_segment*) n);
         if (dynamic_cast<start_symbolList*>(n) ) return visit((start_symbolList*) n);
@@ -7685,6 +8212,10 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
         if (dynamic_cast<produces1*>(n) ) return visit((produces1*) n);
         if (dynamic_cast<produces2*>(n) ) return visit((produces2*) n);
         if (dynamic_cast<produces3*>(n) ) return visit((produces3*) n);
+        if (dynamic_cast<ebnf_quantifier0*>(n) ) return visit((ebnf_quantifier0*) n);
+        if (dynamic_cast<ebnf_quantifier1*>(n) ) return visit((ebnf_quantifier1*) n);
+        if (dynamic_cast<ebnf_quantifier2*>(n) ) return visit((ebnf_quantifier2*) n);
+        if (dynamic_cast<ebnf_quantifier3*>(n) ) return visit((ebnf_quantifier3*) n);
         if (dynamic_cast<symWithAttrs0*>(n) ) return visit((symWithAttrs0*) n);
         if (dynamic_cast<symWithAttrs1*>(n) ) return visit((symWithAttrs1*) n);
         if (dynamic_cast<start_symbol0*>(n) ) return visit((start_symbol0*) n);
@@ -7749,7 +8280,12 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
         if (dynamic_cast<RuleName*>(n) ){ endVisit((RuleName*) n);return;}
         if (dynamic_cast<ruleList*>(n) ){ endVisit((ruleList*) n);return;}
         if (dynamic_cast<rule*>(n) ){ endVisit((rule*) n);return;}
-        if (dynamic_cast<symWithAttrsList*>(n) ){ endVisit((symWithAttrsList*) n);return;}
+        if (dynamic_cast<ebnf_elemList*>(n) ){ endVisit((ebnf_elemList*) n);return;}
+        if (dynamic_cast<ebnf_elem*>(n) ){ endVisit((ebnf_elem*) n);return;}
+        if (dynamic_cast<ebnf_group*>(n) ){ endVisit((ebnf_group*) n);return;}
+        if (dynamic_cast<ebnf_iso_opt*>(n) ){ endVisit((ebnf_iso_opt*) n);return;}
+        if (dynamic_cast<ebnf_iso_star*>(n) ){ endVisit((ebnf_iso_star*) n);return;}
+        if (dynamic_cast<ebnf_seqList*>(n) ){ endVisit((ebnf_seqList*) n);return;}
         if (dynamic_cast<symAttrs*>(n) ){ endVisit((symAttrs*) n);return;}
         if (dynamic_cast<action_segment*>(n) ){ endVisit((action_segment*) n);return;}
         if (dynamic_cast<start_symbolList*>(n) ){ endVisit((start_symbolList*) n);return;}
@@ -7791,6 +8327,10 @@ struct AbstractPreOrderVisitor :public PreOrderVisitor
         if (dynamic_cast<produces1*>(n) ){ endVisit((produces1*) n);return;}
         if (dynamic_cast<produces2*>(n) ){ endVisit((produces2*) n);return;}
         if (dynamic_cast<produces3*>(n) ){ endVisit((produces3*) n);return;}
+        if (dynamic_cast<ebnf_quantifier0*>(n) ){ endVisit((ebnf_quantifier0*) n);return;}
+        if (dynamic_cast<ebnf_quantifier1*>(n) ){ endVisit((ebnf_quantifier1*) n);return;}
+        if (dynamic_cast<ebnf_quantifier2*>(n) ){ endVisit((ebnf_quantifier2*) n);return;}
+        if (dynamic_cast<ebnf_quantifier3*>(n) ){ endVisit((ebnf_quantifier3*) n);return;}
         if (dynamic_cast<symWithAttrs0*>(n) ){ endVisit((symWithAttrs0*) n);return;}
         if (dynamic_cast<symWithAttrs1*>(n) ){ endVisit((symWithAttrs1*) n);return;}
         if (dynamic_cast<start_symbol0*>(n) ){ endVisit((start_symbol0*) n);return;}

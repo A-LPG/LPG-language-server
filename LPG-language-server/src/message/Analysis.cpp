@@ -7,6 +7,105 @@
 #include "../CompilationUnit.h"
 using namespace LPGParser_top_level_ast;
 
+namespace {
+void collectRhsSymbols(ASTNode* node, const std::string& fileName, std::vector<std::string>& out)
+{
+    if (!node) return;
+    if (auto* sym1 = dynamic_cast<symWithAttrs1*>(node))
+    {
+        out.emplace_back(fileName + "." + sym1->getSYMBOL()->to_utf8_string());
+        return;
+    }
+    if (auto* list = dynamic_cast<ebnf_elemList*>(node))
+    {
+        for (int i = 0; i < list->size(); ++i)
+            collectRhsSymbols(list->getebnf_elemAt(i), fileName, out);
+        return;
+    }
+    if (auto* alts = dynamic_cast<ebnf_seqList*>(node))
+    {
+        for (int i = 0; i < alts->size(); ++i)
+            collectRhsSymbols(alts->getebnf_seqAt(i), fileName, out);
+        return;
+    }
+    if (auto* elem = dynamic_cast<ebnf_elem*>(node))
+    {
+        collectRhsSymbols(elem->getebnf_primary(), fileName, out);
+        return;
+    }
+    if (auto* group = dynamic_cast<ebnf_group*>(node))
+    {
+        collectRhsSymbols(group->getebnf_alt_list(), fileName, out);
+        return;
+    }
+    if (auto* iso = dynamic_cast<ebnf_iso_opt*>(node))
+    {
+        collectRhsSymbols(iso->getebnf_seq(), fileName, out);
+        return;
+    }
+    if (auto* iso = dynamic_cast<ebnf_iso_star*>(node))
+    {
+        collectRhsSymbols(iso->getebnf_seq(), fileName, out);
+        return;
+    }
+}
+
+void collectRailroadAtoms(ASTNode* node, std::stringex& script)
+{
+    if (!node) return;
+    if (auto* sym1 = dynamic_cast<symWithAttrs1*>(node))
+    {
+        std::stringex rhsStr = sym1->getSYMBOL()->to_utf8_string();
+        if (rhsStr.find("'") != std::string::npos)
+        {
+            rhsStr.trim('\'');
+            script += "Terminal('";
+            script += rhsStr;
+            script += "'),";
+        }
+        else
+        {
+            script += "NonTerminal('";
+            script += rhsStr;
+            script += "'),";
+        }
+        return;
+    }
+    if (auto* list = dynamic_cast<ebnf_elemList*>(node))
+    {
+        for (int i = 0; i < list->size(); ++i)
+            collectRailroadAtoms(list->getebnf_elemAt(i), script);
+        return;
+    }
+    if (auto* alts = dynamic_cast<ebnf_seqList*>(node))
+    {
+        for (int i = 0; i < alts->size(); ++i)
+            collectRailroadAtoms(alts->getebnf_seqAt(i), script);
+        return;
+    }
+    if (auto* elem = dynamic_cast<ebnf_elem*>(node))
+    {
+        collectRailroadAtoms(elem->getebnf_primary(), script);
+        return;
+    }
+    if (auto* group = dynamic_cast<ebnf_group*>(node))
+    {
+        collectRailroadAtoms(group->getebnf_alt_list(), script);
+        return;
+    }
+    if (auto* iso = dynamic_cast<ebnf_iso_opt*>(node))
+    {
+        collectRailroadAtoms(iso->getebnf_seq(), script);
+        return;
+    }
+    if (auto* iso = dynamic_cast<ebnf_iso_star*>(node))
+    {
+        collectRailroadAtoms(iso->getebnf_seq(), script);
+        return;
+    }
+}
+} // namespace
+
 struct CallGraphHandlerVisitor :public AbstractPreOrderVisitor
 {
     std::vector<CallGraphNodeInfo>& out;
@@ -31,18 +130,8 @@ struct CallGraphHandlerVisitor :public AbstractPreOrderVisitor
    
          bool visit(rule* n)
 	{
-        auto rhsList = n->getsymWithAttrsList();
         auto& info = out[out.size() - 1];
-        for (int i = 0; i < rhsList->size(); i++) {
-            auto sym = rhsList->getsymWithAttrsAt(i);
-            if ( dynamic_cast<symWithAttrs1*>(sym))
-            {
-                auto sym1 = (symWithAttrs1*)sym;
-                auto rhsStr = sym1->getSYMBOL()->to_utf8_string();
-                rhsStr = fileName + "." + rhsStr;
-                info.rules.emplace_back(rhsStr);
-            }
-        }
+        collectRhsSymbols(n->getebnf_seq(), fileName, info.rules);
         return true;
     }
 };
@@ -76,31 +165,8 @@ struct RailRoadHandlerVisitor :public AbstractPreOrderVisitor
 
     bool visit(rule* n)
     {
-        auto rhsList = n->getsymWithAttrsList();
         std::stringex script;
-        for (int i = 0; i < rhsList->size(); i++) {
-            auto sym = rhsList->getsymWithAttrsAt(i);
-            if (dynamic_cast<symWithAttrs1*>(sym))
-            {
-                
-                auto sym1 = (symWithAttrs1*)sym;
-                std::stringex rhsStr = sym1->getSYMBOL()->to_utf8_string();
-            	if(rhsStr.find("'")!=std::string::npos)
-            	{
-                    rhsStr.trim('\'');
-                    script += "Terminal('";
-                    script += rhsStr;
-                    script += "'),";
-            	}
-                else
-                {
-                    script += "NonTerminal('";
-                    script += rhsStr;
-                    script += "'),";
-                }
- 
-            }
-        }
+        collectRailroadAtoms(n->getebnf_seq(), script);
         script.trim_right(',');
     	
         rightStr += "Sequence(" + script + "),";

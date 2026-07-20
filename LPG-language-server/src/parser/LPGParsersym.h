@@ -8,49 +8,54 @@
       TK_PRIORITY_EQUIVALENCE = 6,
       TK_ARROW = 7,
       TK_PRIORITY_ARROW = 8,
-      TK_OR_MARKER = 14,
-      TK_EQUAL = 38,
-      TK_COMMA = 37,
-      TK_LEFT_PAREN = 39,
-      TK_RIGHT_PAREN = 40,
-      TK_LEFT_BRACKET = 42,
-      TK_RIGHT_BRACKET = 43,
-      TK_SHARP = 44,
-      TK_ALIAS_KEY = 15,
-      TK_AST_KEY = 16,
-      TK_DEFINE_KEY = 17,
-      TK_DISJOINTPREDECESSORSETS_KEY = 18,
-      TK_DROPRULES_KEY = 19,
-      TK_DROPSYMBOLS_KEY = 20,
-      TK_EMPTY_KEY = 12,
+      TK_OR_MARKER = 16,
+      TK_EQUAL = 45,
+      TK_COMMA = 43,
+      TK_LEFT_PAREN = 10,
+      TK_RIGHT_PAREN = 44,
+      TK_LEFT_BRACKET = 14,
+      TK_RIGHT_BRACKET = 46,
+      TK_LEFT_BRACE = 15,
+      TK_RIGHT_BRACE = 47,
+      TK_STAR = 18,
+      TK_PLUS = 19,
+      TK_QUESTION = 20,
+      TK_SHARP = 49,
+      TK_ALIAS_KEY = 21,
+      TK_AST_KEY = 22,
+      TK_DEFINE_KEY = 23,
+      TK_DISJOINTPREDECESSORSETS_KEY = 24,
+      TK_DROPRULES_KEY = 25,
+      TK_DROPSYMBOLS_KEY = 26,
+      TK_EMPTY_KEY = 9,
       TK_END_KEY = 3,
-      TK_ERROR_KEY = 9,
-      TK_EOL_KEY = 10,
-      TK_EOF_KEY = 13,
-      TK_EXPORT_KEY = 21,
-      TK_GLOBALS_KEY = 22,
-      TK_HEADERS_KEY = 23,
-      TK_IDENTIFIER_KEY = 11,
-      TK_IMPORT_KEY = 24,
-      TK_INCLUDE_KEY = 25,
-      TK_KEYWORDS_KEY = 26,
-      TK_NAMES_KEY = 27,
-      TK_NOTICE_KEY = 28,
-      TK_OPTIONS_KEY = 41,
-      TK_RECOVER_KEY = 29,
-      TK_RULES_KEY = 30,
-      TK_SOFT_KEYWORDS_KEY = 31,
-      TK_START_KEY = 32,
-      TK_TERMINALS_KEY = 33,
-      TK_TRAILERS_KEY = 34,
-      TK_TYPES_KEY = 35,
-      TK_EOF_TOKEN = 36,
-      TK_SINGLE_LINE_COMMENT = 45,
+      TK_ERROR_KEY = 11,
+      TK_EOL_KEY = 12,
+      TK_EOF_KEY = 17,
+      TK_EXPORT_KEY = 27,
+      TK_GLOBALS_KEY = 28,
+      TK_HEADERS_KEY = 29,
+      TK_IDENTIFIER_KEY = 13,
+      TK_IMPORT_KEY = 30,
+      TK_INCLUDE_KEY = 31,
+      TK_KEYWORDS_KEY = 32,
+      TK_NAMES_KEY = 33,
+      TK_NOTICE_KEY = 34,
+      TK_OPTIONS_KEY = 48,
+      TK_RECOVER_KEY = 35,
+      TK_RULES_KEY = 36,
+      TK_SOFT_KEYWORDS_KEY = 37,
+      TK_START_KEY = 38,
+      TK_TERMINALS_KEY = 39,
+      TK_TRAILERS_KEY = 40,
+      TK_TYPES_KEY = 41,
+      TK_EOF_TOKEN = 42,
+      TK_SINGLE_LINE_COMMENT = 50,
       TK_MACRO_NAME = 2,
       TK_SYMBOL = 1,
       TK_BLOCK = 4,
-      TK_VBAR = 46,
-      TK_ERROR_TOKEN = 47;
+      TK_VBAR = 51,
+      TK_ERROR_TOKEN = 52;
 
       inline const static std::vector<std::wstring> orderedTerminalSymbols = {
                  L"",
@@ -62,12 +67,18 @@
                  L"PRIORITY_EQUIVALENCE",
                  L"ARROW",
                  L"PRIORITY_ARROW",
+                 L"EMPTY_KEY",
+                 L"LEFT_PAREN",
                  L"ERROR_KEY",
                  L"EOL_KEY",
                  L"IDENTIFIER_KEY",
-                 L"EMPTY_KEY",
-                 L"EOF_KEY",
+                 L"LEFT_BRACKET",
+                 L"LEFT_BRACE",
                  L"OR_MARKER",
+                 L"EOF_KEY",
+                 L"STAR",
+                 L"PLUS",
+                 L"QUESTION",
                  L"ALIAS_KEY",
                  L"AST_KEY",
                  L"DEFINE_KEY",
@@ -91,19 +102,18 @@
                  L"TYPES_KEY",
                  L"EOF_TOKEN",
                  L"COMMA",
-                 L"EQUAL",
-                 L"LEFT_PAREN",
                  L"RIGHT_PAREN",
-                 L"OPTIONS_KEY",
-                 L"LEFT_BRACKET",
+                 L"EQUAL",
                  L"RIGHT_BRACKET",
+                 L"RIGHT_BRACE",
+                 L"OPTIONS_KEY",
                  L"SHARP",
                  L"SINGLE_LINE_COMMENT",
                  L"VBAR",
                  L"ERROR_TOKEN"
              };
 
-     static constexpr  int numTokenKinds = 47;
+     static constexpr  int numTokenKinds = 52;
     static constexpr int RULE_LPG = 1;
     static constexpr int RULE_LPG_INPUT = 2;
     static constexpr int RULE_LPG_item = 4;
@@ -150,27 +160,31 @@
     static constexpr int RULE_ruleList = 105;
     static constexpr int RULE_produces = 107;
     static constexpr int RULE_rule = 111;
-    static constexpr int RULE_symWithAttrsList = 112;
-    static constexpr int RULE_symWithAttrs = 114;
-    static constexpr int RULE_optAttrList = 116;
-    static constexpr int RULE_opt_action_segment = 118;
-    static constexpr int RULE_action_segment = 120;
-    static constexpr int RULE_start_segment = 121;
-    static constexpr int RULE_start_symbol = 123;
-    static constexpr int RULE_terminals_segment = 125;
-    static constexpr int RULE_terminal = 127;
-    static constexpr int RULE_optTerminalAlias = 128;
-    static constexpr int RULE_terminal_symbol = 130;
-    static constexpr int RULE_trailers_segment = 132;
-    static constexpr int RULE_types_segment = 133;
-    static constexpr int RULE_type_declarations = 135;
-    static constexpr int RULE_barSymbolList = 136;
-    static constexpr int RULE_predecessor_segment = 138;
-    static constexpr int RULE_symbol_pair = 140;
-    static constexpr int RULE_recover_segment = 141;
-    static constexpr int RULE_recover_symbol = 143;
-    static constexpr int RULE_END_KEY_OPT = 144;
-    static constexpr int RULE_action_segment_list = 146;
+    static constexpr int RULE_ebnf_seq = 112;
+    static constexpr int RULE_ebnf_elem = 114;
+    static constexpr int RULE_ebnf_primary = 116;
+    static constexpr int RULE_ebnf_alt_list = 120;
+    static constexpr int RULE_ebnf_quantifier = 122;
+    static constexpr int RULE_symWithAttrs = 126;
+    static constexpr int RULE_optAttrList = 128;
+    static constexpr int RULE_opt_action_segment = 130;
+    static constexpr int RULE_action_segment = 132;
+    static constexpr int RULE_start_segment = 133;
+    static constexpr int RULE_start_symbol = 135;
+    static constexpr int RULE_terminals_segment = 137;
+    static constexpr int RULE_terminal = 139;
+    static constexpr int RULE_optTerminalAlias = 140;
+    static constexpr int RULE_terminal_symbol = 142;
+    static constexpr int RULE_trailers_segment = 144;
+    static constexpr int RULE_types_segment = 145;
+    static constexpr int RULE_type_declarations = 147;
+    static constexpr int RULE_barSymbolList = 148;
+    static constexpr int RULE_predecessor_segment = 150;
+    static constexpr int RULE_symbol_pair = 152;
+    static constexpr int RULE_recover_segment = 153;
+    static constexpr int RULE_recover_symbol = 155;
+    static constexpr int RULE_END_KEY_OPT = 156;
+    static constexpr int RULE_action_segment_list = 158;
 
     inline const static std::vector<std::wstring> orderedRuleNames = {
                  L"",
@@ -285,8 +299,20 @@
                  L"produces",
                  L"produces",
                  L"rule",
-                 L"symWithAttrsList",
-                 L"symWithAttrsList",
+                 L"ebnf_seq",
+                 L"ebnf_seq",
+                 L"ebnf_elem",
+                 L"ebnf_elem",
+                 L"ebnf_primary",
+                 L"ebnf_primary",
+                 L"ebnf_primary",
+                 L"ebnf_primary",
+                 L"ebnf_alt_list",
+                 L"ebnf_alt_list",
+                 L"ebnf_quantifier",
+                 L"ebnf_quantifier",
+                 L"ebnf_quantifier",
+                 L"ebnf_quantifier",
                  L"symWithAttrs",
                  L"symWithAttrs",
                  L"optAttrList",
@@ -323,7 +349,7 @@
                  L"action_segment_list"
              };
 
-     static constexpr  int numRuleNames = 147;
+     static constexpr  int numRuleNames = 159;
 
      static constexpr  bool isValidForParser = true;
 };

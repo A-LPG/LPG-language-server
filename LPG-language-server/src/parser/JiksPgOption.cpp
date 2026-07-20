@@ -115,6 +115,7 @@ JiksPgOption::JiksPgOption(JikesPGLexStream* lex, const std::string& file_path)
         follow = false;
         priority = true;
         edit = false;
+        ebnf = false;
         states = false;
         xref = false;
         nt_check = false;

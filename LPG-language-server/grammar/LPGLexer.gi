@@ -40,6 +40,11 @@
     RIGHT_PAREN
     LEFT_BRACKET
     RIGHT_BRACKET
+    LEFT_BRACE
+    RIGHT_BRACE
+    STAR
+    PLUS
+    QUESTION
     SHARP
     VBAR
 %End
@@ -133,6 +138,13 @@
     Token ::= '|'               /.$BeginJava makeToken($_OR_MARKER);$EndJava./
     Token ::= '['               /.$BeginJava makeToken($_LEFT_BRACKET);$EndJava./
     Token ::= ']'               /.$BeginJava makeToken($_RIGHT_BRACKET);$EndJava./
+    Token ::= '{'               /.$BeginJava makeToken($_LEFT_BRACE);$EndJava./
+    Token ::= '}'               /.$BeginJava makeToken($_RIGHT_BRACE);$EndJava./
+    Token ::= '('               /.$BeginJava makeToken($_LEFT_PAREN);$EndJava./
+    Token ::= ')'               /.$BeginJava makeToken($_RIGHT_PAREN);$EndJava./
+    Token ::= '*'               /.$BeginJava makeToken($_STAR);$EndJava./
+    Token ::= '+'               /.$BeginJava makeToken($_PLUS);$EndJava./
+    Token ::= '?'               /.$BeginJava makeToken($_QUESTION);$EndJava./
    
     digit -> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
@@ -200,9 +212,9 @@
                        '%' | '&' | '^' | ':' | ';' | "'" | '\' | '|' | '{' | '}' |
                        '[' | ']' | '?' | ',' | '<' | '>' | '=' | '#' | '*'
 
-    specialNoDollarBracketSharp -> '+' | '-' | '(' | ')' | '"' | '!' | '@' | '`' | '~' | '.' | '/' |
-                       '%' | '&' | '^' | ':' | ';' | "'" | '\' | '|' | '{' | '}' |
-                       '?' | ',' | '<' | '>' | '=' | '*'
+    specialNoDollarBracketSharp -> '-' | '"' | '!' | '@' | '`' | '~' | '.' | '/' |
+                       '%' | '&' | '^' | ':' | ';' | "'" | '\' |
+                       ',' | '<' | '>' | '='
 
     specialNoDotOrSlash -> '+' | '-' | '(' | ')' | '"' | '!' | '@' | '`' | '~' |
                            '%' | '&' | '^' | ':' | ';' | "'" | '\' | '|' | '{' | '}' |
@@ -232,9 +244,9 @@
                                                                       '%' | '&' | '^' | ':' | ';' | '\' | '|' | '{' | '}' |
                                                                       '[' | ']' | '?' | '>' | '=' | '#' | '*' | '$'
 
-    specialNoColonMinusSingleQuoteDoublequoteLeftAngleLRBracketOrSlashDollarPercent -> '+' | '(' | ')' | '!' | '@' | '`' | '~' | '.' |
-                                                                              '&' | '^' | ';' | '\' | '{' | '}' |
-                                                                              '?' | ',' | '>' | '=' | '*'
+    specialNoColonMinusSingleQuoteDoublequoteLeftAngleLRBracketOrSlashDollarPercent -> '!' | '@' | '`' | '~' | '.' |
+                                                                              '&' | '^' | ';' | '\' |
+                                                                              ',' | '>' | '='
 
     Eol -> LF | CR
 
@@ -606,6 +618,10 @@
    option ::= edit$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./
             | no edit$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./
    edit ::= eE dD iI tT
+
+   option ::= ebnf$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./
+            | no ebnf$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./
+   ebnf ::= eE bB nN fF
 
    option ::= error_maps$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./
             | no error_maps$e optionWhite /.$BeginJava  makeToken(getRhsFirstTokenIndex($e), getRhsLastTokenIndex($e), $_SYMBOL); $EndJava./

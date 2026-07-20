@@ -38,6 +38,7 @@
         struct terminal;
         struct nonTerm;
     }
+
  struct LPGParser :public Object ,public RuleAction
 {
    
@@ -203,7 +204,7 @@
     //
     
 
-    //#line 38 "LPGParser.g
+    //#line 43 "LPGParser.g
 
 
 std::unordered_multimap<std::wstring, LPGParser_top_level_ast::terminal_symbol0*>  terminal_symbol_produce_SYMBOL;

@@ -118,6 +118,7 @@ public:
             follow,
             priority,
             edit,
+            ebnf,
             states,
             xref,
             nt_check,

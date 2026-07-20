@@ -12,15 +12,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 1:  LPG ::= options_segment LPG_INPUT
             //
             case 1: {
-               //#line 51 "LPGParser.g"
+               //#line 56 "LPGParser.g"
                 setResult(
-                    //#line 51 LPGParser.g
+                    //#line 56 LPGParser.g
                      _automatic_ast_pool << new LPG(this, getLeftIToken(), getRightIToken(),
-                            //#line 51 LPGParser.g
+                            //#line 56 LPGParser.g
                             (option_specList*)getRhsSym(1),
-                            //#line 51 LPGParser.g
+                            //#line 56 LPGParser.g
                             (LPG_itemList*)getRhsSym(2))
-                //#line 51 LPGParser.g
+                //#line 56 LPGParser.g
                 );
             break;
             }
@@ -28,11 +28,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 2:  LPG_INPUT ::= $Empty
             //
             case 2: {
-               //#line 59 "LPGParser.g"
+               //#line 64 "LPGParser.g"
                 setResult(
-                    //#line 59 LPGParser.g
+                    //#line 64 LPGParser.g
                      _automatic_ast_pool << new LPG_itemList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 59 LPGParser.g
+                //#line 64 LPGParser.g
                 );
             break;
             }
@@ -40,7 +40,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 3:  LPG_INPUT ::= LPG_INPUT LPG_item
             //
             case 3: {
-               //#line 60 "LPGParser.g"
+               //#line 65 "LPGParser.g"
                 ((LPG_itemList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
@@ -48,13 +48,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 4:  LPG_item ::= ALIAS_KEY$ alias_segment END_KEY_OPT$
             //
             case 4: {
-               //#line 63 "LPGParser.g"
+               //#line 68 "LPGParser.g"
                 setResult(
-                    //#line 63 LPGParser.g
+                    //#line 68 LPGParser.g
                      _automatic_ast_pool << new AliasSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 63 LPGParser.g
+                                 //#line 68 LPGParser.g
                                  (aliasSpecList*)getRhsSym(2))
-                //#line 63 LPGParser.g
+                //#line 68 LPGParser.g
                 );
             break;
             }
@@ -62,13 +62,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 5:  LPG_item ::= AST_KEY$ ast_segment END_KEY_OPT$
             //
             case 5: {
-               //#line 64 "LPGParser.g"
+               //#line 69 "LPGParser.g"
                 setResult(
-                    //#line 64 LPGParser.g
+                    //#line 69 LPGParser.g
                      _automatic_ast_pool << new AstSeg(getLeftIToken(), getRightIToken(),
-                               //#line 64 LPGParser.g
+                               //#line 69 LPGParser.g
                                (action_segmentList*)getRhsSym(2))
-                //#line 64 LPGParser.g
+                //#line 69 LPGParser.g
                 );
             break;
             }
@@ -76,13 +76,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 6:  LPG_item ::= DEFINE_KEY$ define_segment END_KEY_OPT$
             //
             case 6: {
-               //#line 65 "LPGParser.g"
+               //#line 70 "LPGParser.g"
                 setResult(
-                    //#line 65 LPGParser.g
+                    //#line 70 LPGParser.g
                      _automatic_ast_pool << new DefineSeg(getLeftIToken(), getRightIToken(),
-                                  //#line 65 LPGParser.g
+                                  //#line 70 LPGParser.g
                                   (defineSpecList*)getRhsSym(2))
-                //#line 65 LPGParser.g
+                //#line 70 LPGParser.g
                 );
             break;
             }
@@ -90,13 +90,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 7:  LPG_item ::= EOF_KEY$ eof_segment END_KEY_OPT$
             //
             case 7: {
-               //#line 66 "LPGParser.g"
+               //#line 71 "LPGParser.g"
                 setResult(
-                    //#line 66 LPGParser.g
+                    //#line 71 LPGParser.g
                      _automatic_ast_pool << new EofSeg(getLeftIToken(), getRightIToken(),
-                               //#line 66 LPGParser.g
+                               //#line 71 LPGParser.g
                                (ASTNode*)getRhsSym(2))
-                //#line 66 LPGParser.g
+                //#line 71 LPGParser.g
                 );
             break;
             }
@@ -104,13 +104,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 8:  LPG_item ::= EOL_KEY$ eol_segment END_KEY_OPT$
             //
             case 8: {
-               //#line 67 "LPGParser.g"
+               //#line 72 "LPGParser.g"
                 setResult(
-                    //#line 67 LPGParser.g
+                    //#line 72 LPGParser.g
                      _automatic_ast_pool << new EolSeg(getLeftIToken(), getRightIToken(),
-                               //#line 67 LPGParser.g
+                               //#line 72 LPGParser.g
                                (ASTNode*)getRhsSym(2))
-                //#line 67 LPGParser.g
+                //#line 72 LPGParser.g
                 );
             break;
             }
@@ -118,13 +118,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 9:  LPG_item ::= ERROR_KEY$ error_segment END_KEY_OPT$
             //
             case 9: {
-               //#line 68 "LPGParser.g"
+               //#line 73 "LPGParser.g"
                 setResult(
-                    //#line 68 LPGParser.g
+                    //#line 73 LPGParser.g
                      _automatic_ast_pool << new ErrorSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 68 LPGParser.g
+                                 //#line 73 LPGParser.g
                                  (ASTNode*)getRhsSym(2))
-                //#line 68 LPGParser.g
+                //#line 73 LPGParser.g
                 );
             break;
             }
@@ -132,13 +132,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 10:  LPG_item ::= EXPORT_KEY$ export_segment END_KEY_OPT$
             //
             case 10: {
-               //#line 69 "LPGParser.g"
+               //#line 74 "LPGParser.g"
                 setResult(
-                    //#line 69 LPGParser.g
+                    //#line 74 LPGParser.g
                      _automatic_ast_pool << new ExportSeg(getLeftIToken(), getRightIToken(),
-                                  //#line 69 LPGParser.g
+                                  //#line 74 LPGParser.g
                                   (terminal_symbolList*)getRhsSym(2))
-                //#line 69 LPGParser.g
+                //#line 74 LPGParser.g
                 );
             break;
             }
@@ -146,13 +146,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 11:  LPG_item ::= GLOBALS_KEY$ globals_segment END_KEY_OPT$
             //
             case 11: {
-               //#line 70 "LPGParser.g"
+               //#line 75 "LPGParser.g"
                 setResult(
-                    //#line 70 LPGParser.g
+                    //#line 75 LPGParser.g
                      _automatic_ast_pool << new GlobalsSeg(getLeftIToken(), getRightIToken(),
-                                   //#line 70 LPGParser.g
+                                   //#line 75 LPGParser.g
                                    (action_segmentList*)getRhsSym(2))
-                //#line 70 LPGParser.g
+                //#line 75 LPGParser.g
                 );
             break;
             }
@@ -160,13 +160,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 12:  LPG_item ::= HEADERS_KEY$ headers_segment END_KEY_OPT$
             //
             case 12: {
-               //#line 71 "LPGParser.g"
+               //#line 76 "LPGParser.g"
                 setResult(
-                    //#line 71 LPGParser.g
+                    //#line 76 LPGParser.g
                      _automatic_ast_pool << new HeadersSeg(getLeftIToken(), getRightIToken(),
-                                   //#line 71 LPGParser.g
+                                   //#line 76 LPGParser.g
                                    (action_segmentList*)getRhsSym(2))
-                //#line 71 LPGParser.g
+                //#line 76 LPGParser.g
                 );
             break;
             }
@@ -174,13 +174,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 13:  LPG_item ::= IDENTIFIER_KEY$ identifier_segment END_KEY_OPT$
             //
             case 13: {
-               //#line 72 "LPGParser.g"
+               //#line 77 "LPGParser.g"
                 setResult(
-                    //#line 72 LPGParser.g
+                    //#line 77 LPGParser.g
                      _automatic_ast_pool << new IdentifierSeg(getLeftIToken(), getRightIToken(),
-                                      //#line 72 LPGParser.g
+                                      //#line 77 LPGParser.g
                                       (ASTNode*)getRhsSym(2))
-                //#line 72 LPGParser.g
+                //#line 77 LPGParser.g
                 );
             break;
             }
@@ -188,13 +188,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 14:  LPG_item ::= IMPORT_KEY$ import_segment END_KEY_OPT$
             //
             case 14: {
-               //#line 73 "LPGParser.g"
+               //#line 78 "LPGParser.g"
                 setResult(
-                    //#line 73 LPGParser.g
+                    //#line 78 LPGParser.g
                      _automatic_ast_pool << new ImportSeg(getLeftIToken(), getRightIToken(),
-                                  //#line 73 LPGParser.g
+                                  //#line 78 LPGParser.g
                                   (import_segment*)getRhsSym(2))
-                //#line 73 LPGParser.g
+                //#line 78 LPGParser.g
                 );
             break;
             }
@@ -202,13 +202,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 15:  LPG_item ::= INCLUDE_KEY$ include_segment END_KEY_OPT$
             //
             case 15: {
-               //#line 74 "LPGParser.g"
+               //#line 79 "LPGParser.g"
                 setResult(
-                    //#line 74 LPGParser.g
+                    //#line 79 LPGParser.g
                      _automatic_ast_pool << new IncludeSeg(getLeftIToken(), getRightIToken(),
-                                   //#line 74 LPGParser.g
+                                   //#line 79 LPGParser.g
                                    (include_segment*)getRhsSym(2))
-                //#line 74 LPGParser.g
+                //#line 79 LPGParser.g
                 );
             break;
             }
@@ -216,13 +216,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 16:  LPG_item ::= KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
             //
             case 16: {
-               //#line 75 "LPGParser.g"
+               //#line 80 "LPGParser.g"
                 setResult(
-                    //#line 75 LPGParser.g
+                    //#line 80 LPGParser.g
                      _automatic_ast_pool << new KeywordsSeg(getLeftIToken(), getRightIToken(),
-                                    //#line 75 LPGParser.g
+                                    //#line 80 LPGParser.g
                                     (keywordSpecList*)getRhsSym(2))
-                //#line 75 LPGParser.g
+                //#line 80 LPGParser.g
                 );
             break;
             }
@@ -230,13 +230,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 17:  LPG_item ::= NAMES_KEY$ names_segment END_KEY_OPT$
             //
             case 17: {
-               //#line 76 "LPGParser.g"
+               //#line 81 "LPGParser.g"
                 setResult(
-                    //#line 76 LPGParser.g
+                    //#line 81 LPGParser.g
                      _automatic_ast_pool << new NamesSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 76 LPGParser.g
+                                 //#line 81 LPGParser.g
                                  (nameSpecList*)getRhsSym(2))
-                //#line 76 LPGParser.g
+                //#line 81 LPGParser.g
                 );
             break;
             }
@@ -244,13 +244,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 18:  LPG_item ::= NOTICE_KEY$ notice_segment END_KEY_OPT$
             //
             case 18: {
-               //#line 77 "LPGParser.g"
+               //#line 82 "LPGParser.g"
                 setResult(
-                    //#line 77 LPGParser.g
+                    //#line 82 LPGParser.g
                      _automatic_ast_pool << new NoticeSeg(getLeftIToken(), getRightIToken(),
-                                  //#line 77 LPGParser.g
+                                  //#line 82 LPGParser.g
                                   (action_segmentList*)getRhsSym(2))
-                //#line 77 LPGParser.g
+                //#line 82 LPGParser.g
                 );
             break;
             }
@@ -258,13 +258,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 19:  LPG_item ::= RULES_KEY$ rules_segment END_KEY_OPT$
             //
             case 19: {
-               //#line 78 "LPGParser.g"
+               //#line 83 "LPGParser.g"
                 setResult(
-                    //#line 78 LPGParser.g
+                    //#line 83 LPGParser.g
                      _automatic_ast_pool << new RulesSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 78 LPGParser.g
+                                 //#line 83 LPGParser.g
                                  (rules_segment*)getRhsSym(2))
-                //#line 78 LPGParser.g
+                //#line 83 LPGParser.g
                 );
             break;
             }
@@ -272,13 +272,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 20:  LPG_item ::= SOFT_KEYWORDS_KEY$ keywords_segment END_KEY_OPT$
             //
             case 20: {
-               //#line 79 "LPGParser.g"
+               //#line 84 "LPGParser.g"
                 setResult(
-                    //#line 79 LPGParser.g
+                    //#line 84 LPGParser.g
                      _automatic_ast_pool << new SoftKeywordsSeg(getLeftIToken(), getRightIToken(),
-                                        //#line 79 LPGParser.g
+                                        //#line 84 LPGParser.g
                                         (keywordSpecList*)getRhsSym(2))
-                //#line 79 LPGParser.g
+                //#line 84 LPGParser.g
                 );
             break;
             }
@@ -286,13 +286,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 21:  LPG_item ::= START_KEY$ start_segment END_KEY_OPT$
             //
             case 21: {
-               //#line 80 "LPGParser.g"
+               //#line 85 "LPGParser.g"
                 setResult(
-                    //#line 80 LPGParser.g
+                    //#line 85 LPGParser.g
                      _automatic_ast_pool << new StartSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 80 LPGParser.g
+                                 //#line 85 LPGParser.g
                                  (start_symbolList*)getRhsSym(2))
-                //#line 80 LPGParser.g
+                //#line 85 LPGParser.g
                 );
             break;
             }
@@ -300,13 +300,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 22:  LPG_item ::= TERMINALS_KEY$ terminals_segment END_KEY_OPT$
             //
             case 22: {
-               //#line 81 "LPGParser.g"
+               //#line 86 "LPGParser.g"
                 setResult(
-                    //#line 81 LPGParser.g
+                    //#line 86 LPGParser.g
                      _automatic_ast_pool << new TerminalsSeg(getLeftIToken(), getRightIToken(),
-                                     //#line 81 LPGParser.g
+                                     //#line 86 LPGParser.g
                                      (terminalList*)getRhsSym(2))
-                //#line 81 LPGParser.g
+                //#line 86 LPGParser.g
                 );
             break;
             }
@@ -314,13 +314,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 23:  LPG_item ::= TRAILERS_KEY$ trailers_segment END_KEY_OPT$
             //
             case 23: {
-               //#line 82 "LPGParser.g"
+               //#line 87 "LPGParser.g"
                 setResult(
-                    //#line 82 LPGParser.g
+                    //#line 87 LPGParser.g
                      _automatic_ast_pool << new TrailersSeg(getLeftIToken(), getRightIToken(),
-                                    //#line 82 LPGParser.g
+                                    //#line 87 LPGParser.g
                                     (action_segmentList*)getRhsSym(2))
-                //#line 82 LPGParser.g
+                //#line 87 LPGParser.g
                 );
             break;
             }
@@ -328,13 +328,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 24:  LPG_item ::= TYPES_KEY$ types_segment END_KEY_OPT$
             //
             case 24: {
-               //#line 83 "LPGParser.g"
+               //#line 88 "LPGParser.g"
                 setResult(
-                    //#line 83 LPGParser.g
+                    //#line 88 LPGParser.g
                      _automatic_ast_pool << new TypesSeg(getLeftIToken(), getRightIToken(),
-                                 //#line 83 LPGParser.g
+                                 //#line 88 LPGParser.g
                                  (type_declarationsList*)getRhsSym(2))
-                //#line 83 LPGParser.g
+                //#line 88 LPGParser.g
                 );
             break;
             }
@@ -342,13 +342,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 25:  LPG_item ::= RECOVER_KEY$ recover_segment END_KEY_OPT$
             //
             case 25: {
-               //#line 84 "LPGParser.g"
+               //#line 89 "LPGParser.g"
                 setResult(
-                    //#line 84 LPGParser.g
+                    //#line 89 LPGParser.g
                      _automatic_ast_pool << new RecoverSeg(getLeftIToken(), getRightIToken(),
-                                   //#line 84 LPGParser.g
+                                   //#line 89 LPGParser.g
                                    (SYMBOLList*)getRhsSym(2))
-                //#line 84 LPGParser.g
+                //#line 89 LPGParser.g
                 );
             break;
             }
@@ -356,13 +356,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 26:  LPG_item ::= DISJOINTPREDECESSORSETS_KEY$ predecessor_segment END_KEY_OPT$
             //
             case 26: {
-               //#line 85 "LPGParser.g"
+               //#line 90 "LPGParser.g"
                 setResult(
-                    //#line 85 LPGParser.g
+                    //#line 90 LPGParser.g
                      _automatic_ast_pool << new PredecessorSeg(getLeftIToken(), getRightIToken(),
-                                       //#line 85 LPGParser.g
+                                       //#line 90 LPGParser.g
                                        (symbol_pairList*)getRhsSym(2))
-                //#line 85 LPGParser.g
+                //#line 90 LPGParser.g
                 );
             break;
             }
@@ -370,11 +370,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 27:  options_segment ::= $Empty
             //
             case 27: {
-               //#line 88 "LPGParser.g"
+               //#line 93 "LPGParser.g"
                 setResult(
-                    //#line 88 LPGParser.g
+                    //#line 93 LPGParser.g
                      _automatic_ast_pool << new option_specList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 88 LPGParser.g
+                //#line 93 LPGParser.g
                 );
             break;
             }
@@ -382,7 +382,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 28:  options_segment ::= options_segment option_spec
             //
             case 28: {
-               //#line 88 "LPGParser.g"
+               //#line 93 "LPGParser.g"
                 ((option_specList*)getRhsSym(1))->addElement((option_spec *)getRhsSym(2));
             break;
             }
@@ -390,13 +390,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 29:  option_spec ::= OPTIONS_KEY$ option_list
             //
             case 29: {
-               //#line 89 "LPGParser.g"
+               //#line 94 "LPGParser.g"
                 setResult(
-                    //#line 89 LPGParser.g
+                    //#line 94 LPGParser.g
                      _automatic_ast_pool << new option_spec(getLeftIToken(), getRightIToken(),
-                                    //#line 89 LPGParser.g
+                                    //#line 94 LPGParser.g
                                     (optionList*)getRhsSym(2))
-                //#line 89 LPGParser.g
+                //#line 94 LPGParser.g
                 );
             break;
             }
@@ -404,11 +404,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 30:  option_list ::= option
             //
             case 30: {
-               //#line 90 "LPGParser.g"
+               //#line 95 "LPGParser.g"
                 setResult(
-                    //#line 90 LPGParser.g
+                    //#line 95 LPGParser.g
                      _automatic_ast_pool << new optionList((option*)getRhsSym(1), true /* left recursive */)
-                //#line 90 LPGParser.g
+                //#line 95 LPGParser.g
                 );
             break;
             }
@@ -416,7 +416,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 31:  option_list ::= option_list ,$ option
             //
             case 31: {
-               //#line 90 "LPGParser.g"
+               //#line 95 "LPGParser.g"
                 ((optionList*)getRhsSym(1))->addElement((option *)getRhsSym(3));
             break;
             }
@@ -424,15 +424,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 32:  option ::= SYMBOL option_value
             //
             case 32: {
-               //#line 91 "LPGParser.g"
+               //#line 96 "LPGParser.g"
                 setResult(
-                    //#line 91 LPGParser.g
+                    //#line 96 LPGParser.g
                      _automatic_ast_pool << new option(getLeftIToken(), getRightIToken(),
-                               //#line 91 LPGParser.g
+                               //#line 96 LPGParser.g
                                 _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                               //#line 91 LPGParser.g
+                               //#line 96 LPGParser.g
                                (ASTNode*)getRhsSym(2))
-                //#line 91 LPGParser.g
+                //#line 96 LPGParser.g
                 );
             break;
             }
@@ -440,7 +440,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 33:  option_value ::= $Empty
             //
             case 33: {
-               //#line 92 "LPGParser.g"
+               //#line 97 "LPGParser.g"
                 setResult(nullptr);
             break;
             }
@@ -448,13 +448,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 34:  option_value ::= =$ SYMBOL
             //
             case 34: {
-               //#line 92 "LPGParser.g"
+               //#line 97 "LPGParser.g"
                 setResult(
-                    //#line 92 LPGParser.g
+                    //#line 97 LPGParser.g
                      _automatic_ast_pool << new option_value0(getLeftIToken(), getRightIToken(),
-                                      //#line 92 LPGParser.g
+                                      //#line 97 LPGParser.g
                                        _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)))
-                //#line 92 LPGParser.g
+                //#line 97 LPGParser.g
                 );
             break;
             }
@@ -462,13 +462,13 @@ using namespace LPGParser_top_level_ast;
             // Rule 35:  option_value ::= =$ ($ symbol_list )$
             //
             case 35: {
-               //#line 92 "LPGParser.g"
+               //#line 97 "LPGParser.g"
                 setResult(
-                    //#line 92 LPGParser.g
+                    //#line 97 LPGParser.g
                      _automatic_ast_pool << new option_value1(getLeftIToken(), getRightIToken(),
-                                      //#line 92 LPGParser.g
+                                      //#line 97 LPGParser.g
                                       (SYMBOLList*)getRhsSym(3))
-                //#line 92 LPGParser.g
+                //#line 97 LPGParser.g
                 );
             break;
             }
@@ -476,11 +476,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 36:  symbol_list ::= SYMBOL
             //
             case 36: {
-               //#line 94 "LPGParser.g"
+               //#line 99 "LPGParser.g"
                 setResult(
-                    //#line 94 LPGParser.g
+                    //#line 99 LPGParser.g
                      _automatic_ast_pool << new SYMBOLList( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)), true /* left recursive */)
-                //#line 94 LPGParser.g
+                //#line 99 LPGParser.g
                 );
             break;
             }
@@ -488,7 +488,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 37:  symbol_list ::= symbol_list ,$ SYMBOL
             //
             case 37: {
-               //#line 95 "LPGParser.g"
+               //#line 100 "LPGParser.g"
                 ((SYMBOLList*)getRhsSym(1))->addElement( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(3)));
             break;
             }
@@ -496,11 +496,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 38:  alias_segment ::= aliasSpec
             //
             case 38: {
-               //#line 98 "LPGParser.g"
+               //#line 103 "LPGParser.g"
                 setResult(
-                    //#line 98 LPGParser.g
+                    //#line 103 LPGParser.g
                      _automatic_ast_pool << new aliasSpecList((ASTNode*)getRhsSym(1), true /* left recursive */)
-                //#line 98 LPGParser.g
+                //#line 103 LPGParser.g
                 );
             break;
             }
@@ -508,7 +508,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 39:  alias_segment ::= alias_segment aliasSpec
             //
             case 39: {
-               //#line 98 "LPGParser.g"
+               //#line 103 "LPGParser.g"
                 ((aliasSpecList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
@@ -516,102 +516,12 @@ using namespace LPGParser_top_level_ast;
             // Rule 40:  aliasSpec ::= ERROR_KEY produces alias_rhs
             //
             case 40: {
-               //#line 100 "LPGParser.g"
-                setResult(
-                    //#line 100 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec0(getLeftIToken(), getRightIToken(),
-                                   //#line 100 LPGParser.g
-                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                   //#line 100 LPGParser.g
-                                   (ASTNode*)getRhsSym(2),
-                                   //#line 100 LPGParser.g
-                                   (ASTNode*)getRhsSym(3))
-                //#line 100 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 41:  aliasSpec ::= EOL_KEY produces alias_rhs
-            //
-            case 41: {
-               //#line 101 "LPGParser.g"
-                setResult(
-                    //#line 101 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec1(getLeftIToken(), getRightIToken(),
-                                   //#line 101 LPGParser.g
-                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                   //#line 101 LPGParser.g
-                                   (ASTNode*)getRhsSym(2),
-                                   //#line 101 LPGParser.g
-                                   (ASTNode*)getRhsSym(3))
-                //#line 101 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 42:  aliasSpec ::= EOF_KEY produces alias_rhs
-            //
-            case 42: {
-               //#line 102 "LPGParser.g"
-                setResult(
-                    //#line 102 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec2(getLeftIToken(), getRightIToken(),
-                                   //#line 102 LPGParser.g
-                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                   //#line 102 LPGParser.g
-                                   (ASTNode*)getRhsSym(2),
-                                   //#line 102 LPGParser.g
-                                   (ASTNode*)getRhsSym(3))
-                //#line 102 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 43:  aliasSpec ::= IDENTIFIER_KEY produces alias_rhs
-            //
-            case 43: {
-               //#line 103 "LPGParser.g"
-                setResult(
-                    //#line 103 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec3(getLeftIToken(), getRightIToken(),
-                                   //#line 103 LPGParser.g
-                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                   //#line 103 LPGParser.g
-                                   (ASTNode*)getRhsSym(2),
-                                   //#line 103 LPGParser.g
-                                   (ASTNode*)getRhsSym(3))
-                //#line 103 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 44:  aliasSpec ::= SYMBOL produces alias_rhs
-            //
-            case 44: {
-               //#line 104 "LPGParser.g"
-                setResult(
-                    //#line 104 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec4(getLeftIToken(), getRightIToken(),
-                                   //#line 104 LPGParser.g
-                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                   //#line 104 LPGParser.g
-                                   (ASTNode*)getRhsSym(2),
-                                   //#line 104 LPGParser.g
-                                   (ASTNode*)getRhsSym(3))
-                //#line 104 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 45:  aliasSpec ::= alias_lhs_macro_name produces alias_rhs
-            //
-            case 45: {
                //#line 105 "LPGParser.g"
                 setResult(
                     //#line 105 LPGParser.g
-                     _automatic_ast_pool << new aliasSpec5(getLeftIToken(), getRightIToken(),
+                     _automatic_ast_pool << new aliasSpec0(getLeftIToken(), getRightIToken(),
                                    //#line 105 LPGParser.g
-                                   (alias_lhs_macro_name*)getRhsSym(1),
+                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
                                    //#line 105 LPGParser.g
                                    (ASTNode*)getRhsSym(2),
                                    //#line 105 LPGParser.g
@@ -621,14 +531,104 @@ using namespace LPGParser_top_level_ast;
             break;
             }
             //
-            // Rule 46:  alias_lhs_macro_name ::= MACRO_NAME
+            // Rule 41:  aliasSpec ::= EOL_KEY produces alias_rhs
             //
-            case 46: {
+            case 41: {
+               //#line 106 "LPGParser.g"
+                setResult(
+                    //#line 106 LPGParser.g
+                     _automatic_ast_pool << new aliasSpec1(getLeftIToken(), getRightIToken(),
+                                   //#line 106 LPGParser.g
+                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                   //#line 106 LPGParser.g
+                                   (ASTNode*)getRhsSym(2),
+                                   //#line 106 LPGParser.g
+                                   (ASTNode*)getRhsSym(3))
+                //#line 106 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 42:  aliasSpec ::= EOF_KEY produces alias_rhs
+            //
+            case 42: {
                //#line 107 "LPGParser.g"
                 setResult(
                     //#line 107 LPGParser.g
-                     _automatic_ast_pool << new alias_lhs_macro_name(getRhsIToken(1))
+                     _automatic_ast_pool << new aliasSpec2(getLeftIToken(), getRightIToken(),
+                                   //#line 107 LPGParser.g
+                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                   //#line 107 LPGParser.g
+                                   (ASTNode*)getRhsSym(2),
+                                   //#line 107 LPGParser.g
+                                   (ASTNode*)getRhsSym(3))
                 //#line 107 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 43:  aliasSpec ::= IDENTIFIER_KEY produces alias_rhs
+            //
+            case 43: {
+               //#line 108 "LPGParser.g"
+                setResult(
+                    //#line 108 LPGParser.g
+                     _automatic_ast_pool << new aliasSpec3(getLeftIToken(), getRightIToken(),
+                                   //#line 108 LPGParser.g
+                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                   //#line 108 LPGParser.g
+                                   (ASTNode*)getRhsSym(2),
+                                   //#line 108 LPGParser.g
+                                   (ASTNode*)getRhsSym(3))
+                //#line 108 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 44:  aliasSpec ::= SYMBOL produces alias_rhs
+            //
+            case 44: {
+               //#line 109 "LPGParser.g"
+                setResult(
+                    //#line 109 LPGParser.g
+                     _automatic_ast_pool << new aliasSpec4(getLeftIToken(), getRightIToken(),
+                                   //#line 109 LPGParser.g
+                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                   //#line 109 LPGParser.g
+                                   (ASTNode*)getRhsSym(2),
+                                   //#line 109 LPGParser.g
+                                   (ASTNode*)getRhsSym(3))
+                //#line 109 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 45:  aliasSpec ::= alias_lhs_macro_name produces alias_rhs
+            //
+            case 45: {
+               //#line 110 "LPGParser.g"
+                setResult(
+                    //#line 110 LPGParser.g
+                     _automatic_ast_pool << new aliasSpec5(getLeftIToken(), getRightIToken(),
+                                   //#line 110 LPGParser.g
+                                   (alias_lhs_macro_name*)getRhsSym(1),
+                                   //#line 110 LPGParser.g
+                                   (ASTNode*)getRhsSym(2),
+                                   //#line 110 LPGParser.g
+                                   (ASTNode*)getRhsSym(3))
+                //#line 110 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 46:  alias_lhs_macro_name ::= MACRO_NAME
+            //
+            case 46: {
+               //#line 112 "LPGParser.g"
+                setResult(
+                    //#line 112 LPGParser.g
+                     _automatic_ast_pool << new alias_lhs_macro_name(getRhsIToken(1))
+                //#line 112 LPGParser.g
                 );
             break;
             }
@@ -636,11 +636,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 47:  alias_rhs ::= SYMBOL
             //
             case 47: {
-               //#line 109 "LPGParser.g"
+               //#line 114 "LPGParser.g"
                 setResult(
-                    //#line 109 LPGParser.g
+                    //#line 114 LPGParser.g
                      _automatic_ast_pool << new alias_rhs0(getRhsIToken(1))
-                //#line 109 LPGParser.g
+                //#line 114 LPGParser.g
                 );
             break;
             }
@@ -648,11 +648,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 48:  alias_rhs ::= MACRO_NAME
             //
             case 48: {
-               //#line 110 "LPGParser.g"
+               //#line 115 "LPGParser.g"
                 setResult(
-                    //#line 110 LPGParser.g
+                    //#line 115 LPGParser.g
                      _automatic_ast_pool << new alias_rhs1(getRhsIToken(1))
-                //#line 110 LPGParser.g
+                //#line 115 LPGParser.g
                 );
             break;
             }
@@ -660,11 +660,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 49:  alias_rhs ::= ERROR_KEY
             //
             case 49: {
-               //#line 111 "LPGParser.g"
+               //#line 116 "LPGParser.g"
                 setResult(
-                    //#line 111 LPGParser.g
+                    //#line 116 LPGParser.g
                      _automatic_ast_pool << new alias_rhs2(getRhsIToken(1))
-                //#line 111 LPGParser.g
+                //#line 116 LPGParser.g
                 );
             break;
             }
@@ -672,11 +672,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 50:  alias_rhs ::= EOL_KEY
             //
             case 50: {
-               //#line 112 "LPGParser.g"
+               //#line 117 "LPGParser.g"
                 setResult(
-                    //#line 112 LPGParser.g
+                    //#line 117 LPGParser.g
                      _automatic_ast_pool << new alias_rhs3(getRhsIToken(1))
-                //#line 112 LPGParser.g
+                //#line 117 LPGParser.g
                 );
             break;
             }
@@ -684,11 +684,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 51:  alias_rhs ::= EOF_KEY
             //
             case 51: {
-               //#line 113 "LPGParser.g"
+               //#line 118 "LPGParser.g"
                 setResult(
-                    //#line 113 LPGParser.g
+                    //#line 118 LPGParser.g
                      _automatic_ast_pool << new alias_rhs4(getRhsIToken(1))
-                //#line 113 LPGParser.g
+                //#line 118 LPGParser.g
                 );
             break;
             }
@@ -696,11 +696,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 52:  alias_rhs ::= EMPTY_KEY
             //
             case 52: {
-               //#line 114 "LPGParser.g"
+               //#line 119 "LPGParser.g"
                 setResult(
-                    //#line 114 LPGParser.g
+                    //#line 119 LPGParser.g
                      _automatic_ast_pool << new alias_rhs5(getRhsIToken(1))
-                //#line 114 LPGParser.g
+                //#line 119 LPGParser.g
                 );
             break;
             }
@@ -708,11 +708,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 53:  alias_rhs ::= IDENTIFIER_KEY
             //
             case 53: {
-               //#line 115 "LPGParser.g"
+               //#line 120 "LPGParser.g"
                 setResult(
-                    //#line 115 LPGParser.g
+                    //#line 120 LPGParser.g
                      _automatic_ast_pool << new alias_rhs6(getRhsIToken(1))
-                //#line 115 LPGParser.g
+                //#line 120 LPGParser.g
                 );
             break;
             }
@@ -725,11 +725,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 55:  define_segment ::= defineSpec
             //
             case 55: {
-               //#line 121 "LPGParser.g"
+               //#line 126 "LPGParser.g"
                 setResult(
-                    //#line 121 LPGParser.g
+                    //#line 126 LPGParser.g
                      _automatic_ast_pool << new defineSpecList((defineSpec*)getRhsSym(1), true /* left recursive */)
-                //#line 121 LPGParser.g
+                //#line 126 LPGParser.g
                 );
             break;
             }
@@ -737,7 +737,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 56:  define_segment ::= define_segment defineSpec
             //
             case 56: {
-               //#line 121 "LPGParser.g"
+               //#line 126 "LPGParser.g"
                 ((defineSpecList*)getRhsSym(1))->addElement((defineSpec *)getRhsSym(2));
             break;
             }
@@ -745,15 +745,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 57:  defineSpec ::= macro_name_symbol macro_segment
             //
             case 57: {
-               //#line 122 "LPGParser.g"
+               //#line 127 "LPGParser.g"
                 setResult(
-                    //#line 122 LPGParser.g
+                    //#line 127 LPGParser.g
                      _automatic_ast_pool << new defineSpec(this, getLeftIToken(), getRightIToken(),
-                                   //#line 122 LPGParser.g
+                                   //#line 127 LPGParser.g
                                    (ASTNode*)getRhsSym(1),
-                                   //#line 122 LPGParser.g
+                                   //#line 127 LPGParser.g
                                    (macro_segment*)getRhsSym(2))
-                //#line 122 LPGParser.g
+                //#line 127 LPGParser.g
                 );
             break;
             }
@@ -761,11 +761,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 58:  macro_name_symbol ::= MACRO_NAME
             //
             case 58: {
-               //#line 130 "LPGParser.g"
+               //#line 135 "LPGParser.g"
                 setResult(
-                    //#line 130 LPGParser.g
+                    //#line 135 LPGParser.g
                      _automatic_ast_pool << new macro_name_symbol0(getRhsIToken(1))
-                //#line 130 LPGParser.g
+                //#line 135 LPGParser.g
                 );
             break;
             }
@@ -773,11 +773,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 59:  macro_name_symbol ::= SYMBOL
             //
             case 59: {
-               //#line 131 "LPGParser.g"
+               //#line 136 "LPGParser.g"
                 setResult(
-                    //#line 131 LPGParser.g
+                    //#line 136 LPGParser.g
                      _automatic_ast_pool << new macro_name_symbol1(getRhsIToken(1))
-                //#line 131 LPGParser.g
+                //#line 136 LPGParser.g
                 );
             break;
             }
@@ -785,11 +785,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 60:  macro_segment ::= BLOCK
             //
             case 60: {
-               //#line 132 "LPGParser.g"
+               //#line 137 "LPGParser.g"
                 setResult(
-                    //#line 132 LPGParser.g
+                    //#line 137 LPGParser.g
                      _automatic_ast_pool << new macro_segment(getRhsIToken(1))
-                //#line 132 LPGParser.g
+                //#line 137 LPGParser.g
                 );
             break;
             }
@@ -812,11 +812,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 64:  export_segment ::= terminal_symbol
             //
             case 64: {
-               //#line 142 "LPGParser.g"
+               //#line 147 "LPGParser.g"
                 setResult(
-                    //#line 142 LPGParser.g
+                    //#line 147 LPGParser.g
                      _automatic_ast_pool << new terminal_symbolList((ASTNode*)getRhsSym(1), true /* left recursive */)
-                //#line 142 LPGParser.g
+                //#line 147 LPGParser.g
                 );
             break;
             }
@@ -824,7 +824,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 65:  export_segment ::= export_segment terminal_symbol
             //
             case 65: {
-               //#line 142 "LPGParser.g"
+               //#line 147 "LPGParser.g"
                 ((terminal_symbolList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
@@ -832,11 +832,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 66:  globals_segment ::= action_segment
             //
             case 66: {
-               //#line 145 "LPGParser.g"
+               //#line 150 "LPGParser.g"
                 setResult(
-                    //#line 145 LPGParser.g
+                    //#line 150 LPGParser.g
                      _automatic_ast_pool << new action_segmentList((action_segment*)getRhsSym(1), true /* left recursive */)
-                //#line 145 LPGParser.g
+                //#line 150 LPGParser.g
                 );
             break;
             }
@@ -844,7 +844,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 67:  globals_segment ::= globals_segment action_segment
             //
             case 67: {
-               //#line 145 "LPGParser.g"
+               //#line 150 "LPGParser.g"
                 ((action_segmentList*)getRhsSym(1))->addElement((action_segment *)getRhsSym(2));
             break;
             }
@@ -862,15 +862,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 70:  import_segment ::= SYMBOL drop_command_list
             //
             case 70: {
-               //#line 154 "LPGParser.g"
+               //#line 159 "LPGParser.g"
                 setResult(
-                    //#line 154 LPGParser.g
+                    //#line 159 LPGParser.g
                      _automatic_ast_pool << new import_segment(getLeftIToken(), getRightIToken(),
-                                       //#line 154 LPGParser.g
+                                       //#line 159 LPGParser.g
                                         _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                       //#line 154 LPGParser.g
+                                       //#line 159 LPGParser.g
                                        (drop_commandList*)getRhsSym(2))
-                //#line 154 LPGParser.g
+                //#line 159 LPGParser.g
                 );
             break;
             }
@@ -878,11 +878,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 71:  drop_command_list ::= $Empty
             //
             case 71: {
-               //#line 156 "LPGParser.g"
+               //#line 161 "LPGParser.g"
                 setResult(
-                    //#line 156 LPGParser.g
+                    //#line 161 LPGParser.g
                      _automatic_ast_pool << new drop_commandList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 156 LPGParser.g
+                //#line 161 LPGParser.g
                 );
             break;
             }
@@ -890,7 +890,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 72:  drop_command_list ::= drop_command_list drop_command
             //
             case 72: {
-               //#line 156 "LPGParser.g"
+               //#line 161 "LPGParser.g"
                 ((drop_commandList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
@@ -898,15 +898,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 73:  drop_command ::= DROPSYMBOLS_KEY drop_symbols
             //
             case 73: {
-               //#line 158 "LPGParser.g"
+               //#line 163 "LPGParser.g"
                 setResult(
-                    //#line 158 LPGParser.g
+                    //#line 163 LPGParser.g
                      _automatic_ast_pool << new drop_command0(getLeftIToken(), getRightIToken(),
-                                      //#line 158 LPGParser.g
+                                      //#line 163 LPGParser.g
                                        _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                      //#line 158 LPGParser.g
+                                      //#line 163 LPGParser.g
                                       (SYMBOLList*)getRhsSym(2))
-                //#line 158 LPGParser.g
+                //#line 163 LPGParser.g
                 );
             break;
             }
@@ -914,15 +914,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 74:  drop_command ::= DROPRULES_KEY drop_rules
             //
             case 74: {
-               //#line 159 "LPGParser.g"
+               //#line 164 "LPGParser.g"
                 setResult(
-                    //#line 159 LPGParser.g
+                    //#line 164 LPGParser.g
                      _automatic_ast_pool << new drop_command1(getLeftIToken(), getRightIToken(),
-                                      //#line 159 LPGParser.g
+                                      //#line 164 LPGParser.g
                                        _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                      //#line 159 LPGParser.g
+                                      //#line 164 LPGParser.g
                                       (drop_ruleList*)getRhsSym(2))
-                //#line 159 LPGParser.g
+                //#line 164 LPGParser.g
                 );
             break;
             }
@@ -930,11 +930,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 75:  drop_symbols ::= SYMBOL
             //
             case 75: {
-               //#line 161 "LPGParser.g"
+               //#line 166 "LPGParser.g"
                 setResult(
-                    //#line 161 LPGParser.g
+                    //#line 166 LPGParser.g
                      _automatic_ast_pool << new SYMBOLList( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)), true /* left recursive */)
-                //#line 161 LPGParser.g
+                //#line 166 LPGParser.g
                 );
             break;
             }
@@ -942,7 +942,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 76:  drop_symbols ::= drop_symbols SYMBOL
             //
             case 76: {
-               //#line 162 "LPGParser.g"
+               //#line 167 "LPGParser.g"
                 ((SYMBOLList*)getRhsSym(1))->addElement( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)));
             break;
             }
@@ -950,11 +950,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 77:  drop_rules ::= drop_rule
             //
             case 77: {
-               //#line 163 "LPGParser.g"
+               //#line 168 "LPGParser.g"
                 setResult(
-                    //#line 163 LPGParser.g
+                    //#line 168 LPGParser.g
                      _automatic_ast_pool << new drop_ruleList((drop_rule*)getRhsSym(1), true /* left recursive */)
-                //#line 163 LPGParser.g
+                //#line 168 LPGParser.g
                 );
             break;
             }
@@ -962,7 +962,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 78:  drop_rules ::= drop_rules drop_rule
             //
             case 78: {
-               //#line 164 "LPGParser.g"
+               //#line 169 "LPGParser.g"
                 ((drop_ruleList*)getRhsSym(1))->addElement((drop_rule *)getRhsSym(2));
             break;
             }
@@ -970,19 +970,19 @@ using namespace LPGParser_top_level_ast;
             // Rule 79:  drop_rule ::= SYMBOL optMacroName produces ruleList
             //
             case 79: {
-               //#line 166 "LPGParser.g"
+               //#line 171 "LPGParser.g"
                 setResult(
-                    //#line 166 LPGParser.g
+                    //#line 171 LPGParser.g
                      _automatic_ast_pool << new drop_rule(getLeftIToken(), getRightIToken(),
-                                  //#line 166 LPGParser.g
+                                  //#line 171 LPGParser.g
                                    _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                  //#line 166 LPGParser.g
+                                  //#line 171 LPGParser.g
                                   (optMacroName*)getRhsSym(2),
-                                  //#line 166 LPGParser.g
+                                  //#line 171 LPGParser.g
                                   (ASTNode*)getRhsSym(3),
-                                  //#line 166 LPGParser.g
+                                  //#line 171 LPGParser.g
                                   (ruleList*)getRhsSym(4))
-                //#line 166 LPGParser.g
+                //#line 171 LPGParser.g
                 );
             break;
             }
@@ -990,7 +990,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 80:  optMacroName ::= $Empty
             //
             case 80: {
-               //#line 168 "LPGParser.g"
+               //#line 173 "LPGParser.g"
                 setResult(nullptr);
             break;
             }
@@ -998,11 +998,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 81:  optMacroName ::= MACRO_NAME
             //
             case 81: {
-               //#line 168 "LPGParser.g"
+               //#line 173 "LPGParser.g"
                 setResult(
-                    //#line 168 LPGParser.g
+                    //#line 173 LPGParser.g
                      _automatic_ast_pool << new optMacroName(getRhsIToken(1))
-                //#line 168 LPGParser.g
+                //#line 173 LPGParser.g
                 );
             break;
             }
@@ -1010,11 +1010,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 82:  include_segment ::= SYMBOL
             //
             case 82: {
-               //#line 171 "LPGParser.g"
+               //#line 176 "LPGParser.g"
                 setResult(
-                    //#line 171 LPGParser.g
+                    //#line 176 LPGParser.g
                      _automatic_ast_pool << new include_segment(getRhsIToken(1))
-                //#line 171 LPGParser.g
+                //#line 176 LPGParser.g
                 );
             break;
             }
@@ -1022,11 +1022,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 83:  keywords_segment ::= keywordSpec
             //
             case 83: {
-               //#line 174 "LPGParser.g"
+               //#line 179 "LPGParser.g"
                 setResult(
-                    //#line 174 LPGParser.g
+                    //#line 179 LPGParser.g
                      _automatic_ast_pool << new keywordSpecList((ASTNode*)getRhsSym(1), true /* left recursive */)
-                //#line 174 LPGParser.g
+                //#line 179 LPGParser.g
                 );
             break;
             }
@@ -1034,7 +1034,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 84:  keywords_segment ::= keywords_segment keywordSpec
             //
             case 84: {
-               //#line 174 "LPGParser.g"
+               //#line 179 "LPGParser.g"
                 ((keywordSpecList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
@@ -1047,17 +1047,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 86:  keywordSpec ::= terminal_symbol produces name
             //
             case 86: {
-               //#line 176 "LPGParser.g"
+               //#line 181 "LPGParser.g"
                 setResult(
-                    //#line 176 LPGParser.g
+                    //#line 181 LPGParser.g
                      _automatic_ast_pool << new keywordSpec(getLeftIToken(), getRightIToken(),
-                                    //#line 176 LPGParser.g
+                                    //#line 181 LPGParser.g
                                     (ASTNode*)getRhsSym(1),
-                                    //#line 176 LPGParser.g
+                                    //#line 181 LPGParser.g
                                     (ASTNode*)getRhsSym(2),
-                                    //#line 176 LPGParser.g
+                                    //#line 181 LPGParser.g
                                     (ASTNode*)getRhsSym(3))
-                //#line 176 LPGParser.g
+                //#line 181 LPGParser.g
                 );
             break;
             }
@@ -1065,11 +1065,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 87:  names_segment ::= nameSpec
             //
             case 87: {
-               //#line 179 "LPGParser.g"
+               //#line 184 "LPGParser.g"
                 setResult(
-                    //#line 179 LPGParser.g
+                    //#line 184 LPGParser.g
                      _automatic_ast_pool << new nameSpecList((nameSpec*)getRhsSym(1), true /* left recursive */)
-                //#line 179 LPGParser.g
+                //#line 184 LPGParser.g
                 );
             break;
             }
@@ -1077,7 +1077,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 88:  names_segment ::= names_segment nameSpec
             //
             case 88: {
-               //#line 179 "LPGParser.g"
+               //#line 184 "LPGParser.g"
                 ((nameSpecList*)getRhsSym(1))->addElement((nameSpec *)getRhsSym(2));
             break;
             }
@@ -1085,17 +1085,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 89:  nameSpec ::= name produces name
             //
             case 89: {
-               //#line 180 "LPGParser.g"
+               //#line 185 "LPGParser.g"
                 setResult(
-                    //#line 180 LPGParser.g
+                    //#line 185 LPGParser.g
                      _automatic_ast_pool << new nameSpec(getLeftIToken(), getRightIToken(),
-                                 //#line 180 LPGParser.g
+                                 //#line 185 LPGParser.g
                                  (ASTNode*)getRhsSym(1),
-                                 //#line 180 LPGParser.g
+                                 //#line 185 LPGParser.g
                                  (ASTNode*)getRhsSym(2),
-                                 //#line 180 LPGParser.g
+                                 //#line 185 LPGParser.g
                                  (ASTNode*)getRhsSym(3))
-                //#line 180 LPGParser.g
+                //#line 185 LPGParser.g
                 );
             break;
             }
@@ -1103,11 +1103,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 90:  name ::= SYMBOL
             //
             case 90: {
-               //#line 182 "LPGParser.g"
+               //#line 187 "LPGParser.g"
                 setResult(
-                    //#line 182 LPGParser.g
+                    //#line 187 LPGParser.g
                      _automatic_ast_pool << new name0(getRhsIToken(1))
-                //#line 182 LPGParser.g
+                //#line 187 LPGParser.g
                 );
             break;
             }
@@ -1115,11 +1115,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 91:  name ::= MACRO_NAME
             //
             case 91: {
-               //#line 183 "LPGParser.g"
+               //#line 188 "LPGParser.g"
                 setResult(
-                    //#line 183 LPGParser.g
+                    //#line 188 LPGParser.g
                      _automatic_ast_pool << new name1(getRhsIToken(1))
-                //#line 183 LPGParser.g
+                //#line 188 LPGParser.g
                 );
             break;
             }
@@ -1127,11 +1127,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 92:  name ::= EMPTY_KEY
             //
             case 92: {
-               //#line 184 "LPGParser.g"
+               //#line 189 "LPGParser.g"
                 setResult(
-                    //#line 184 LPGParser.g
+                    //#line 189 LPGParser.g
                      _automatic_ast_pool << new name2(getRhsIToken(1))
-                //#line 184 LPGParser.g
+                //#line 189 LPGParser.g
                 );
             break;
             }
@@ -1139,11 +1139,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 93:  name ::= ERROR_KEY
             //
             case 93: {
-               //#line 185 "LPGParser.g"
+               //#line 190 "LPGParser.g"
                 setResult(
-                    //#line 185 LPGParser.g
+                    //#line 190 LPGParser.g
                      _automatic_ast_pool << new name3(getRhsIToken(1))
-                //#line 185 LPGParser.g
+                //#line 190 LPGParser.g
                 );
             break;
             }
@@ -1151,11 +1151,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 94:  name ::= EOL_KEY
             //
             case 94: {
-               //#line 186 "LPGParser.g"
+               //#line 191 "LPGParser.g"
                 setResult(
-                    //#line 186 LPGParser.g
+                    //#line 191 LPGParser.g
                      _automatic_ast_pool << new name4(getRhsIToken(1))
-                //#line 186 LPGParser.g
+                //#line 191 LPGParser.g
                 );
             break;
             }
@@ -1163,11 +1163,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 95:  name ::= IDENTIFIER_KEY
             //
             case 95: {
-               //#line 187 "LPGParser.g"
+               //#line 192 "LPGParser.g"
                 setResult(
-                    //#line 187 LPGParser.g
+                    //#line 192 LPGParser.g
                      _automatic_ast_pool << new name5(getRhsIToken(1))
-                //#line 187 LPGParser.g
+                //#line 192 LPGParser.g
                 );
             break;
             }
@@ -1175,11 +1175,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 96:  notice_segment ::= action_segment
             //
             case 96: {
-               //#line 190 "LPGParser.g"
+               //#line 195 "LPGParser.g"
                 setResult(
-                    //#line 190 LPGParser.g
+                    //#line 195 LPGParser.g
                      _automatic_ast_pool << new action_segmentList((action_segment*)getRhsSym(1), true /* left recursive */)
-                //#line 190 LPGParser.g
+                //#line 195 LPGParser.g
                 );
             break;
             }
@@ -1187,7 +1187,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 97:  notice_segment ::= notice_segment action_segment
             //
             case 97: {
-               //#line 190 "LPGParser.g"
+               //#line 195 "LPGParser.g"
                 ((action_segmentList*)getRhsSym(1))->addElement((action_segment *)getRhsSym(2));
             break;
             }
@@ -1195,15 +1195,15 @@ using namespace LPGParser_top_level_ast;
             // Rule 98:  rules_segment ::= action_segment_list nonTermList
             //
             case 98: {
-               //#line 193 "LPGParser.g"
+               //#line 198 "LPGParser.g"
                 setResult(
-                    //#line 193 LPGParser.g
+                    //#line 198 LPGParser.g
                      _automatic_ast_pool << new rules_segment(getLeftIToken(), getRightIToken(),
-                                      //#line 193 LPGParser.g
+                                      //#line 198 LPGParser.g
                                       (action_segmentList*)getRhsSym(1),
-                                      //#line 193 LPGParser.g
+                                      //#line 198 LPGParser.g
                                       (nonTermList*)getRhsSym(2))
-                //#line 193 LPGParser.g
+                //#line 198 LPGParser.g
                 );
             break;
             }
@@ -1211,11 +1211,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 99:  nonTermList ::= $Empty
             //
             case 99: {
-               //#line 195 "LPGParser.g"
+               //#line 200 "LPGParser.g"
                 setResult(
-                    //#line 195 LPGParser.g
+                    //#line 200 LPGParser.g
                      _automatic_ast_pool << new nonTermList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 195 LPGParser.g
+                //#line 200 LPGParser.g
                 );
             break;
             }
@@ -1223,7 +1223,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 100:  nonTermList ::= nonTermList nonTerm
             //
             case 100: {
-               //#line 195 "LPGParser.g"
+               //#line 200 "LPGParser.g"
                 ((nonTermList*)getRhsSym(1))->addElement((nonTerm *)getRhsSym(2));
             break;
             }
@@ -1231,17 +1231,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 101:  nonTerm ::= ruleNameWithAttributes produces ruleList
             //
             case 101: {
-               //#line 197 "LPGParser.g"
+               //#line 202 "LPGParser.g"
                 setResult(
-                    //#line 197 LPGParser.g
+                    //#line 202 LPGParser.g
                      _automatic_ast_pool << new nonTerm(this, getLeftIToken(), getRightIToken(),
-                                //#line 197 LPGParser.g
+                                //#line 202 LPGParser.g
                                 (RuleName*)getRhsSym(1),
-                                //#line 197 LPGParser.g
+                                //#line 202 LPGParser.g
                                 (ASTNode*)getRhsSym(2),
-                                //#line 197 LPGParser.g
+                                //#line 202 LPGParser.g
                                 (ruleList*)getRhsSym(3))
-                //#line 197 LPGParser.g
+                //#line 202 LPGParser.g
                 );
             break;
             }
@@ -1249,17 +1249,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 102:  ruleNameWithAttributes ::= SYMBOL
             //
             case 102: {
-               //#line 205 "LPGParser.g"
+               //#line 210 "LPGParser.g"
                 setResult(
-                    //#line 205 LPGParser.g
+                    //#line 210 LPGParser.g
                      _automatic_ast_pool << new RuleName(getLeftIToken(), getRightIToken(),
-                                 //#line 205 LPGParser.g
+                                 //#line 210 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                 //#line 205 LPGParser.g
+                                 //#line 210 LPGParser.g
                                  nullptr,
-                                 //#line 205 LPGParser.g
+                                 //#line 210 LPGParser.g
                                  nullptr)
-                //#line 205 LPGParser.g
+                //#line 210 LPGParser.g
                 );
             break;
             }
@@ -1267,17 +1267,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 103:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className
             //
             case 103: {
-               //#line 206 "LPGParser.g"
+               //#line 211 "LPGParser.g"
                 setResult(
-                    //#line 206 LPGParser.g
+                    //#line 211 LPGParser.g
                      _automatic_ast_pool << new RuleName(getLeftIToken(), getRightIToken(),
-                                 //#line 206 LPGParser.g
+                                 //#line 211 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                 //#line 206 LPGParser.g
+                                 //#line 211 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)),
-                                 //#line 206 LPGParser.g
+                                 //#line 211 LPGParser.g
                                  nullptr)
-                //#line 206 LPGParser.g
+                //#line 211 LPGParser.g
                 );
             break;
             }
@@ -1285,17 +1285,17 @@ using namespace LPGParser_top_level_ast;
             // Rule 104:  ruleNameWithAttributes ::= SYMBOL MACRO_NAME$className MACRO_NAME$arrayElement
             //
             case 104: {
-               //#line 207 "LPGParser.g"
+               //#line 212 "LPGParser.g"
                 setResult(
-                    //#line 207 LPGParser.g
+                    //#line 212 LPGParser.g
                      _automatic_ast_pool << new RuleName(getLeftIToken(), getRightIToken(),
-                                 //#line 207 LPGParser.g
+                                 //#line 212 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                 //#line 207 LPGParser.g
+                                 //#line 212 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)),
-                                 //#line 207 LPGParser.g
+                                 //#line 212 LPGParser.g
                                   _automatic_ast_pool << new ASTNodeToken(getRhsIToken(3)))
-                //#line 207 LPGParser.g
+                //#line 212 LPGParser.g
                 );
             break;
             }
@@ -1303,11 +1303,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 105:  ruleList ::= rule
             //
             case 105: {
-               //#line 221 "LPGParser.g"
+               //#line 226 "LPGParser.g"
                 setResult(
-                    //#line 221 LPGParser.g
+                    //#line 226 LPGParser.g
                      _automatic_ast_pool << new ruleList((rule*)getRhsSym(1), true /* left recursive */)
-                //#line 221 LPGParser.g
+                //#line 226 LPGParser.g
                 );
             break;
             }
@@ -1315,7 +1315,7 @@ using namespace LPGParser_top_level_ast;
             // Rule 106:  ruleList ::= ruleList |$ rule
             //
             case 106: {
-               //#line 221 "LPGParser.g"
+               //#line 226 "LPGParser.g"
                 ((ruleList*)getRhsSym(1))->addElement((rule *)getRhsSym(3));
             break;
             }
@@ -1323,11 +1323,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 107:  produces ::= ::=
             //
             case 107: {
-               //#line 223 "LPGParser.g"
+               //#line 228 "LPGParser.g"
                 setResult(
-                    //#line 223 LPGParser.g
+                    //#line 228 LPGParser.g
                      _automatic_ast_pool << new produces0(getRhsIToken(1))
-                //#line 223 LPGParser.g
+                //#line 228 LPGParser.g
                 );
             break;
             }
@@ -1335,11 +1335,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 108:  produces ::= ::=?
             //
             case 108: {
-               //#line 224 "LPGParser.g"
+               //#line 229 "LPGParser.g"
                 setResult(
-                    //#line 224 LPGParser.g
+                    //#line 229 LPGParser.g
                      _automatic_ast_pool << new produces1(getRhsIToken(1))
-                //#line 224 LPGParser.g
+                //#line 229 LPGParser.g
                 );
             break;
             }
@@ -1347,11 +1347,11 @@ using namespace LPGParser_top_level_ast;
             // Rule 109:  produces ::= ->
             //
             case 109: {
-               //#line 225 "LPGParser.g"
+               //#line 230 "LPGParser.g"
                 setResult(
-                    //#line 225 LPGParser.g
+                    //#line 230 LPGParser.g
                      _automatic_ast_pool << new produces2(getRhsIToken(1))
-                //#line 225 LPGParser.g
+                //#line 230 LPGParser.g
                 );
             break;
             }
@@ -1359,429 +1359,569 @@ using namespace LPGParser_top_level_ast;
             // Rule 110:  produces ::= ->?
             //
             case 110: {
-               //#line 226 "LPGParser.g"
+               //#line 231 "LPGParser.g"
                 setResult(
-                    //#line 226 LPGParser.g
+                    //#line 231 LPGParser.g
                      _automatic_ast_pool << new produces3(getRhsIToken(1))
-                //#line 226 LPGParser.g
+                //#line 231 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 111:  rule ::= symWithAttrsList action_segment_list
+            // Rule 111:  rule ::= ebnf_seq action_segment_list
             //
             case 111: {
-               //#line 228 "LPGParser.g"
-                setResult(
-                    //#line 228 LPGParser.g
-                     _automatic_ast_pool << new rule(getLeftIToken(), getRightIToken(),
-                             //#line 228 LPGParser.g
-                             (symWithAttrsList*)getRhsSym(1),
-                             //#line 228 LPGParser.g
-                             (action_segmentList*)getRhsSym(2))
-                //#line 228 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 112:  symWithAttrsList ::= $Empty
-            //
-            case 112: {
-               //#line 230 "LPGParser.g"
-                setResult(
-                    //#line 230 LPGParser.g
-                     _automatic_ast_pool << new symWithAttrsList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 230 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 113:  symWithAttrsList ::= symWithAttrsList symWithAttrs
-            //
-            case 113: {
-               //#line 230 "LPGParser.g"
-                ((symWithAttrsList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
-            break;
-            }
-            //
-            // Rule 114:  symWithAttrs ::= EMPTY_KEY
-            //
-            case 114: {
-               //#line 232 "LPGParser.g"
-                setResult(
-                    //#line 232 LPGParser.g
-                     _automatic_ast_pool << new symWithAttrs0(getRhsIToken(1))
-                //#line 232 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 115:  symWithAttrs ::= SYMBOL optAttrList
-            //
-            case 115: {
                //#line 233 "LPGParser.g"
                 setResult(
                     //#line 233 LPGParser.g
-                     _automatic_ast_pool << new symWithAttrs1(getLeftIToken(), getRightIToken(),
-                                      //#line 233 LPGParser.g
-                                       _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                      //#line 233 LPGParser.g
-                                      (symAttrs*)getRhsSym(2))
+                     _automatic_ast_pool << new rule(getLeftIToken(), getRightIToken(),
+                             //#line 233 LPGParser.g
+                             (ebnf_elemList*)getRhsSym(1),
+                             //#line 233 LPGParser.g
+                             (action_segmentList*)getRhsSym(2))
                 //#line 233 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 116:  optAttrList ::= $Empty
+            // Rule 112:  ebnf_seq ::= $Empty
             //
-            case 116: {
+            case 112: {
                //#line 236 "LPGParser.g"
                 setResult(
                     //#line 236 LPGParser.g
-                     _automatic_ast_pool << new symAttrs(getLeftIToken(), getRightIToken(),
-                                 //#line 236 LPGParser.g
-                                 nullptr)
+                     _automatic_ast_pool << new ebnf_elemList(getLeftIToken(), getRightIToken(), true /* left recursive */)
                 //#line 236 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 117:  optAttrList ::= MACRO_NAME
+            // Rule 113:  ebnf_seq ::= ebnf_seq ebnf_elem
             //
-            case 117: {
-               //#line 237 "LPGParser.g"
-                setResult(
-                    //#line 237 LPGParser.g
-                     _automatic_ast_pool << new symAttrs(getLeftIToken(), getRightIToken(),
-                                 //#line 237 LPGParser.g
-                                  _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)))
-                //#line 237 LPGParser.g
-                );
+            case 113: {
+               //#line 236 "LPGParser.g"
+                ((ebnf_elemList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
             break;
             }
             //
-            // Rule 118:  opt_action_segment ::= $Empty
+            // Rule 114:  ebnf_elem ::= ebnf_primary
             //
-            case 118: {
-               //#line 239 "LPGParser.g"
-                setResult(nullptr);
-            break;
-            }
-            //
-            // Rule 119:  opt_action_segment ::= action_segment
-            //
-            case 119:
+            case 114:
                 break;
             //
-            // Rule 120:  action_segment ::= BLOCK
+            // Rule 115:  ebnf_elem ::= ebnf_primary ebnf_quantifier
             //
-            case 120: {
-               //#line 241 "LPGParser.g"
+            case 115: {
+               //#line 239 "LPGParser.g"
                 setResult(
-                    //#line 241 LPGParser.g
-                     _automatic_ast_pool << new action_segment(this, getRhsIToken(1))
-                //#line 241 LPGParser.g
+                    //#line 239 LPGParser.g
+                     _automatic_ast_pool << new ebnf_elem(getLeftIToken(), getRightIToken(),
+                                  //#line 239 LPGParser.g
+                                  (ASTNode*)getRhsSym(1),
+                                  //#line 239 LPGParser.g
+                                  (ASTNode*)getRhsSym(2))
+                //#line 239 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 121:  start_segment ::= start_symbol
+            // Rule 116:  ebnf_primary ::= symWithAttrs
             //
-            case 121: {
+            case 116:
+                break;
+            //
+            // Rule 117:  ebnf_primary ::= ($ ebnf_alt_list )$
+            //
+            case 117: {
+               //#line 242 "LPGParser.g"
+                setResult(
+                    //#line 242 LPGParser.g
+                     _automatic_ast_pool << new ebnf_group(getLeftIToken(), getRightIToken(),
+                                   //#line 242 LPGParser.g
+                                   (ebnf_seqList*)getRhsSym(2))
+                //#line 242 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 118:  ebnf_primary ::= [$ ebnf_seq ]$
+            //
+            case 118: {
+               //#line 243 "LPGParser.g"
+                setResult(
+                    //#line 243 LPGParser.g
+                     _automatic_ast_pool << new ebnf_iso_opt(getLeftIToken(), getRightIToken(),
+                                     //#line 243 LPGParser.g
+                                     (ebnf_elemList*)getRhsSym(2))
+                //#line 243 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 119:  ebnf_primary ::= {$ ebnf_seq }$
+            //
+            case 119: {
+               //#line 244 "LPGParser.g"
+                setResult(
+                    //#line 244 LPGParser.g
+                     _automatic_ast_pool << new ebnf_iso_star(getLeftIToken(), getRightIToken(),
+                                      //#line 244 LPGParser.g
+                                      (ebnf_elemList*)getRhsSym(2))
+                //#line 244 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 120:  ebnf_alt_list ::= ebnf_seq
+            //
+            case 120: {
                //#line 246 "LPGParser.g"
                 setResult(
                     //#line 246 LPGParser.g
-                     _automatic_ast_pool << new start_symbolList((ASTNode*)getRhsSym(1), true /* left recursive */)
+                     _automatic_ast_pool << new ebnf_seqList((ebnf_elemList*)getRhsSym(1), true /* left recursive */)
                 //#line 246 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 122:  start_segment ::= start_segment start_symbol
+            // Rule 121:  ebnf_alt_list ::= ebnf_alt_list |$ ebnf_seq
+            //
+            case 121: {
+               //#line 247 "LPGParser.g"
+                ((ebnf_seqList*)getRhsSym(1))->addElement((ebnf_elemList *)getRhsSym(3));
+            break;
+            }
+            //
+            // Rule 122:  ebnf_quantifier ::= ?
             //
             case 122: {
-               //#line 246 "LPGParser.g"
-                ((start_symbolList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
+               //#line 249 "LPGParser.g"
+                setResult(
+                    //#line 249 LPGParser.g
+                     _automatic_ast_pool << new ebnf_quantifier0(getRhsIToken(1))
+                //#line 249 LPGParser.g
+                );
             break;
             }
             //
-            // Rule 123:  start_symbol ::= SYMBOL
+            // Rule 123:  ebnf_quantifier ::= *
             //
             case 123: {
-               //#line 247 "LPGParser.g"
+               //#line 250 "LPGParser.g"
                 setResult(
-                    //#line 247 LPGParser.g
-                     _automatic_ast_pool << new start_symbol0(getRhsIToken(1))
-                //#line 247 LPGParser.g
+                    //#line 250 LPGParser.g
+                     _automatic_ast_pool << new ebnf_quantifier1(getRhsIToken(1))
+                //#line 250 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 124:  start_symbol ::= MACRO_NAME
+            // Rule 124:  ebnf_quantifier ::= +
             //
             case 124: {
-               //#line 248 "LPGParser.g"
-                setResult(
-                    //#line 248 LPGParser.g
-                     _automatic_ast_pool << new start_symbol1(getRhsIToken(1))
-                //#line 248 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 125:  terminals_segment ::= terminal
-            //
-            case 125: {
                //#line 251 "LPGParser.g"
                 setResult(
                     //#line 251 LPGParser.g
-                     _automatic_ast_pool << new terminalList((terminal*)getRhsSym(1), true /* left recursive */)
+                     _automatic_ast_pool << new ebnf_quantifier2(getRhsIToken(1))
                 //#line 251 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 126:  terminals_segment ::= terminals_segment terminal
+            // Rule 125:  ebnf_quantifier ::= * MACRO_NAME
             //
-            case 126: {
-               //#line 251 "LPGParser.g"
-                ((terminalList*)getRhsSym(1))->addElement((terminal *)getRhsSym(2));
+            case 125: {
+               //#line 252 "LPGParser.g"
+                setResult(
+                    //#line 252 LPGParser.g
+                     _automatic_ast_pool << new ebnf_quantifier3(getLeftIToken(), getRightIToken(),
+                                         //#line 252 LPGParser.g
+                                          _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                         //#line 252 LPGParser.g
+                                          _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)))
+                //#line 252 LPGParser.g
+                );
             break;
             }
             //
-            // Rule 127:  terminal ::= terminal_symbol optTerminalAlias
+            // Rule 126:  symWithAttrs ::= EMPTY_KEY
             //
-            case 127: {
+            case 126: {
                //#line 254 "LPGParser.g"
                 setResult(
                     //#line 254 LPGParser.g
-                     _automatic_ast_pool << new terminal(this, getLeftIToken(), getRightIToken(),
-                                 //#line 254 LPGParser.g
-                                 (ASTNode*)getRhsSym(1),
-                                 //#line 254 LPGParser.g
-                                 (optTerminalAlias*)getRhsSym(2))
+                     _automatic_ast_pool << new symWithAttrs0(getRhsIToken(1))
                 //#line 254 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 128:  optTerminalAlias ::= $Empty
+            // Rule 127:  symWithAttrs ::= SYMBOL optAttrList
+            //
+            case 127: {
+               //#line 255 "LPGParser.g"
+                setResult(
+                    //#line 255 LPGParser.g
+                     _automatic_ast_pool << new symWithAttrs1(getLeftIToken(), getRightIToken(),
+                                      //#line 255 LPGParser.g
+                                       _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                      //#line 255 LPGParser.g
+                                      (symAttrs*)getRhsSym(2))
+                //#line 255 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 128:  optAttrList ::= $Empty
             //
             case 128: {
-               //#line 260 "LPGParser.g"
+               //#line 258 "LPGParser.g"
+                setResult(
+                    //#line 258 LPGParser.g
+                     _automatic_ast_pool << new symAttrs(getLeftIToken(), getRightIToken(),
+                                 //#line 258 LPGParser.g
+                                 nullptr)
+                //#line 258 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 129:  optAttrList ::= MACRO_NAME
+            //
+            case 129: {
+               //#line 259 "LPGParser.g"
+                setResult(
+                    //#line 259 LPGParser.g
+                     _automatic_ast_pool << new symAttrs(getLeftIToken(), getRightIToken(),
+                                 //#line 259 LPGParser.g
+                                  _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)))
+                //#line 259 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 130:  opt_action_segment ::= $Empty
+            //
+            case 130: {
+               //#line 261 "LPGParser.g"
                 setResult(nullptr);
             break;
             }
             //
-            // Rule 129:  optTerminalAlias ::= produces name
+            // Rule 131:  opt_action_segment ::= action_segment
             //
-            case 129: {
-               //#line 260 "LPGParser.g"
+            case 131:
+                break;
+            //
+            // Rule 132:  action_segment ::= BLOCK
+            //
+            case 132: {
+               //#line 263 "LPGParser.g"
                 setResult(
-                    //#line 260 LPGParser.g
-                     _automatic_ast_pool << new optTerminalAlias(getLeftIToken(), getRightIToken(),
-                                         //#line 260 LPGParser.g
-                                         (ASTNode*)getRhsSym(1),
-                                         //#line 260 LPGParser.g
-                                         (ASTNode*)getRhsSym(2))
-                //#line 260 LPGParser.g
+                    //#line 263 LPGParser.g
+                     _automatic_ast_pool << new action_segment(this, getRhsIToken(1))
+                //#line 263 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 130:  terminal_symbol ::= SYMBOL
+            // Rule 133:  start_segment ::= start_symbol
             //
-            case 130: {
-               //#line 262 "LPGParser.g"
-                setResult(
-                    //#line 262 LPGParser.g
-                     _automatic_ast_pool << new terminal_symbol0(this, getRhsIToken(1))
-                //#line 262 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 131:  terminal_symbol ::= MACRO_NAME
-            //
-            case 131: {
+            case 133: {
                //#line 268 "LPGParser.g"
                 setResult(
                     //#line 268 LPGParser.g
-                     _automatic_ast_pool << new terminal_symbol1(getRhsIToken(1))
+                     _automatic_ast_pool << new start_symbolList((ASTNode*)getRhsSym(1), true /* left recursive */)
                 //#line 268 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 132:  trailers_segment ::= action_segment_list
+            // Rule 134:  start_segment ::= start_segment start_symbol
             //
-            case 132:
-                break;
+            case 134: {
+               //#line 268 "LPGParser.g"
+                ((start_symbolList*)getRhsSym(1))->addElement((ASTNode *)getRhsSym(2));
+            break;
+            }
             //
-            // Rule 133:  types_segment ::= type_declarations
+            // Rule 135:  start_symbol ::= SYMBOL
             //
-            case 133: {
-               //#line 274 "LPGParser.g"
+            case 135: {
+               //#line 269 "LPGParser.g"
                 setResult(
-                    //#line 274 LPGParser.g
-                     _automatic_ast_pool << new type_declarationsList((type_declarations*)getRhsSym(1), true /* left recursive */)
-                //#line 274 LPGParser.g
+                    //#line 269 LPGParser.g
+                     _automatic_ast_pool << new start_symbol0(getRhsIToken(1))
+                //#line 269 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 134:  types_segment ::= types_segment type_declarations
+            // Rule 136:  start_symbol ::= MACRO_NAME
             //
-            case 134: {
-               //#line 274 "LPGParser.g"
-                ((type_declarationsList*)getRhsSym(1))->addElement((type_declarations *)getRhsSym(2));
+            case 136: {
+               //#line 270 "LPGParser.g"
+                setResult(
+                    //#line 270 LPGParser.g
+                     _automatic_ast_pool << new start_symbol1(getRhsIToken(1))
+                //#line 270 LPGParser.g
+                );
             break;
             }
             //
-            // Rule 135:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
+            // Rule 137:  terminals_segment ::= terminal
             //
-            case 135: {
+            case 137: {
+               //#line 273 "LPGParser.g"
+                setResult(
+                    //#line 273 LPGParser.g
+                     _automatic_ast_pool << new terminalList((terminal*)getRhsSym(1), true /* left recursive */)
+                //#line 273 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 138:  terminals_segment ::= terminals_segment terminal
+            //
+            case 138: {
+               //#line 273 "LPGParser.g"
+                ((terminalList*)getRhsSym(1))->addElement((terminal *)getRhsSym(2));
+            break;
+            }
+            //
+            // Rule 139:  terminal ::= terminal_symbol optTerminalAlias
+            //
+            case 139: {
                //#line 276 "LPGParser.g"
                 setResult(
                     //#line 276 LPGParser.g
-                     _automatic_ast_pool << new type_declarations(getLeftIToken(), getRightIToken(),
-                                          //#line 276 LPGParser.g
-                                           _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                          //#line 276 LPGParser.g
-                                          (ASTNode*)getRhsSym(2),
-                                          //#line 276 LPGParser.g
-                                          (SYMBOLList*)getRhsSym(3),
-                                          //#line 276 LPGParser.g
-                                          (action_segment*)getRhsSym(4))
+                     _automatic_ast_pool << new terminal(this, getLeftIToken(), getRightIToken(),
+                                 //#line 276 LPGParser.g
+                                 (ASTNode*)getRhsSym(1),
+                                 //#line 276 LPGParser.g
+                                 (optTerminalAlias*)getRhsSym(2))
                 //#line 276 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 136:  barSymbolList ::= SYMBOL
-            //
-            case 136: {
-               //#line 277 "LPGParser.g"
-                setResult(
-                    //#line 277 LPGParser.g
-                     _automatic_ast_pool << new SYMBOLList( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)), true /* left recursive */)
-                //#line 277 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 137:  barSymbolList ::= barSymbolList |$ SYMBOL
-            //
-            case 137: {
-               //#line 277 "LPGParser.g"
-                ((SYMBOLList*)getRhsSym(1))->addElement( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(3)));
-            break;
-            }
-            //
-            // Rule 138:  predecessor_segment ::= $Empty
-            //
-            case 138: {
-               //#line 280 "LPGParser.g"
-                setResult(
-                    //#line 280 LPGParser.g
-                     _automatic_ast_pool << new symbol_pairList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 280 LPGParser.g
-                );
-            break;
-            }
-            //
-            // Rule 139:  predecessor_segment ::= predecessor_segment symbol_pair
-            //
-            case 139: {
-               //#line 280 "LPGParser.g"
-                ((symbol_pairList*)getRhsSym(1))->addElement((symbol_pair *)getRhsSym(2));
-            break;
-            }
-            //
-            // Rule 140:  symbol_pair ::= SYMBOL SYMBOL
+            // Rule 140:  optTerminalAlias ::= $Empty
             //
             case 140: {
                //#line 282 "LPGParser.g"
+                setResult(nullptr);
+            break;
+            }
+            //
+            // Rule 141:  optTerminalAlias ::= produces name
+            //
+            case 141: {
+               //#line 282 "LPGParser.g"
                 setResult(
                     //#line 282 LPGParser.g
-                     _automatic_ast_pool << new symbol_pair(getLeftIToken(), getRightIToken(),
-                                    //#line 282 LPGParser.g
-                                     _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
-                                    //#line 282 LPGParser.g
-                                     _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)))
+                     _automatic_ast_pool << new optTerminalAlias(getLeftIToken(), getRightIToken(),
+                                         //#line 282 LPGParser.g
+                                         (ASTNode*)getRhsSym(1),
+                                         //#line 282 LPGParser.g
+                                         (ASTNode*)getRhsSym(2))
                 //#line 282 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 141:  recover_segment ::= $Empty
+            // Rule 142:  terminal_symbol ::= SYMBOL
             //
-            case 141: {
-               //#line 285 "LPGParser.g"
+            case 142: {
+               //#line 284 "LPGParser.g"
                 setResult(
-                    //#line 285 LPGParser.g
-                     _automatic_ast_pool << new SYMBOLList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 285 LPGParser.g
+                    //#line 284 LPGParser.g
+                     _automatic_ast_pool << new terminal_symbol0(this, getRhsIToken(1))
+                //#line 284 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 142:  recover_segment ::= recover_segment recover_symbol
+            // Rule 143:  terminal_symbol ::= MACRO_NAME
             //
-            case 142: {
-               //#line 285 "LPGParser.g"
+            case 143: {
+               //#line 290 "LPGParser.g"
+                setResult(
+                    //#line 290 LPGParser.g
+                     _automatic_ast_pool << new terminal_symbol1(getRhsIToken(1))
+                //#line 290 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 144:  trailers_segment ::= action_segment_list
+            //
+            case 144:
+                break;
+            //
+            // Rule 145:  types_segment ::= type_declarations
+            //
+            case 145: {
+               //#line 296 "LPGParser.g"
+                setResult(
+                    //#line 296 LPGParser.g
+                     _automatic_ast_pool << new type_declarationsList((type_declarations*)getRhsSym(1), true /* left recursive */)
+                //#line 296 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 146:  types_segment ::= types_segment type_declarations
+            //
+            case 146: {
+               //#line 296 "LPGParser.g"
+                ((type_declarationsList*)getRhsSym(1))->addElement((type_declarations *)getRhsSym(2));
+            break;
+            }
+            //
+            // Rule 147:  type_declarations ::= SYMBOL produces barSymbolList opt_action_segment
+            //
+            case 147: {
+               //#line 298 "LPGParser.g"
+                setResult(
+                    //#line 298 LPGParser.g
+                     _automatic_ast_pool << new type_declarations(getLeftIToken(), getRightIToken(),
+                                          //#line 298 LPGParser.g
+                                           _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                          //#line 298 LPGParser.g
+                                          (ASTNode*)getRhsSym(2),
+                                          //#line 298 LPGParser.g
+                                          (SYMBOLList*)getRhsSym(3),
+                                          //#line 298 LPGParser.g
+                                          (action_segment*)getRhsSym(4))
+                //#line 298 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 148:  barSymbolList ::= SYMBOL
+            //
+            case 148: {
+               //#line 299 "LPGParser.g"
+                setResult(
+                    //#line 299 LPGParser.g
+                     _automatic_ast_pool << new SYMBOLList( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)), true /* left recursive */)
+                //#line 299 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 149:  barSymbolList ::= barSymbolList |$ SYMBOL
+            //
+            case 149: {
+               //#line 299 "LPGParser.g"
+                ((SYMBOLList*)getRhsSym(1))->addElement( _automatic_ast_pool << new ASTNodeToken(getRhsIToken(3)));
+            break;
+            }
+            //
+            // Rule 150:  predecessor_segment ::= $Empty
+            //
+            case 150: {
+               //#line 302 "LPGParser.g"
+                setResult(
+                    //#line 302 LPGParser.g
+                     _automatic_ast_pool << new symbol_pairList(getLeftIToken(), getRightIToken(), true /* left recursive */)
+                //#line 302 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 151:  predecessor_segment ::= predecessor_segment symbol_pair
+            //
+            case 151: {
+               //#line 302 "LPGParser.g"
+                ((symbol_pairList*)getRhsSym(1))->addElement((symbol_pair *)getRhsSym(2));
+            break;
+            }
+            //
+            // Rule 152:  symbol_pair ::= SYMBOL SYMBOL
+            //
+            case 152: {
+               //#line 304 "LPGParser.g"
+                setResult(
+                    //#line 304 LPGParser.g
+                     _automatic_ast_pool << new symbol_pair(getLeftIToken(), getRightIToken(),
+                                    //#line 304 LPGParser.g
+                                     _automatic_ast_pool << new ASTNodeToken(getRhsIToken(1)),
+                                    //#line 304 LPGParser.g
+                                     _automatic_ast_pool << new ASTNodeToken(getRhsIToken(2)))
+                //#line 304 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 153:  recover_segment ::= $Empty
+            //
+            case 153: {
+               //#line 307 "LPGParser.g"
+                setResult(
+                    //#line 307 LPGParser.g
+                     _automatic_ast_pool << new SYMBOLList(getLeftIToken(), getRightIToken(), true /* left recursive */)
+                //#line 307 LPGParser.g
+                );
+            break;
+            }
+            //
+            // Rule 154:  recover_segment ::= recover_segment recover_symbol
+            //
+            case 154: {
+               //#line 307 "LPGParser.g"
                 setResult((SYMBOLList*)getRhsSym(1));
             break;
             }
             //
-            // Rule 143:  recover_symbol ::= SYMBOL
+            // Rule 155:  recover_symbol ::= SYMBOL
             //
-            case 143: {
-               //#line 287 "LPGParser.g"
+            case 155: {
+               //#line 309 "LPGParser.g"
                 setResult(
-                    //#line 287 LPGParser.g
+                    //#line 309 LPGParser.g
                      _automatic_ast_pool << new recover_symbol(this, getRhsIToken(1))
-                //#line 287 LPGParser.g
+                //#line 309 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 144:  END_KEY_OPT ::= $Empty
+            // Rule 156:  END_KEY_OPT ::= $Empty
             //
-            case 144: {
-               //#line 294 "LPGParser.g"
+            case 156: {
+               //#line 316 "LPGParser.g"
                 setResult(nullptr);
             break;
             }
             //
-            // Rule 145:  END_KEY_OPT ::= END_KEY
+            // Rule 157:  END_KEY_OPT ::= END_KEY
             //
-            case 145: {
-               //#line 295 "LPGParser.g"
+            case 157: {
+               //#line 317 "LPGParser.g"
                 setResult(
-                    //#line 295 LPGParser.g
+                    //#line 317 LPGParser.g
                      _automatic_ast_pool << new END_KEY_OPT(getRhsIToken(1))
-                //#line 295 LPGParser.g
+                //#line 317 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 146:  action_segment_list ::= $Empty
+            // Rule 158:  action_segment_list ::= $Empty
             //
-            case 146: {
-               //#line 297 "LPGParser.g"
+            case 158: {
+               //#line 319 "LPGParser.g"
                 setResult(
-                    //#line 297 LPGParser.g
+                    //#line 319 LPGParser.g
                      _automatic_ast_pool << new action_segmentList(getLeftIToken(), getRightIToken(), true /* left recursive */)
-                //#line 297 LPGParser.g
+                //#line 319 LPGParser.g
                 );
             break;
             }
             //
-            // Rule 147:  action_segment_list ::= action_segment_list action_segment
+            // Rule 159:  action_segment_list ::= action_segment_list action_segment
             //
-            case 147: {
-               //#line 298 "LPGParser.g"
+            case 159: {
+               //#line 320 "LPGParser.g"
                 ((action_segmentList*)getRhsSym(1))->addElement((action_segment *)getRhsSym(2));
             break;
             }

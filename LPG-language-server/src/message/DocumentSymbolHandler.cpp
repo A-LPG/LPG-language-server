@@ -398,6 +398,35 @@ struct LPGModelVisitor :public AbstractPreOrderVisitor {
         fRHSLabel.append(n->getSYMBOL()->to_utf8_string());
     }
 
+    bool visit(ebnf_group* n) {
+        fRHSLabel.append(" (");
+        return true;
+    }
+    void endVisit(ebnf_group* n) {
+        fRHSLabel.append(" )");
+    }
+
+    bool visit(ebnf_iso_opt* n) {
+        fRHSLabel.append(" [");
+        return true;
+    }
+    void endVisit(ebnf_iso_opt* n) {
+        fRHSLabel.append("]");
+    }
+
+    bool visit(ebnf_iso_star* n) {
+        fRHSLabel.append(" {");
+        return true;
+    }
+    void endVisit(ebnf_iso_star* n) {
+        fRHSLabel.append("}");
+    }
+
+    void endVisit(ebnf_elem* n) {
+        if (n->getebnf_quantifier())
+            fRHSLabel.append(n->getebnf_quantifier()->to_utf8_string());
+    }
+
     //  bool visit(types_segment1 n) {
     // return true;
     // }
