@@ -54,6 +54,14 @@ using namespace boost::asio::ip;
 using namespace std;
 using namespace lsp;
 
+// LSP $/setTrace — Cursor/VS Code send this after initialize; ignore safely.
+struct SetTraceParams
+{
+	lsInitializeParams::lsTrace value = lsInitializeParams::lsTrace::Off;
+};
+MAKE_REFLECT_STRUCT(SetTraceParams, value);
+DEFINE_NOTIFICATION_TYPE(Notify_SetTrace, SetTraceParams, "$/setTrace");
+
 
 #include <thread>
 #include <atomic>
@@ -855,6 +863,11 @@ public:
 		// Outgoing client/registerCapability needs a response parser; LspCpp
 		// requires it before startProcessingMessages() (TcpServer::run).
 		_sp.registerResponseParser<Req_ClientRegisterCapability::request>();
+
+		_sp.registerHandler([&](Notify_SetTrace::notify& /*notify*/)
+		{
+			// No-op: we do not adjust server logging from client trace level.
+		});
 
 		std::thread([&]()
 			{
