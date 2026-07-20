@@ -375,6 +375,10 @@ public:
 			    if(clientPreferences->isRenameDynamicRegistrationSupported()){
                     collectRegisterCapability(td_rename::request::kMethodInfo);
                 }
+				if (registeredCapabilities.empty())
+				{
+					return;
+				}
 				Req_ClientRegisterCapability::request request;
 				for(auto& it : registeredCapabilities)
 				{
@@ -847,6 +851,10 @@ public:
 		{
 				on_exit();
 		});
+
+		// Outgoing client/registerCapability needs a response parser; LspCpp
+		// requires it before startProcessingMessages() (TcpServer::run).
+		_sp.registerResponseParser<Req_ClientRegisterCapability::request>();
 
 		std::thread([&]()
 			{
