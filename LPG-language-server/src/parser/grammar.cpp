@@ -1085,6 +1085,24 @@ void Grammar::ProcessRules(Tuple<int>& declared_terminals)
             }
             else
             {
+                // Sugar AST (opt-in EBNF) leaves meta tokens on the RHS token span.
+                // Skip them here; the IDE does not expand to __ebnf_* auxiliaries.
+                int const kind = lex_stream->Kind(i);
+                if (kind == TK_LEFT_PAREN || kind == TK_RIGHT_PAREN ||
+                    kind == TK_LEFT_BRACKET || kind == TK_RIGHT_BRACKET ||
+                    kind == TK_LEFT_BRACE || kind == TK_RIGHT_BRACE ||
+                    kind == TK_STAR || kind == TK_PLUS || kind == TK_QUESTION ||
+                    kind == TK_OR_MARKER)
+                {
+                    continue;
+                }
+                if (kind != TK_SYMBOL && kind != TK_EMPTY_KEY &&
+                    kind != TK_IDENTIFIER_KEY && kind != TK_ERROR_KEY &&
+                    kind != TK_EOF_KEY && kind != TK_EOL_KEY)
+                {
+                    continue;
+                }
+
                 VariableSymbol* rhs_symbol = GetSymbol(i);
                 int image = (rhs_symbol ? AssignSymbolIndex(rhs_symbol) : 0);
                 if (image == 0)
