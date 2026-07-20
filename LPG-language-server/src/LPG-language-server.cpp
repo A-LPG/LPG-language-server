@@ -308,8 +308,16 @@ public:
 							_type.push_back(to_string(static_cast<SemanticTokenType>(i)));
 						return _type;
 					};
+					auto semanticTokenModifiers = [] {
+						std::vector<std::string> mods;
+						for (unsigned i = 0; i <= static_cast<unsigned>(SemanticTokenModifier::LastModifier);
+							++i)
+							mods.push_back(to_string(static_cast<SemanticTokenModifier>(i)));
+						return mods;
+					};
 
 					semantic_tokens_opt.legend.tokenTypes = semanticTokenTypes();
+					semantic_tokens_opt.legend.tokenModifiers = semanticTokenModifiers();
 
 					std::pair< optional<bool>, optional<lsp::Any> > rang;
 					rang.first = false;
@@ -887,7 +895,7 @@ public:
 
 };
 
-const char VERSION[] = "LPG-language-server 0.2.4 (" __DATE__ ")";
+const char VERSION[] = "LPG-language-server 0.2.5 (" __DATE__ ")";
 
 const char* _PORT_STR = "port";
 int main(int argc, char* argv[])
